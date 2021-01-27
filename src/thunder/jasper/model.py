@@ -1,11 +1,8 @@
 """All of the stuff to load the Jasper checkpoint
 """
 
-# https://github.com/NVIDIA/NeMo/blob/a0fa01ab9daf453d82dee029c04af7448421005f/nemo/core/classes/modelPT.py#L1229
-# https://github.com/NVIDIA/NeMo/blob/f0378b10cdadc82752d70032bd80219e531519c0/nemo/collections/asr/modules/conv_asr.py
-# https://github.com/NVIDIA/NeMo/blob/a0fa01ab9daf453d82dee029c04af7448421005f/nemo/collections/asr/models/ctc_models.py#L41
-
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Tuple
 
 import torch
@@ -16,7 +13,11 @@ from torchaudio.datasets.utils import download_url, extract_archive
 from thunder.jasper.blocks import JasperBlock, init_weights, jasper_activations
 
 checkpoint_archives = {
-    "QuartzNet15x5Base-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-En.nemo"
+    "QuartzNet15x5Base-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-En.nemo",
+    "QuartzNet15x5Base-Zh": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-Zh.nemo",
+    "QuartzNet5x5LS-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet5x5LS-En.nemo",
+    "QuartzNet15x5NR-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5NR-En.nemo",
+    "Jasper10x5Dr-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/Jasper10x5Dr-En.nemo",
 }
 
 
@@ -118,15 +119,17 @@ def get_jasper(name: str, checkpoint_folder: str) -> Tuple[nn.Module, nn.Module]
     )
     filename = url.split("/")[-1]
     checkpoint_path = Path(checkpoint_folder) / filename
-    extract_path = Path(checkpoint_folder) / filename.replace(".nemo", "")
-    extract_archive(str(checkpoint_path), extract_path)
-    return load_jasper_weights(
-        extract_path / "model_config.yaml", extract_path / "model_weights.ckpt"
-    )
+    with TemporaryDirectory() as extract_path:
+        extract_path = Path(extract_path)
+        extract_archive(str(checkpoint_path), extract_path)
+        encoder, decoder = load_jasper_weights(
+            extract_path / "model_config.yaml", extract_path / "model_weights.ckpt"
+        )
+    return encoder, decoder
 
 
 if __name__ == "__main__":
     encoder, decoder = get_jasper(
-        "QuartzNet15x5Base-En", "/home/scart/audio/thunder-speech/models"
+        "QuartzNet5x5LS-En", "/home/scart/audio/thunder-speech/models"
     )
     print(encoder)
