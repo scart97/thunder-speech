@@ -21,7 +21,7 @@ checkpoint_archives = {
 }
 
 
-def read_config(config_path: Path) -> Tuple[nn.Module, nn.Module]:
+def read_config(config_path: str) -> Tuple[nn.Module, nn.Module]:
     """Read .yaml config and creates the encoder and decoder modules
 
     Args:
@@ -39,7 +39,7 @@ def read_config(config_path: Path) -> Tuple[nn.Module, nn.Module]:
 
     layers = []
     for cfg in jasper_conf:
-        if cfg.get("residual_dense", False):
+        if cfg.pop("residual_dense", False):
             residual_panes.append(inplanes)
         cfg["conv_mask"] = encoder_params["conv_mask"]
         cfg["planes"] = cfg.pop("filters")
