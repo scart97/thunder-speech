@@ -71,7 +71,16 @@ def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
             nn.init.zeros_(m.bias)
 
 
-def compute_new_kernel_size(kernel_size, kernel_width):
+def compute_new_kernel_size(kernel_size: int, kernel_width: float) -> int:
+    """Calculates the new convolutional kernel size given the factor kernel_width.
+
+    Args:
+        kernel_size: Original kernel size
+        kernel_width: Contraction or expansion factor
+
+    Returns:
+        First positive odd number that is equal or greater than kernel_size * kernel_width
+    """
     new_kernel_size = max(int(kernel_size * kernel_width), 1)
     # If kernel is even shape, round up to make it odd
     if new_kernel_size % 2 == 0:
