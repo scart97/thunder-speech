@@ -2,7 +2,12 @@ import pytest
 
 from torch import nn
 
-from thunder.jasper.blocks import InitMode, MaskedConv1d, init_weights
+from thunder.jasper.blocks import (
+    InitMode,
+    MaskedConv1d,
+    compute_new_kernel_size,
+    init_weights,
+)
 
 
 def test_init_linear_weights():
@@ -43,3 +48,19 @@ def test_init_batchnorm1d():
         assert bn_layer.num_batches_tracked == 0
         assert (bn_layer.weight == 1).all()
         assert (bn_layer.bias == 0).all()
+
+
+def test_compute_kernel_size():
+    for kernel_size in range(1, 90):
+        for kernel_width in [0.1 * i for i in range(30)]:
+            result = compute_new_kernel_size(kernel_size, kernel_width)
+            # New kernel should be odd
+            assert result % 2 == 1
+            # And it should be positive
+            assert result > 0
+            # The kernel width should correctly control the
+            # expansion or contraction in size.
+            if kernel_width < 1.0:
+                assert result <= kernel_size
+            else:
+                assert result >= kernel_size
