@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Original file: https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/parts/jasper.py
 
+from enum import Enum
 from typing import Callable, List, Optional, Tuple
 
 import torch
@@ -26,21 +28,39 @@ jasper_activations = {
 }
 
 
-def init_weights(m, mode: Optional[str] = "xavier_uniform"):
+class InitMode(str, Enum):
+    """Possible weight init methods. Used by [`init_weights`][thunder.jasper.blocks.init_weights]."""
+
+    xavier_uniform = "xavier_uniform"
+    xavier_normal = "xavier_normal"
+    kaiming_uniform = "kaiming_uniform"
+    kaiming_normal = "kaiming_normal"
+
+
+def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
+    """Initialize Linear, MaskedConv1d/Conv1d or BatchNorm1d weights.
+    There's no return, the operation occurs inplace.
+
+    Args:
+        m: The layer to be initialized
+        mode: Weight initialization mode. Only applicable to linear and conv layers.
+
+    Raises:
+        ValueError: Raised when the initial mode is not one of the possible options.
+    """
     if isinstance(m, MaskedConv1d):
         init_weights(m.conv, mode)
     if isinstance(m, (nn.Conv1d, nn.Linear)):
-        if mode is not None:
-            if mode == "xavier_uniform":
-                nn.init.xavier_uniform_(m.weight, gain=1.0)
-            elif mode == "xavier_normal":
-                nn.init.xavier_normal_(m.weight, gain=1.0)
-            elif mode == "kaiming_uniform":
-                nn.init.kaiming_uniform_(m.weight, nonlinearity="relu")
-            elif mode == "kaiming_normal":
-                nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
-            else:
-                raise ValueError("Unknown Initialization mode: {0}".format(mode))
+        if mode == InitMode.xavier_uniform:
+            nn.init.xavier_uniform_(m.weight, gain=1.0)
+        elif mode == InitMode.xavier_normal:
+            nn.init.xavier_normal_(m.weight, gain=1.0)
+        elif mode == InitMode.kaiming_uniform:
+            nn.init.kaiming_uniform_(m.weight, nonlinearity="relu")
+        elif mode == InitMode.kaiming_normal:
+            nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
+        else:
+            raise ValueError("Unknown Initialization mode: {0}".format(mode))
     elif isinstance(m, nn.BatchNorm1d):
         if m.track_running_stats:
             m.running_mean.zero_()
