@@ -1,11 +1,10 @@
-# thunder-speech
+[![codecov](https://codecov.io/gh/scart97/thunder-speech/branch/master/graph/badge.svg?token=USCEGEGM3D)](https://codecov.io/gh/scart97/thunder-speech)
 
-Add a short description here!
+![Test](https://github.com/scart97/thunder-speech/workflows/Test/badge.svg)
 
+# Thunder speech
 
-## Description
-
-A longer description of your project goes here...
+A Hackable speech recognition library.
 
 
 ## Note
