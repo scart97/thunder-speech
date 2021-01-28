@@ -20,8 +20,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install libsndfile1
           pip install -e .[dev,testing]
+      - name: Build docs
+        run: mkdocs build
       - name: Deploy docs
-        uses: mhausenblas/mkdocs-deploy-gh-pages@master
+        uses: peaceiris/actions-gh-pages@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONFIG_FILE: mkdocs.yml
+          publish_dir: ./site/
