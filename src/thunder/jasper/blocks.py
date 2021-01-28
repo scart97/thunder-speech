@@ -88,7 +88,7 @@ def compute_new_kernel_size(kernel_size: int, kernel_width: float) -> int:
     return new_kernel_size
 
 
-def get_same_padding(kernel_size, stride, dilation):
+def get_same_padding(kernel_size: int, stride: int, dilation: int):
     if stride > 1 and dilation > 1:
         raise ValueError("Only stride OR dilation may be greater than 1")
     if dilation > 1:
@@ -96,14 +96,20 @@ def get_same_padding(kernel_size, stride, dilation):
     return kernel_size // 2
 
 
+class StatsPoolMode(str, Enum):
+    xvector = "xvector"
+    superVector = "superVector"
+    gram = "gram"
+
+
 class StatsPoolLayer(nn.Module):
-    def __init__(self, feat_in, pool_mode="xvector"):
+    def __init__(self, feat_in: int, pool_mode: StatsPoolMode = StatsPoolMode.xvector):
         super().__init__()
         self.feat_in = 0
-        if pool_mode == "gram":
+        if pool_mode == StatsPoolMode.gram:
             gram = True
             super_vector = False
-        elif pool_mode == "superVector":
+        elif pool_mode == StatsPoolMode.superVector:
             gram = True
             super_vector = True
         else:
@@ -148,16 +154,16 @@ class MaskedConv1d(nn.Module):
 
     def __init__(
         self,
-        in_channels,
-        out_channels,
-        kernel_size,
-        stride=1,
-        padding=0,
-        dilation=1,
-        groups=1,
-        heads=-1,
-        bias=False,
-        use_mask=True,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        stride: int = 1,
+        padding: int = 0,
+        dilation: int = 1,
+        groups: int = 1,
+        heads: int = -1,
+        bias: bool = False,
+        use_mask: bool = True,
     ):
         super(MaskedConv1d, self).__init__()
 
@@ -215,7 +221,7 @@ class MaskedConv1d(nn.Module):
 
 
 class GroupShuffle(nn.Module):
-    def __init__(self, groups, channels):
+    def __init__(self, groups: int, channels: int):
         super(GroupShuffle, self).__init__()
 
         self.groups = groups
@@ -299,30 +305,30 @@ class JasperBlock(nn.Module):
 
     def __init__(
         self,
-        inplanes,
-        planes,
-        repeat=3,
-        kernel_size=11,
-        kernel_size_factor=1,
-        stride=1,
-        dilation=1,
-        padding="same",
-        dropout=0.2,
+        inplanes: int,
+        planes: int,
+        repeat: int = 3,
+        kernel_size: int = 11,
+        kernel_size_factor: int = 1,
+        stride: int = 1,
+        dilation: int = 1,
+        padding: str = "same",
+        dropout: float = 0.2,
         activation=None,
-        residual=True,
-        groups=1,
-        separable=False,
-        heads=-1,
-        normalization="batch",
-        norm_groups=1,
-        residual_mode="add",
+        residual: bool = True,
+        groups: int = 1,
+        separable: bool = False,
+        heads: int = -1,
+        normalization: str = "batch",
+        norm_groups: int = 1,
+        residual_mode: str = "add",
         residual_panes=[],
-        conv_mask=False,
-        se=False,
-        se_reduction_ratio=16,
+        conv_mask: bool = False,
+        se: bool = False,
+        se_reduction_ratio: int = 16,
         se_context_window=None,
-        se_interpolation_mode="nearest",
-        stride_last=False,
+        se_interpolation_mode: str = "nearest",
+        stride_last: bool = False,
     ):
         super(JasperBlock, self).__init__()
 
