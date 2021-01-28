@@ -49,7 +49,7 @@ def read_config(config_path: str) -> Tuple[nn.Module, nn.Module]:
                 inplanes=inplanes,
                 activation=activation,
                 residual_panes=residual_panes,
-                **cfg
+                **cfg,
             )
         )
         inplanes = cfg["planes"]
@@ -129,7 +129,7 @@ def get_jasper(name: str, checkpoint_folder: str) -> Tuple[nn.Module, nn.Module]
 
 
 if __name__ == "__main__":
-    encoder, decoder = get_jasper(
-        "QuartzNet5x5LS-En", "/home/scart/audio/thunder-speech/models"
-    )
-    print(encoder)
+    for model in checkpoint_archives.keys():
+        print(model)
+        encoder, decoder = get_jasper(model, "/home/scart/audio/thunder-speech/models")
+        print("model loaded with success")
