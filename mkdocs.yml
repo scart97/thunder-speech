@@ -1,7 +1,10 @@
 site_name: Thunder
 plugins:
-  - search
-  - mkdocstrings
+- search
+- mkdocstrings:
+    watch:
+        - src/thunder
+
 
 repo_name: Thunder speech
 repo_url: https://github.com/scart97/thunder-speech
