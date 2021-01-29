@@ -1,11 +1,16 @@
+from math import ceil, floor
+
 import pytest
 
+from hypothesis import given
+from hypothesis.strategies import integers
 from torch import nn
 
 from thunder.jasper.blocks import (
     InitMode,
     MaskedConv1d,
     compute_new_kernel_size,
+    get_same_padding,
     init_weights,
 )
 
@@ -64,3 +69,52 @@ def test_compute_kernel_size():
                 assert result <= kernel_size
             else:
                 assert result >= kernel_size
+
+
+def conv_outsize(i: int, p: int, k: int, s: int, d: int) -> int:
+    """Calculates conv output size based on input size and params
+        Based on https://arxiv.org/abs/1603.07285 Section 2.4 - Relationship 6
+        and also the Conv1d pytorch docs - https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
+    Args:
+        i: input size
+        p: padding
+        k: kernel size
+        s: stride
+        d: dilation
+
+    Returns:
+        output size
+    """
+    numerator = i + 2 * p - d * (k - 1) - 1
+    return floor(numerator / s + 1)
+
+
+@given(
+    i=integers(10, 10_000),
+    stride=integers(1, 4),
+    ks=integers(3, 100).filter(lambda x: x % 2 == 1),
+)
+def test_same_padding_unit_dilation(i, stride, ks):
+    p = get_same_padding(ks, stride, 1)
+    assert conv_outsize(i, p, ks, stride, 1) == ceil(i / stride)
+
+
+@given(
+    i=integers(100, 10_000),
+    dilation=integers(2, 5),
+    ks=integers(3, 100).filter(lambda x: x % 2 == 1),
+)
+def test_same_padding_unit_stride(i, dilation, ks):
+    p = get_same_padding(ks, 1, dilation)
+    assert conv_outsize(i, p, ks, 1, dilation) == i
+
+
+@given(
+    i=integers(10, 10_000),
+    stride=integers(2, 10),
+    ks=integers(3, 100).filter(lambda x: x % 2 == 1),
+    dilation=integers(2, 10),
+)
+def test_same_padding_ValueError(i, stride, ks, dilation):
+    with pytest.raises(ValueError):
+        get_same_padding(ks, stride, dilation)

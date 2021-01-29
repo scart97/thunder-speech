@@ -88,11 +88,29 @@ def compute_new_kernel_size(kernel_size: int, kernel_width: float) -> int:
     return new_kernel_size
 
 
-def get_same_padding(kernel_size: int, stride: int, dilation: int):
+def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
+    """Calculates the padding size to obtain same padding.
+        Same padding means that the output will have the
+        shape input_shape / stride. That means, for
+        stride = 1 the output shape is the same as the input,
+        and stride = 2 gives an output that is half of the
+        input shape.
+
+    Args:
+        kernel_size : convolution kernel size. Only tested to be correct with odd values.
+        stride : convolution stride
+        dilation : convolution dilation
+
+    Raises:
+        ValueError: Only stride or dilation may be greater than 1
+
+    Returns:
+        padding value to obtain same padding.
+    """
     if stride > 1 and dilation > 1:
         raise ValueError("Only stride OR dilation may be greater than 1")
     if dilation > 1:
-        return (dilation * kernel_size) // 2 - 1
+        return (dilation * (kernel_size - 1) + 1) // 2
     return kernel_size // 2
 
 
