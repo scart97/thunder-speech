@@ -19,6 +19,7 @@ from typing import Callable, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
+from einops.layers.torch import Rearrange
 from torch import Tensor
 
 jasper_activations = {
@@ -115,7 +116,7 @@ def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
 
 
 class MaskedConv1d(nn.Module):
-    __constants__ = ["use_conv_mask", "real_out_channels", "heads"]
+    __constants__ = ["use_mask", "padding", "dilation", "kernel_size", "stride"]
 
     def __init__(
         self,
@@ -130,18 +131,38 @@ class MaskedConv1d(nn.Module):
         bias: bool = False,
         use_mask: bool = True,
     ):
+        """Masked Convolution.
+        This module correspond to a 1d convolution with input masking. Arguments to create are the
+        same as nn.Conv1d, but with the addition of heads and use_mask for special behaviour.
+
+
+        Args:
+            in_channels : Same as nn.Conv1d
+            out_channels : Same as nn.Conv1d
+            kernel_size : Same as nn.Conv1d
+            stride : Same as nn.Conv1d
+            padding : Same as nn.Conv1d
+            dilation : Same as nn.Conv1d
+            groups : Same as nn.Conv1d
+            bias : Same as nn.Conv1d
+            heads : Number of heads to be used. Only applicable for depthwise convolutions.
+            use_mask : Controls the masking of input before the convolution during the forward.
+
+        Raises:
+            ValueError: Selecting heads != -1 without doing a depthwise convolution will raise this error.
+        """
         super(MaskedConv1d, self).__init__()
 
         if not (heads == -1 or groups == in_channels):
             raise ValueError("Only use heads for depthwise convolutions")
 
-        self.real_out_channels = out_channels
+        self.use_mask = use_mask
         if heads != -1:
             in_channels = heads
             out_channels = heads
             groups = heads
 
-        self.conv = nn.Conv1d(
+        conv = nn.Conv1d(
             in_channels,
             out_channels,
             kernel_size,
@@ -151,57 +172,85 @@ class MaskedConv1d(nn.Module):
             groups=groups,
             bias=bias,
         )
-        self.use_mask = use_mask
-        self.heads = heads
+        if heads != -1:
+            self.conv = nn.Sequential(
+                Rearrange("b (f heads) t -> (b f) heads t", heads=heads),
+                conv,
+                Rearrange(
+                    "(b f) heads t -> b (f heads) t",
+                    heads=heads,
+                    f=out_channels // heads,
+                ),
+            )
+        else:
+            self.conv = conv
 
-    def get_seq_len(self, lens):
+        self.padding = conv.padding[0]
+        self.dilation = conv.dilation[0]
+        self.kernel_size = conv.kernel_size[0]
+        self.stride = conv.stride[0]
+
+    def get_seq_len(self, lens: torch.Tensor) -> torch.Tensor:
+        """Get the lengths of the inputs after the convolution operation is applied.
+
+        Args:
+            lens : Original lengths of the inputs
+
+        Returns:
+            Resulting lengths after the convolution
+        """
         return (
-            lens
-            + 2 * self.conv.padding[0]
-            - self.conv.dilation[0] * (self.conv.kernel_size[0] - 1)
-            - 1
-        ) // self.conv.stride[0] + 1
+            lens + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1
+        ) // self.stride + 1
 
-    def forward(self, x, lens):
-        if self.use_mask:
-            lens = lens.to(dtype=torch.long)
-            max_len = x.size(2)
-            mask = torch.arange(max_len).to(lens.device).expand(
-                len(lens), max_len
-            ) >= lens.unsqueeze(1)
-            x = x.masked_fill(mask.unsqueeze(1).to(device=x.device), 0)
-            # del mask
-            lens = self.get_seq_len(lens)
+    def mask_fill(self, x: torch.Tensor, lens: torch.Tensor) -> torch.Tensor:
+        """Mask the input based on it's respective lengths.
 
-        sh = x.shape
-        if self.heads != -1:
-            x = x.view(-1, self.heads, sh[-1])
+        Args:
+            x : Signal to be processed, of shape (batch, features, time)
+            lens : Lenghts of each element in the batch of x, with shape (batch)
 
-        out = self.conv(x)
-
-        if self.heads != -1:
-            out = out.view(sh[0], self.real_out_channels, -1)
-
-        return out, lens
-
-
-class GroupShuffle(nn.Module):
-    def __init__(self, groups: int, channels: int):
-        super(GroupShuffle, self).__init__()
-
-        self.groups = groups
-        self.channels_per_group = channels // groups
-
-    def forward(self, x):
-        sh = x.shape
-
-        x = x.view(-1, self.groups, self.channels_per_group, sh[-1])
-
-        x = torch.transpose(x, 1, 2).contiguous()
-
-        x = x.view(-1, self.groups * self.channels_per_group, sh[-1])
-
+        Returns:
+            The masked signal
+        """
+        lens = lens.to(dtype=torch.long)
+        max_len = x.size(2)
+        mask = torch.arange(max_len, device=lens.device).expand(
+            lens.shape[0], max_len
+        ) >= lens.unsqueeze(1)
+        x = x.masked_fill(mask.unsqueeze(1).to(device=x.device), 0)
         return x
+
+    def forward(
+        self, x: torch.Tensor, lens: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Forward method
+
+        Args:
+            x : Signal to be processed, of shape (batch, features, time)
+            lens : Lenghts of each element in the batch of x, with shape (batch)
+
+        Returns:
+            Both the signal processed by the convolution and the resulting lengths
+        """
+        if self.use_mask:
+            x = self.mask_fill(x, lens)
+        out = self.conv(x)
+        return out, self.get_seq_len(lens)
+
+
+def GroupShuffle(groups: int, channels: int) -> nn.Module:
+    """Group shuffle operator from shufflenet.
+    Original paper: https://arxiv.org/abs/1707.01083
+
+    Args:
+        groups : Number of groups to be used
+        channels : Number of channels of the input.Deprecated, only keep for compatibility with old checkpoints.
+
+    Returns:
+        Group shuffle layer
+    """
+    return Rearrange("b (c1 c2) t -> b (c2 c1) t", c1=groups)
 
 
 class SqueezeExcite(nn.Module):
