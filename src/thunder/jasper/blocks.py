@@ -15,10 +15,11 @@
 # Original file: https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/parts/jasper.py
 
 from enum import Enum
-from typing import Callable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import torch
 import torch.nn as nn
+from einops import rearrange
 from einops.layers.torch import Rearrange
 from torch import Tensor
 
@@ -260,7 +261,7 @@ class SqueezeExcite(nn.Module):
         reduction_ratio: int,
         context_window: int = -1,
         interpolation_mode: str = "nearest",
-        activation: Optional[Callable] = None,
+        activation: nn.Module = nn.ReLU(inplace=True),
     ):
         """
         Squeeze-and-Excitation sub-module.
@@ -275,8 +276,7 @@ class SqueezeExcite(nn.Module):
                 Used only if context window is > 1.
                 The modes available for resizing are: `nearest`, `linear` (3D-only),
                 `bilinear`, `area`
-            activation: Intermediate activation function used. Must be a
-                callable activation function.
+            activation: Intermediate activation function used.
         """
         super(SqueezeExcite, self).__init__()
         self.context_window = int(context_window)
@@ -287,22 +287,25 @@ class SqueezeExcite(nn.Module):
         else:
             self.pool = nn.AvgPool1d(self.context_window, stride=1)
 
-        if activation is None:
-            activation = nn.ReLU(inplace=True)
-
         self.fc = nn.Sequential(
             nn.Linear(channels, channels // reduction_ratio, bias=False),
             activation,
             nn.Linear(channels // reduction_ratio, channels, bias=False),
         )
 
-    def forward(self, x):
-        # The use of negative indices on the transpose allow for expanded SqueezeExcite
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x : Tensor of shape (batch, channels, time)
+
+        Returns:
+            Tensor of shape (batch, channels, time)
+        """
         batch, channels, timesteps = x.size()[:3]
         y = self.pool(x)  # [B, C, T - context_window + 1]
-        y = y.transpose(1, -1)  # [B, T - context_window + 1, C]
+        y = rearrange(y, "b c t_pool -> b t_pool c")
         y = self.fc(y)  # [B, T - context_window + 1, C]
-        y = y.transpose(1, -1)  # [B, C, T - context_window + 1]
+        y = rearrange(y, "b t_pool c -> b c t_pool")
 
         if self.context_window > 0:
             y = torch.nn.functional.interpolate(

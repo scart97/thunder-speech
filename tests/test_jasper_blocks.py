@@ -1,21 +1,93 @@
 from math import ceil, floor
 from tempfile import TemporaryDirectory
+from typing import List
 
 import pytest
 
 import torch
 from hypothesis import given
 from hypothesis.strategies import integers
+from pytorch_lightning import seed_everything
 from torch import nn
 
 from thunder.jasper.blocks import (
     GroupShuffle,
     InitMode,
     MaskedConv1d,
+    SqueezeExcite,
     compute_new_kernel_size,
     get_same_padding,
     init_weights,
 )
+
+# ##############################################
+# Awesome resource on deep learning testing.
+# Inspired various tests here.
+# https://krokotsch.eu/cleancode/2020/08/11/Unit-Tests-for-Deep-Learning.html
+# ##############################################
+
+requirescuda = pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="This test requires cuda."
+)
+
+
+def _test_parameters_update(model: nn.Module, x: List[torch.Tensor]):
+    optim = torch.optim.SGD(model.parameters(), lr=0.1)
+
+    outputs = model(*x)
+    if isinstance(outputs, tuple):
+        outputs = outputs[0]
+    loss = outputs.mean()
+    loss.backward()
+    optim.step()
+
+    for param in model.parameters():
+        if param.requires_grad:
+            assert param.grad is not None
+            assert (torch.sum(param.grad ** 2) != 0.0).all()
+
+
+def _test_simple_device_move(model: nn.Module, x: torch.Tensor):
+    seed_everything(42)
+    outputs_cpu = model(x)
+
+    seed_everything(42)
+    model = model.cuda()
+    outputs_gpu = model(x.cuda())
+
+    seed_everything(42)
+    model = model.cpu()
+    outputs_back_on_cpu = model(x.cpu())
+
+    assert torch.allclose(outputs_cpu, outputs_gpu.cpu())
+    assert torch.allclose(outputs_cpu, outputs_back_on_cpu)
+
+
+def _test_simple_batch_independence(model: nn.Module, x: torch.Tensor):
+    x.requires_grad_(True)
+
+    # Compute forward pass in eval mode to deactivate batch norm
+    model.eval()
+    outputs = model(x)
+    model.train()
+
+    # Mask loss for certain samples in batch
+    batch_size = x.shape[0]
+    mask_idx = torch.randint(0, batch_size, ())
+    mask = torch.ones_like(outputs)
+    mask[mask_idx] = 0
+    outputs = outputs * mask
+
+    # Compute backward pass
+    loss = outputs.mean()
+    loss.backward()
+
+    # Check if gradient exists and is zero for masked samples
+    for i, grad in enumerate(x.grad):
+        if i == mask_idx:
+            assert torch.all(grad == 0).item()
+        else:
+            assert not torch.all(grad == 0)
 
 
 def test_init_linear_weights():
@@ -144,6 +216,67 @@ def test_maskconv_error():
         MaskedConv1d(128, 64, 3, heads=4)
 
 
+def test_maskconv_parameters_update():
+    x = torch.randn(10, 128, 1337)
+    lens = torch.Tensor([1000] * 10)
+    conv = MaskedConv1d(128, 10, 3)
+    _test_parameters_update(conv, [x, lens])
+
+
+@requirescuda
+def test_maskconv_device_move():
+    conv = MaskedConv1d(128, 10, 3)
+    x = torch.randn(10, 128, 1337)
+    lens = torch.Tensor([1000] * 10)
+
+    seed_everything(42)
+    outputs_cpu, lens_cpu = conv(x, lens)
+
+    seed_everything(42)
+    conv = conv.cuda()
+    outputs_gpu, lens_gpu = conv(x.cuda(), lens.cuda())
+
+    seed_everything(42)
+    conv = conv.cpu()
+    outputs_back_on_cpu, lens_back_on_cpu = conv(x.cpu(), lens.cpu())
+
+    assert torch.allclose(lens_cpu, lens_gpu.cpu())
+    assert torch.allclose(lens_cpu, lens_back_on_cpu)
+
+    assert torch.allclose(outputs_cpu, outputs_gpu.cpu(), atol=1e-6)
+    assert torch.allclose(outputs_cpu, outputs_back_on_cpu)
+
+
+def test_maskconv_batch_independence():
+    conv = MaskedConv1d(128, 10, 3)
+    x = torch.randn(10, 128, 1337)
+    lens = torch.Tensor([1000] * 10)
+    x.requires_grad_(True)
+
+    # Compute forward pass in eval mode to deactivate batch norm
+    conv.eval()
+    outputs, _ = conv(x, lens)
+    conv.train()
+
+    # Mask loss for certain samples in batch
+    batch_size = x.shape[0]
+    mask_idx = torch.randint(0, batch_size, ())
+    mask = torch.ones_like(outputs)
+    mask[mask_idx] = 0
+    outputs = outputs * mask
+
+    # Compute backward pass
+    loss = outputs.mean()
+    loss.backward()
+
+    # Check if gradient exists and is zero for masked samples
+    for i, grad in enumerate(x.grad):
+        if i == mask_idx:
+            assert torch.all(grad == 0).item()
+        else:
+            assert not torch.all(grad == 0)
+
+
 def test_mask_fill():
     x = torch.randn(10, 128, 1337)
     lens = torch.Tensor([1000] * 10)
@@ -202,6 +335,19 @@ def test_group_shuffle():
     assert not torch.allclose(x, out)
 
 
+@requirescuda
+def test_group_shuffle_device_move():
+    gs = GroupShuffle(4, 128)
+    x = torch.randn(10, 128, 1337)
+    _test_simple_device_move(gs, x)
+
+
+def test_groupshuffle_batch_independence():
+    gs = GroupShuffle(4, 128)
+    x = torch.randn(10, 128, 1337)
+    _test_simple_batch_independence(gs, x)
+
+
 def test_group_shuffle_trace():
     x_traced = torch.randn(5, 128, 137)
     gs = GroupShuffle(4, 128)
@@ -231,3 +377,59 @@ def test_group_shuffle_script():
     gs_script = torch.jit.script(gs)
     x = torch.randn(10, 128, 1337)
     assert torch.allclose(gs_script(x), gs(x))
+
+
+def test_squeezeexcite_retains_shape():
+    x = torch.randn(10, 128, 1337)
+    se = SqueezeExcite(128, 4)
+    assert x.shape == se(x).shape
+
+
+@requirescuda
+def test_squeezeexcite_device_move():
+    se = SqueezeExcite(128, 4)
+    x = torch.randn(10, 128, 1337)
+    _test_simple_device_move(se, x)
+
+
+def test_squeezeexcite_batch_independence():
+    se = SqueezeExcite(128, 4)
+    x = torch.randn(10, 128, 1337)
+    _test_simple_batch_independence(se, x)
+
+
+def test_se_parameters_updated():
+    se = SqueezeExcite(128, 4)
+    x = torch.randn(10, 128, 1337)
+    _test_parameters_update(se, [x])
+
+
+def test_squeezeexcite_trace():
+    x_traced = torch.randn(5, 128, 137)
+    se = SqueezeExcite(128, 4)
+    se_trace = torch.jit.trace(se, x_traced)
+    # using a different shape than the traced one
+    x = torch.randn(10, 128, 1337)
+    assert torch.allclose(se_trace(x), se(x))
+
+    with TemporaryDirectory() as save_dir:
+        save_file = f"{save_dir}/shuffle.pth"
+        torch.jit.save(se_trace, save_file)
+        gs_loaded = torch.jit.load(save_file)
+        assert torch.allclose(gs_loaded(x), se(x))
+
+
+def test_squeezeexcite_onnx():
+    x = torch.randn(10, 128, 1337)
+    se = SqueezeExcite(128, 4)
+    with TemporaryDirectory() as export_path:
+        torch.onnx.export(se, x, f"{export_path}/squeeze.onnx", verbose=True)
+
+
+@pytest.mark.xfail
+def test_squeezeexcite_script():
+    # Only torch.jit.trace works with einops
+    se = SqueezeExcite(128, 4)
+    se_script = torch.jit.script(se)
+    x = torch.randn(10, 128, 1337)
+    assert torch.allclose(se_script(x), se(x))
