@@ -31,7 +31,11 @@ jasper_activations = {
 
 
 class InitMode(str, Enum):
-    """Possible weight init methods. Used by [`init_weights`][thunder.jasper.blocks.init_weights]."""
+    """Weight init methods. Used by [`init_weights`][thunder.jasper.blocks.init_weights].
+
+    Note:
+        Possible values are `xavier_uniform`,`xavier_normal`,`kaiming_uniform` and `kaiming_normal`
+    """
 
     xavier_uniform = "xavier_uniform"
     xavier_normal = "xavier_normal"
@@ -225,8 +229,7 @@ class MaskedConv1d(nn.Module):
     def forward(
         self, x: torch.Tensor, lens: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Forward method
-
+        """
         Args:
             x : Signal to be processed, of shape (batch, features, time)
             lens : Lenghts of each element in the batch of x, with shape (batch)
@@ -254,13 +257,25 @@ def GroupShuffle(groups: int, channels: int) -> nn.Module:
     return Rearrange("b (c1 c2) t -> b (c2 c1) t", c1=groups)
 
 
+class InterpolationMode(str, Enum):
+    """Interpolation mode. Used by [`SqueezeExcite`][thunder.jasper.blocks.SqueezeExcite] block.
+
+    Note:
+        Possible values are `nearest`,`linear` and `area`
+    """
+
+    nearest = "nearest"
+    linear = "linear"
+    area = "area"
+
+
 class SqueezeExcite(nn.Module):
     def __init__(
         self,
         channels: int,
         reduction_ratio: int,
         context_window: int = -1,
-        interpolation_mode: str = "nearest",
+        interpolation_mode: InterpolationMode = InterpolationMode.nearest,
         activation: nn.Module = nn.ReLU(inplace=True),
     ):
         """
@@ -274,8 +289,6 @@ class SqueezeExcite(nn.Module):
                 If value < 1, then global context is computed.
             interpolation_mode: Interpolation mode of timestep dimension.
                 Used only if context window is > 1.
-                The modes available for resizing are: `nearest`, `linear` (3D-only),
-                `bilinear`, `area`
             activation: Intermediate activation function used.
         """
         super(SqueezeExcite, self).__init__()

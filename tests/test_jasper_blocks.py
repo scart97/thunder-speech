@@ -13,6 +13,7 @@ from torch import nn
 from thunder.jasper.blocks import (
     GroupShuffle,
     InitMode,
+    InterpolationMode,
     MaskedConv1d,
     SqueezeExcite,
     compute_new_kernel_size,
@@ -385,11 +386,26 @@ def test_squeezeexcite_retains_shape():
     assert x.shape == se(x).shape
 
 
+def test_squeezeexcite_interpolation():
+    x = torch.randn(10, 128, 1337)
+    for interp in InterpolationMode:
+        se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
+        assert x.shape == se(x).shape
+
+
 @requirescuda
 def test_squeezeexcite_device_move():
     se = SqueezeExcite(128, 4)
     x = torch.randn(10, 128, 1337)
     _test_simple_device_move(se, x)
+
+
+@requirescuda
+def test_squeezeexcite_interp_device_move():
+    for interp in InterpolationMode:
+        se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
+        x = torch.randn(10, 128, 1337)
+        _test_simple_device_move(se, x)
 
 
 def test_squeezeexcite_batch_independence():
@@ -398,10 +414,24 @@ def test_squeezeexcite_batch_independence():
     _test_simple_batch_independence(se, x)
 
 
+def test_squeezeexcite_interp_batch_independence():
+    for interp in InterpolationMode:
+        se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
+        x = torch.randn(10, 128, 1337)
+        _test_simple_batch_independence(se, x)
+
+
 def test_se_parameters_updated():
     se = SqueezeExcite(128, 4)
     x = torch.randn(10, 128, 1337)
     _test_parameters_update(se, [x])
+
+
+def test_se_interp_parameters_updated():
+    for interp in InterpolationMode:
+        se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
+        x = torch.randn(10, 128, 1337)
+        _test_parameters_update(se, [x])
 
 
 def test_squeezeexcite_trace():
