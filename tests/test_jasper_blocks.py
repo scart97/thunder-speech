@@ -1,3 +1,4 @@
+from functools import partial
 from math import ceil, floor
 from tempfile import TemporaryDirectory
 from typing import List
@@ -11,11 +12,11 @@ from pytorch_lightning import seed_everything
 from torch import nn
 
 from thunder.jasper.blocks import (
+    Conv1dWithHeads,
     GroupShuffle,
     InitMode,
     InterpolationMode,
     JasperBlock,
-    MaskedConv1d,
     NormalizationType,
     SqueezeExcite,
     compute_new_kernel_size,
@@ -38,9 +39,7 @@ requirescuda = pytest.mark.skipif(
 def _test_parameters_update(model: nn.Module, x: List[torch.Tensor]):
     optim = torch.optim.SGD(model.parameters(), lr=0.1)
 
-    outputs = model(*x)
-    if isinstance(outputs, tuple):
-        outputs = outputs[0]
+    outputs = model(x)
     loss = outputs.mean()
     loss.backward()
     optim.step()
@@ -51,7 +50,7 @@ def _test_parameters_update(model: nn.Module, x: List[torch.Tensor]):
             assert (torch.sum(param.grad ** 2) != 0.0).all()
 
 
-def _test_simple_device_move(model: nn.Module, x: torch.Tensor):
+def _test_device_move(model: nn.Module, x: torch.Tensor):
     seed_everything(42)
     outputs_cpu = model(x)
 
@@ -62,12 +61,11 @@ def _test_simple_device_move(model: nn.Module, x: torch.Tensor):
     seed_everything(42)
     model = model.cpu()
     outputs_back_on_cpu = model(x.cpu())
-
-    assert torch.allclose(outputs_cpu, outputs_gpu.cpu())
+    assert torch.allclose(outputs_cpu, outputs_gpu.cpu(), atol=1e-6)
     assert torch.allclose(outputs_cpu, outputs_back_on_cpu)
 
 
-def _test_simple_batch_independence(model: nn.Module, x: torch.Tensor):
+def _test_batch_independence(model: nn.Module, x: torch.Tensor):
     x.requires_grad_(True)
 
     # Compute forward pass in eval mode to deactivate batch norm
@@ -108,18 +106,30 @@ def test_init_linear_weights():
         init_weights(linear_layer, "unknown_init")
 
 
-def test_init_masked_conv():
-    conv_layer = MaskedConv1d(128, 10, 11)
-    original_std = conv_layer.conv.weight.std()
-    original_mean = conv_layer.conv.weight.mean()
+def test_init_conv1d():
+    conv_layer = Conv1dWithHeads(128, 10, 11)
+    original_std = conv_layer.weight.std()
+    original_mean = conv_layer.weight.mean()
 
     for init in InitMode:
         init_weights(conv_layer, init)
-        assert conv_layer.conv.weight.std() != original_std
-        assert conv_layer.conv.weight.mean() != original_mean
+        assert conv_layer.weight.std() != original_std
+        assert conv_layer.weight.mean() != original_mean
 
     with pytest.raises(ValueError):
         init_weights(conv_layer, "unknown_init")
+
+
+def test_init_conv1d_heads():
+    conv_layer = Conv1dWithHeads(128, 10, 11, groups=128, heads=4)
+    original_std = conv_layer[1].weight.std()
+    original_mean = conv_layer[1].weight.mean()
+
+    for init in InitMode:
+        init_weights(conv_layer, init)
+        conv_layer.apply(partial(init_weights, mode=init))
+        assert conv_layer[1].weight.std() != original_std
+        assert conv_layer[1].weight.mean() != original_mean
 
 
 def test_init_batchnorm1d():
@@ -206,128 +216,66 @@ def test_same_padding_ValueError(i, stride, ks, dilation):
     stride=integers(1, 64),
     padding=integers(1, 64),
 )
-def test_maskconv_init(in_channels, out_channels, kernel_size, stride, padding):
-    maskconv = MaskedConv1d(in_channels, out_channels, kernel_size, stride, padding)
-    assert maskconv.conv.in_channels == in_channels
-    assert maskconv.conv.out_channels == out_channels
-    assert maskconv.conv.kernel_size[0] == kernel_size
-    assert maskconv.conv.stride[0] == stride
-    assert maskconv.conv.padding[0] == padding
+def test_conv1d_init(in_channels, out_channels, kernel_size, stride, padding):
+    conv1d = Conv1dWithHeads(in_channels, out_channels, kernel_size, stride, padding)
+    assert conv1d.in_channels == in_channels
+    assert conv1d.out_channels == out_channels
+    assert conv1d.kernel_size[0] == kernel_size
+    assert conv1d.stride[0] == stride
+    assert conv1d.padding[0] == padding
 
 
-def test_maskconv_error():
+def test_conv1d_error():
     with pytest.raises(ValueError):
-        MaskedConv1d(128, 64, 3, heads=4)
+        Conv1dWithHeads(128, 64, 3, heads=4)
 
 
-def test_maskconv_parameters_update():
+def test_conv1d_parameters_update():
     x = torch.randn(10, 128, 1337)
-    lens = torch.Tensor([1000] * 10)
-    conv = MaskedConv1d(128, 10, 3)
-    _test_parameters_update(conv, [x, lens])
+    conv = Conv1dWithHeads(128, 10, 3)
+    _test_parameters_update(conv, x)
 
 
 @requirescuda
-def test_maskconv_device_move():
-    conv = MaskedConv1d(128, 10, 3)
+def test_conv1d_device_move():
+    conv = Conv1dWithHeads(128, 10, 3)
     x = torch.randn(10, 128, 1337)
-    lens = torch.Tensor([1000] * 10)
-
-    seed_everything(42)
-    outputs_cpu, lens_cpu = conv(x, lens)
-
-    seed_everything(42)
-    conv = conv.cuda()
-    outputs_gpu, lens_gpu = conv(x.cuda(), lens.cuda())
-
-    seed_everything(42)
-    conv = conv.cpu()
-    outputs_back_on_cpu, lens_back_on_cpu = conv(x.cpu(), lens.cpu())
-
-    assert torch.allclose(lens_cpu, lens_gpu.cpu())
-    assert torch.allclose(lens_cpu, lens_back_on_cpu)
-
-    assert torch.allclose(outputs_cpu, outputs_gpu.cpu(), atol=1e-6)
-    assert torch.allclose(outputs_cpu, outputs_back_on_cpu)
+    _test_device_move(conv, x)
 
 
-def test_maskconv_batch_independence():
-    conv = MaskedConv1d(128, 10, 3)
+def test_conv1d_batch_independence():
+    conv = Conv1dWithHeads(128, 10, 3)
     x = torch.randn(10, 128, 1337)
-    lens = torch.Tensor([1000] * 10)
-    x.requires_grad_(True)
-
-    # Compute forward pass in eval mode to deactivate batch norm
-    conv.eval()
-    outputs, _ = conv(x, lens)
-    conv.train()
-
-    # Mask loss for certain samples in batch
-    batch_size = x.shape[0]
-    mask_idx = torch.randint(0, batch_size, ())
-    mask = torch.ones_like(outputs)
-    mask[mask_idx] = 0
-    outputs = outputs * mask
-
-    # Compute backward pass
-    loss = outputs.mean()
-    loss.backward()
-
-    # Check if gradient exists and is zero for masked samples
-    for i, grad in enumerate(x.grad):
-        if i == mask_idx:
-            assert torch.all(grad == 0).item()
-        else:
-            assert not torch.all(grad == 0)
+    _test_batch_independence(conv, x)
 
 
-def test_mask_fill():
+def test_conv1d_script():
     x = torch.randn(10, 128, 1337)
-    lens = torch.Tensor([1000] * 10)
-    conv = MaskedConv1d(128, 10, 3)
-    x_mask = conv.mask_fill(x, lens)
-    lens_mask = conv.get_seq_len(lens)
-
-    assert lens_mask[0] == conv_outsize(1000, 0, 3, 1, 1)
-    assert (x_mask[:, :, 1000:] == 0).all()
-
-
-def test_maskconv_script():
-    x = torch.randn(10, 128, 1337)
-    lens = torch.randint(10, 1337, (10,))
-    conv = MaskedConv1d(128, 10, 3)
+    conv = Conv1dWithHeads(128, 10, 3)
 
     conv_script = torch.jit.script(conv)
-    x_old, lens_old = conv(x, lens)
-    x_new, lens_new = conv_script(x, lens)
-    assert torch.allclose(x_old, x_new)
-    assert torch.allclose(lens_old, lens_new)
+    assert torch.allclose(conv(x), conv_script(x))
 
 
-def test_maskconv_onnx():
+def test_conv1d_onnx():
     x = torch.randn(10, 128, 1337)
-    lens = torch.randint(10, 1337, (10,))
-    conv = MaskedConv1d(128, 10, 3)
+    conv = Conv1dWithHeads(128, 10, 3)
     with TemporaryDirectory() as export_path:
-        torch.onnx.export(conv, (x, lens), f"{export_path}/maskconv.onnx", verbose=True)
+        torch.onnx.export(conv, (x), f"{export_path}/conv1d.onnx", verbose=True)
 
 
-def test_maskconv_heads_trace():
+def test_conv1d_heads_trace():
     x = torch.randn(10, 128, 1337)
-    lens = torch.randint(10, 1337, (10,))
 
-    conv = MaskedConv1d(128, 10, 3, heads=2, groups=128)
-    conv_trace = torch.jit.trace(conv, (x, lens))
-    x_old, lens_old = conv(x, lens)
-    x_new, lens_new = conv_trace(x, lens)
-    assert torch.allclose(x_old, x_new)
-    assert torch.allclose(lens_old, lens_new)
+    conv = Conv1dWithHeads(128, 10, 3, heads=2, groups=128)
+    conv_trace = torch.jit.trace(conv, x)
+    assert torch.allclose(conv(x), conv_trace(x))
 
 
 @pytest.mark.xfail
-def test_maskconv_heads_script():
+def test_conv1d_heads_script():
     # Only torch.jit.trace works with einops
-    conv = MaskedConv1d(128, 10, 3, heads=2, groups=128)
+    conv = Conv1dWithHeads(128, 10, 3, heads=2, groups=128)
     torch.jit.script(conv)
 
 
@@ -343,13 +291,13 @@ def test_group_shuffle():
 def test_group_shuffle_device_move():
     gs = GroupShuffle(4, 128)
     x = torch.randn(10, 128, 1337)
-    _test_simple_device_move(gs, x)
+    _test_device_move(gs, x)
 
 
 def test_groupshuffle_batch_independence():
     gs = GroupShuffle(4, 128)
     x = torch.randn(10, 128, 1337)
-    _test_simple_batch_independence(gs, x)
+    _test_batch_independence(gs, x)
 
 
 def test_group_shuffle_trace():
@@ -400,7 +348,7 @@ def test_squeezeexcite_interpolation():
 def test_squeezeexcite_device_move():
     se = SqueezeExcite(128, 4)
     x = torch.randn(10, 128, 1337)
-    _test_simple_device_move(se, x)
+    _test_device_move(se, x)
 
 
 @requirescuda
@@ -408,33 +356,33 @@ def test_squeezeexcite_interp_device_move():
     for interp in InterpolationMode:
         se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
         x = torch.randn(10, 128, 1337)
-        _test_simple_device_move(se, x)
+        _test_device_move(se, x)
 
 
 def test_squeezeexcite_batch_independence():
     se = SqueezeExcite(128, 4)
     x = torch.randn(10, 128, 1337)
-    _test_simple_batch_independence(se, x)
+    _test_batch_independence(se, x)
 
 
 def test_squeezeexcite_interp_batch_independence():
     for interp in InterpolationMode:
         se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
         x = torch.randn(10, 128, 1337)
-        _test_simple_batch_independence(se, x)
+        _test_batch_independence(se, x)
 
 
 def test_se_parameters_updated():
     se = SqueezeExcite(128, 4)
     x = torch.randn(10, 128, 1337)
-    _test_parameters_update(se, [x])
+    _test_parameters_update(se, x)
 
 
 def test_se_interp_parameters_updated():
     for interp in InterpolationMode:
         se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
         x = torch.randn(10, 128, 1337)
-        _test_parameters_update(se, [x])
+        _test_parameters_update(se, x)
 
 
 def test_squeezeexcite_trace():

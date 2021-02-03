@@ -15,7 +15,7 @@
 # Original file: https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/parts/jasper.py
 
 from enum import Enum
-from typing import List, Tuple
+from typing import List
 
 import torch
 import torch.nn as nn
@@ -53,8 +53,6 @@ def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
     Raises:
         ValueError: Raised when the initial mode is not one of the possible options.
     """
-    if isinstance(m, MaskedConv1d):
-        init_weights(m.conv, mode)
     if isinstance(m, (nn.Conv1d, nn.Linear)):
         if mode == InitMode.xavier_uniform:
             nn.init.xavier_uniform_(m.weight, gain=1.0)
@@ -130,6 +128,23 @@ def Conv1dWithHeads(
     heads: int = -1,
     bias: bool = False,
 ):
+    """1d convolution with option to use multiple heads.
+
+    Args:
+        in_channels : Same as nn.Conv1d
+        out_channels : Same as nn.Conv1d
+        kernel_size : Same as nn.Conv1d
+        stride : Same as nn.Conv1d
+        padding : Same as nn.Conv1d
+        dilation : Same as nn.Conv1d
+        groups : Same as nn.Conv1d
+        bias : Same as nn.Conv1d
+        heads : Number of heads to be used. Only applicable for depthwise convolutions.
+
+    Raises:
+        ValueError: Selecting heads != -1 without doing a depthwise convolution will raise this error.
+        ValueError: When using multiple heads, the number of channels should be a multiple of the number of heads.
+    """
     if not (heads == -1 or groups == in_channels):
         raise ValueError("Only use heads for depthwise convolutions")
     if not (heads == -1 or in_channels % heads == 0):
@@ -163,129 +178,6 @@ def Conv1dWithHeads(
             ),
         )
     return conv
-
-
-class MaskedConv1d(nn.Module):
-    __constants__ = ["use_mask", "padding", "dilation", "kernel_size", "stride"]
-
-    def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        kernel_size: int,
-        stride: int = 1,
-        padding: int = 0,
-        dilation: int = 1,
-        groups: int = 1,
-        heads: int = -1,
-        bias: bool = False,
-        use_mask: bool = True,
-    ):
-        """Masked Convolution.
-        This module correspond to a 1d convolution with input masking. Arguments to create are the
-        same as nn.Conv1d, but with the addition of heads and use_mask for special behaviour.
-
-
-        Args:
-            in_channels : Same as nn.Conv1d
-            out_channels : Same as nn.Conv1d
-            kernel_size : Same as nn.Conv1d
-            stride : Same as nn.Conv1d
-            padding : Same as nn.Conv1d
-            dilation : Same as nn.Conv1d
-            groups : Same as nn.Conv1d
-            bias : Same as nn.Conv1d
-            heads : Number of heads to be used. Only applicable for depthwise convolutions.
-            use_mask : Controls the masking of input before the convolution during the forward.
-
-        Raises:
-            ValueError: Selecting heads != -1 without doing a depthwise convolution will raise this error.
-        """
-        super(MaskedConv1d, self).__init__()
-
-        if not (heads == -1 or groups == in_channels):
-            raise ValueError("Only use heads for depthwise convolutions")
-
-        self.use_mask = use_mask
-        if heads != -1:
-            in_channels = heads
-            out_channels = heads
-            groups = heads
-
-        conv = nn.Conv1d(
-            in_channels,
-            out_channels,
-            kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias,
-        )
-        if heads != -1:
-            self.conv = nn.Sequential(
-                Rearrange("b (f heads) t -> (b f) heads t", heads=heads),
-                conv,
-                Rearrange(
-                    "(b f) heads t -> b (f heads) t",
-                    heads=heads,
-                    f=out_channels // heads,
-                ),
-            )
-        else:
-            self.conv = conv
-
-        self.padding = conv.padding[0]
-        self.dilation = conv.dilation[0]
-        self.kernel_size = conv.kernel_size[0]
-        self.stride = conv.stride[0]
-
-    def get_seq_len(self, lens: torch.Tensor) -> torch.Tensor:
-        """Get the lengths of the inputs after the convolution operation is applied.
-
-        Args:
-            lens : Original lengths of the inputs
-
-        Returns:
-            Resulting lengths after the convolution
-        """
-        return (
-            lens + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1
-        ) // self.stride + 1
-
-    def mask_fill(self, x: torch.Tensor, lens: torch.Tensor) -> torch.Tensor:
-        """Mask the input based on it's respective lengths.
-
-        Args:
-            x : Signal to be processed, of shape (batch, features, time)
-            lens : Lenghts of each element in the batch of x, with shape (batch)
-
-        Returns:
-            The masked signal
-        """
-        lens = lens.to(dtype=torch.long)
-        max_len = x.size(2)
-        mask = torch.arange(max_len, device=lens.device).expand(
-            lens.shape[0], max_len
-        ) >= lens.unsqueeze(1)
-        x = x.masked_fill(mask.unsqueeze(1).to(device=x.device), 0)
-        return x
-
-    def forward(
-        self, x: torch.Tensor, lens: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
-        """
-        Args:
-            x : Signal to be processed, of shape (batch, features, time)
-            lens : Lenghts of each element in the batch of x, with shape (batch)
-
-        Returns:
-            Both the signal processed by the convolution and the resulting lengths
-        """
-        if self.use_mask:
-            x = self.mask_fill(x, lens)
-        out = self.conv(x)
-        return out, self.get_seq_len(lens)
 
 
 def GroupShuffle(groups: int, channels: int) -> nn.Module:
