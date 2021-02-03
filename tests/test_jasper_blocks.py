@@ -6,7 +6,7 @@ import pytest
 
 import torch
 from hypothesis import given
-from hypothesis.strategies import integers
+from hypothesis.strategies import booleans, floats, integers, lists
 from pytorch_lightning import seed_everything
 from torch import nn
 
@@ -14,9 +14,12 @@ from thunder.jasper.blocks import (
     GroupShuffle,
     InitMode,
     InterpolationMode,
+    JasperBlock,
     MaskedConv1d,
+    NormalizationType,
     SqueezeExcite,
     compute_new_kernel_size,
+    get_normalization,
     get_same_padding,
     init_weights,
 )
@@ -463,3 +466,59 @@ def test_squeezeexcite_script():
     se_script = torch.jit.script(se)
     x = torch.randn(10, 128, 1337)
     assert torch.allclose(se_script(x), se(x))
+
+
+def test_get_normalization():
+    for normtype in NormalizationType:
+        norm = get_normalization(normtype, 128, 64)
+        assert isinstance(norm, (nn.GroupNorm, nn.InstanceNorm1d, nn.BatchNorm1d))
+
+
+def test_jasperblock_dense_residual():
+    for res_mod in ["add", "max"]:
+        block = JasperBlock(
+            64,
+            64,
+            stride=[1],
+            dilation=[1],
+            kernel_size=[33],
+            residual_panes=[64],
+            residual_mode=res_mod,
+        )
+        mdl = nn.Sequential(block, block, block)
+        x = torch.randn(10, 64, 1337)
+        out = mdl([x])
+        assert len(out) == 4
+
+
+def test_jasperblock_normalization_error():
+    with pytest.raises(ValueError):
+        JasperBlock(64, 64, normalization="unknown")
+
+
+@given(
+    inplanes=integers(16, 32),
+    planes=integers(16, 32),
+    repeat=integers(1, 4),
+    kernel_size=lists(integers(11, 33), min_size=1, max_size=1),
+    kernel_size_factor=floats(0.5, 2.0),
+    stride=lists(integers(1, 3), min_size=1, max_size=1),
+    dilation=lists(integers(1, 2), min_size=1, max_size=1),
+    residual=booleans(),
+    groups=integers(1, 3),
+    separable=booleans(),
+    heads=integers(-1, 4).filter(lambda x: x != 0),
+    norm_groups=integers(1, 4),
+    se=booleans(),
+    se_context_window=integers(1, 10),
+    stride_last=booleans(),
+)
+def test_jasperblock_combinations(**kwargs):
+    try:
+        block = JasperBlock(**kwargs)
+    except ValueError:
+        return
+    x = torch.randn(10, kwargs["inplanes"], 1337)
+    out = block([x])
+    assert out[-1].shape[0] == x.shape[0]
+    assert out[-1].shape[1] == kwargs["planes"]

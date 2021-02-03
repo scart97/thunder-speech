@@ -15,13 +15,12 @@
 # Original file: https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/parts/jasper.py
 
 from enum import Enum
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
 from einops import rearrange
 from einops.layers.torch import Rearrange
-from torch import Tensor
 
 jasper_activations = {
     "hardtanh": nn.Hardtanh,
@@ -118,6 +117,52 @@ def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
     if dilation > 1:
         return (dilation * (kernel_size - 1) + 1) // 2
     return kernel_size // 2
+
+
+def Conv1dWithHeads(
+    in_channels: int,
+    out_channels: int,
+    kernel_size: int,
+    stride: int = 1,
+    padding: int = 0,
+    dilation: int = 1,
+    groups: int = 1,
+    heads: int = -1,
+    bias: bool = False,
+):
+    if not (heads == -1 or groups == in_channels):
+        raise ValueError("Only use heads for depthwise convolutions")
+    if not (heads == -1 or in_channels % heads == 0):
+        raise ValueError(
+            f"The number of input channels {in_channels} cannot be evenly distributed into {heads} heads"
+        )
+
+    if heads != -1:
+        in_channels = heads
+        out_channels = heads
+        groups = heads
+
+    conv = nn.Conv1d(
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        bias=bias,
+    )
+    if heads != -1:
+        conv = nn.Sequential(
+            Rearrange("b (f heads) t -> (b f) heads t", heads=heads),
+            conv,
+            Rearrange(
+                "(b f) heads t -> b (f heads) t",
+                heads=heads,
+                f=out_channels // heads,
+            ),
+        )
+    return conv
 
 
 class MaskedConv1d(nn.Module):
@@ -330,21 +375,53 @@ class SqueezeExcite(nn.Module):
         return x * y
 
 
+class NormalizationType(str, Enum):
+    """Normalization type. Used by [`get_normalization`][thunder.jasper.blocks.get_normalization].
+
+    Note:
+        Possible values are `group`,`instance`, `layer` and `batch`
+    """
+
+    group = "group"
+    instance = "instance"
+    layer = "layer"
+    batch = "batch"
+
+
+def get_normalization(
+    normalization: NormalizationType,
+    norm_groups: int,
+    out_channels: int,
+):
+    if normalization == NormalizationType.group:
+        return nn.GroupNorm(num_groups=norm_groups, num_channels=out_channels)
+    elif normalization == NormalizationType.instance:
+        return nn.InstanceNorm1d(out_channels)
+    elif normalization == NormalizationType.layer:
+        return nn.GroupNorm(num_groups=1, num_channels=out_channels)
+    elif normalization == NormalizationType.batch:
+        return nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1)
+    else:
+        raise ValueError(
+            f"Normalization method ({normalization}) does not match"
+            f" one of [batch, layer, group, instance]."
+        )
+
+
 class JasperBlock(nn.Module):
-    __constants__ = ["conv_mask", "separable", "residual_mode", "res", "mconv"]
+    __constants__ = ["residual_mode", "res", "mconv"]
 
     def __init__(
         self,
         inplanes: int,
         planes: int,
         repeat: int = 3,
-        kernel_size: int = 11,
-        kernel_size_factor: int = 1,
-        stride: int = 1,
-        dilation: int = 1,
-        padding: str = "same",
+        kernel_size: List[int] = [11],
+        kernel_size_factor: float = 1.0,
+        stride: List[int] = [1],
+        dilation: List[int] = [1],
         dropout: float = 0.2,
-        activation=None,
+        activation=nn.Hardtanh(min_val=0.0, max_val=20.0),
         residual: bool = True,
         groups: int = 1,
         separable: bool = False,
@@ -353,34 +430,28 @@ class JasperBlock(nn.Module):
         norm_groups: int = 1,
         residual_mode: str = "add",
         residual_panes=[],
-        conv_mask: bool = False,
         se: bool = False,
         se_reduction_ratio: int = 16,
         se_context_window=None,
         se_interpolation_mode: str = "nearest",
         stride_last: bool = False,
     ):
-        super(JasperBlock, self).__init__()
-
-        if padding != "same":
-            raise ValueError("currently only 'same' padding is supported")
+        super().__init__()
+        if separable and heads != -1:
+            raise ValueError(
+                "Separable convolutions are not compatible with multiple heads"
+            )
 
         kernel_size_factor = float(kernel_size_factor)
-        if type(kernel_size) in (list, tuple):
-            kernel_size = [
-                compute_new_kernel_size(k, kernel_size_factor) for k in kernel_size
-            ]
-        else:
-            kernel_size = compute_new_kernel_size(kernel_size, kernel_size_factor)
-
+        kernel_size = [
+            compute_new_kernel_size(k, kernel_size_factor) for k in kernel_size
+        ]
         padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
-        self.conv_mask = conv_mask
-        self.separable = separable
+
         self.residual_mode = residual_mode
-        self.se = se
 
         inplanes_loop = inplanes
-        conv = nn.ModuleList()
+        conv = []
 
         for _ in range(repeat - 1):
             # Stride last means only the last convolution in block will have stride
@@ -402,6 +473,7 @@ class JasperBlock(nn.Module):
                     separable=separable,
                     normalization=normalization,
                     norm_groups=norm_groups,
+                    bias=False,
                 )
             )
 
@@ -424,6 +496,7 @@ class JasperBlock(nn.Module):
                 separable=separable,
                 normalization=normalization,
                 norm_groups=norm_groups,
+                bias=False,
             )
         )
 
@@ -438,7 +511,7 @@ class JasperBlock(nn.Module):
                 )
             )
 
-        self.mconv = conv
+        self.mconv = nn.Sequential(*conv)
 
         res_panes = residual_panes.copy()
         self.dense_residual = residual
@@ -446,23 +519,22 @@ class JasperBlock(nn.Module):
         if residual:
             res_list = nn.ModuleList()
 
-            if residual_mode == "stride_add":
-                stride_val = stride
-            else:
-                stride_val = [1]
-
+            stride_residual = (
+                stride if stride[0] == 1 or stride_last else stride[0] ** repeat
+            )
             if len(residual_panes) == 0:
                 res_panes = [inplanes]
                 self.dense_residual = False
             for ip in res_panes:
-                res = nn.ModuleList(
-                    self._get_conv_bn_layer(
+                res = nn.Sequential(
+                    *self._get_conv_bn_layer(
                         ip,
                         planes,
                         kernel_size=1,
                         normalization=normalization,
                         norm_groups=norm_groups,
-                        stride=stride_val,
+                        stride=stride_residual,
+                        bias=False,
                     )
                 )
 
@@ -480,58 +552,31 @@ class JasperBlock(nn.Module):
         self,
         in_channels,
         out_channels,
-        kernel_size=11,
-        stride=1,
-        dilation=1,
-        padding=0,
-        bias=False,
-        groups=1,
+        kernel_size,
         heads=-1,
-        separable=False,
+        **conv_kwargs,
     ):
-        use_mask = self.conv_mask
-        if use_mask:
-            return MaskedConv1d(
-                in_channels,
-                out_channels,
-                kernel_size,
-                stride=stride,
-                dilation=dilation,
-                padding=padding,
-                bias=bias,
-                groups=groups,
-                heads=heads,
-                use_mask=use_mask,
-            )
-        else:
-            return nn.Conv1d(
-                in_channels,
-                out_channels,
-                kernel_size,
-                stride=stride,
-                dilation=dilation,
-                padding=padding,
-                bias=bias,
-                groups=groups,
-            )
+
+        return Conv1dWithHeads(
+            in_channels,
+            out_channels,
+            kernel_size,
+            heads=heads,
+            **conv_kwargs,
+        )
 
     def _get_conv_bn_layer(
         self,
         in_channels,
         out_channels,
         kernel_size=11,
-        stride=1,
-        dilation=1,
-        padding=0,
-        bias=False,
         groups=1,
         heads=-1,
         separable=False,
         normalization="batch",
         norm_groups=1,
+        **conv_kwargs,
     ):
-        if norm_groups == -1:
-            norm_groups = out_channels
 
         if separable:
             layers = [
@@ -539,12 +584,9 @@ class JasperBlock(nn.Module):
                     in_channels,
                     in_channels,
                     kernel_size,
-                    stride=stride,
-                    dilation=dilation,
-                    padding=padding,
-                    bias=bias,
                     groups=in_channels,
                     heads=heads,
+                    **conv_kwargs,
                 ),
                 self._get_conv(
                     in_channels,
@@ -553,7 +595,7 @@ class JasperBlock(nn.Module):
                     stride=1,
                     dilation=1,
                     padding=0,
-                    bias=bias,
+                    bias=conv_kwargs.get("bias", False),
                     groups=groups,
                 ),
             ]
@@ -563,72 +605,30 @@ class JasperBlock(nn.Module):
                     in_channels,
                     out_channels,
                     kernel_size,
-                    stride=stride,
-                    dilation=dilation,
-                    padding=padding,
-                    bias=bias,
                     groups=groups,
+                    **conv_kwargs,
                 )
             ]
 
-        if normalization == "group":
-            layers.append(
-                nn.GroupNorm(num_groups=norm_groups, num_channels=out_channels)
-            )
-        elif normalization == "instance":
-            layers.append(
-                nn.GroupNorm(num_groups=out_channels, num_channels=out_channels)
-            )
-        elif normalization == "layer":
-            layers.append(nn.GroupNorm(num_groups=1, num_channels=out_channels))
-        elif normalization == "batch":
-            layers.append(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1))
-        else:
-            raise ValueError(
-                f"Normalization method ({normalization}) does not match"
-                f" one of [batch, layer, group, instance]."
-            )
+        norm_groups = out_channels if norm_groups == -1 else norm_groups
+        layers.append(get_normalization(normalization, norm_groups, out_channels))
 
         if groups > 1:
             layers.append(GroupShuffle(groups, out_channels))
         return layers
 
-    def _get_act_dropout_layer(self, drop_prob=0.2, activation=None):
-        if activation is None:
-            activation = nn.Hardtanh(min_val=0.0, max_val=20.0)
-        layers = [activation, nn.Dropout(p=drop_prob)]
-        return layers
+    def _get_act_dropout_layer(self, activation, drop_prob=0.2):
+        return [activation, nn.Dropout(p=drop_prob)]
 
-    def forward(self, input_: Tuple[List[Tensor], Optional[Tensor]]):
-        # type: (Tuple[List[Tensor], Optional[Tensor]]) -> Tuple[List[Tensor], Optional[Tensor]] # nopep8
-        lens_orig = None
-        xs = input_[0]
-        if len(input_) == 2:
-            xs, lens_orig = input_
-
+    def forward(self, xs: List[torch.Tensor]):
         # compute forward convolutions
         out = xs[-1]
-
-        lens = lens_orig
-        for i, l in enumerate(self.mconv):
-            # if we're doing masked convolutions, we need to pass in and
-            # possibly update the sequence lengths
-            # if (i % 4) == 0 and self.conv_mask:
-            if isinstance(l, MaskedConv1d):
-                out, lens = l(out, lens)
-            else:
-                out = l(out)
+        out = self.mconv(out)
 
         # compute the residuals
         if self.res is not None:
             for i, layer in enumerate(self.res):
-                res_out = xs[i]
-                for j, res_layer in enumerate(layer):
-                    if isinstance(res_layer, MaskedConv1d):
-                        res_out, _ = res_layer(res_out, lens_orig)
-                    else:
-                        res_out = res_layer(res_out)
-
+                res_out = layer(xs[i])
                 if self.residual_mode == "add" or self.residual_mode == "stride_add":
                     out = out + res_out
                 else:
@@ -637,6 +637,6 @@ class JasperBlock(nn.Module):
         # compute the output
         out = self.mout(out)
         if self.res is not None and self.dense_residual:
-            return xs + [out], lens
+            return xs + [out]
 
-        return [out], lens
+        return [out]

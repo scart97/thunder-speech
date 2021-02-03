@@ -41,9 +41,9 @@ def read_config(config_path: str) -> Tuple[nn.Module, nn.Module]:
     for cfg in jasper_conf:
         if cfg.pop("residual_dense", False):
             residual_panes.append(inplanes)
-        cfg["conv_mask"] = encoder_params["conv_mask"]
         cfg["planes"] = cfg.pop("filters")
         cfg["kernel_size"] = cfg.pop("kernel")
+
         layers.append(
             JasperBlock(
                 inplanes=inplanes,
@@ -86,7 +86,9 @@ def load_jasper_weights(
     # We remove the 'encoder.' and 'decoder.' prefix from the weights to enable
     # compatibility to load with plain nn.Modules created by reading the config
     encoder_weights = {
-        k.replace("encoder.", ""): v for k, v in weights.items() if "encoder" in k
+        k.replace("encoder.", "").replace(".conv", ""): v
+        for k, v in weights.items()
+        if "encoder" in k
     }
     encoder.load_state_dict(encoder_weights, strict=True)
 
