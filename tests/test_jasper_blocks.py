@@ -496,6 +496,7 @@ def test_jasperblock_update(**kwargs):
 
 
 @jasper_parameters
+@settings(deadline=None)
 def test_jasperblock_independence(**kwargs):
     try:
         block = JasperBlock(**kwargs)
