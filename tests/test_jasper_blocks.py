@@ -6,7 +6,7 @@ from typing import List
 import pytest
 
 import torch
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis.strategies import booleans, floats, integers, lists
 from pytorch_lightning import seed_everything
 from torch import nn
@@ -37,9 +37,12 @@ requirescuda = pytest.mark.skipif(
 
 
 def _test_parameters_update(model: nn.Module, x: List[torch.Tensor]):
+    model.train()
     optim = torch.optim.SGD(model.parameters(), lr=0.1)
 
     outputs = model(x)
+    if isinstance(outputs, list):
+        outputs = outputs[-1]
     loss = outputs.mean()
     loss.backward()
     optim.step()
@@ -51,6 +54,7 @@ def _test_parameters_update(model: nn.Module, x: List[torch.Tensor]):
 
 
 def _test_device_move(model: nn.Module, x: torch.Tensor):
+    model.eval()
     seed_everything(42)
     outputs_cpu = model(x)
 
@@ -61,7 +65,8 @@ def _test_device_move(model: nn.Module, x: torch.Tensor):
     seed_everything(42)
     model = model.cpu()
     outputs_back_on_cpu = model(x.cpu())
-    assert torch.allclose(outputs_cpu, outputs_gpu.cpu(), atol=1e-6)
+    model.train()
+    assert torch.allclose(outputs_cpu, outputs_gpu.cpu(), atol=1e-4)
     assert torch.allclose(outputs_cpu, outputs_back_on_cpu)
 
 
@@ -228,6 +233,8 @@ def test_conv1d_init(in_channels, out_channels, kernel_size, stride, padding):
 def test_conv1d_error():
     with pytest.raises(ValueError):
         Conv1dWithHeads(128, 64, 3, heads=4)
+    with pytest.raises(ValueError):
+        Conv1dWithHeads(128, 64, 3, groups=128, heads=3)
 
 
 def test_conv1d_parameters_update():
@@ -435,8 +442,11 @@ def test_jasperblock_dense_residual():
         )
         mdl = nn.Sequential(block, block, block)
         x = torch.randn(10, 64, 1337)
-        out = mdl([x])
-        assert len(out) == 4
+        out = mdl(x)
+
+        assert out.shape[0] == x.shape[0]
+        assert out.shape[1] == 4 * 64
+        assert torch.allclose(out[:, :64, :], x)
 
 
 def test_jasperblock_normalization_error():
@@ -444,7 +454,7 @@ def test_jasperblock_normalization_error():
         JasperBlock(64, 64, normalization="unknown")
 
 
-@given(
+jasper_parameters = given(
     inplanes=integers(16, 32),
     planes=integers(16, 32),
     repeat=integers(1, 4),
@@ -461,12 +471,94 @@ def test_jasperblock_normalization_error():
     se_context_window=integers(1, 10),
     stride_last=booleans(),
 )
+
+
+@jasper_parameters
 def test_jasperblock_combinations(**kwargs):
     try:
         block = JasperBlock(**kwargs)
     except ValueError:
         return
     x = torch.randn(10, kwargs["inplanes"], 1337)
-    out = block([x])
-    assert out[-1].shape[0] == x.shape[0]
-    assert out[-1].shape[1] == kwargs["planes"]
+    out = block(x)
+    assert out.shape[0] == x.shape[0]
+    assert out.shape[1] == kwargs["planes"]
+
+
+@jasper_parameters
+def test_jasperblock_update(**kwargs):
+    try:
+        block = JasperBlock(**kwargs)
+    except ValueError:
+        return
+    x = torch.randn(10, kwargs["inplanes"], 1337)
+    _test_parameters_update(block, x)
+
+
+@jasper_parameters
+def test_jasperblock_independence(**kwargs):
+    try:
+        block = JasperBlock(**kwargs)
+    except ValueError:
+        return
+    x = torch.randn(10, kwargs["inplanes"], 1337)
+    _test_batch_independence(block, x)
+
+
+@requirescuda
+@jasper_parameters
+def test_jasperblock_device_move(**kwargs):
+    try:
+        block = JasperBlock(**kwargs)
+    except ValueError:
+        return
+    x = torch.randn(10, kwargs["inplanes"], 1337)
+    _test_device_move(block, x)
+
+
+@jasper_parameters
+@settings(deadline=None)
+def test_jasperblock_trace(**kwargs):
+    try:
+        block = JasperBlock(**kwargs)
+        block.eval()
+    except ValueError:
+        return
+
+    x = torch.randn(10, kwargs["inplanes"], 1337)
+    block_script = torch.jit.trace(block, (x))
+
+    assert torch.allclose(block(x), block_script(x))
+
+
+@jasper_parameters
+@settings(deadline=None)
+@pytest.mark.xfail
+def test_jasperblock_script(**kwargs):
+    try:
+        block = JasperBlock(**kwargs)
+        block.eval()
+    except ValueError:
+        return
+
+    x = torch.randn(10, kwargs["inplanes"], 1337)
+    block_script = torch.jit.script(block)
+    assert torch.allclose(block(x), block_script(x))
+
+
+@jasper_parameters
+@settings(deadline=None)
+def test_jasperblock_onnx(**kwargs):
+    try:
+        block = JasperBlock(**kwargs)
+    except ValueError:
+        return
+    x = torch.randn(10, kwargs["inplanes"], 1337)
+    with TemporaryDirectory() as export_path:
+        torch.onnx.export(
+            block,
+            (x),
+            f"{export_path}/jasperblock.onnx",
+            verbose=True,
+            opset_version=11,
+        )

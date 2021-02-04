@@ -242,6 +242,11 @@ class SqueezeExcite(nn.Module):
             activation,
             nn.Linear(channels // reduction_ratio, channels, bias=False),
         )
+        self.extra_kwargs = (
+            {"align_corners": True}
+            if self.interpolation_mode == InterpolationMode.linear
+            else {}
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -259,7 +264,7 @@ class SqueezeExcite(nn.Module):
 
         if self.context_window > 0:
             y = torch.nn.functional.interpolate(
-                y, size=timesteps, mode=self.interpolation_mode
+                y, size=timesteps, mode=self.interpolation_mode, **self.extra_kwargs
             )
 
         y = torch.sigmoid(y)
@@ -301,7 +306,7 @@ def get_normalization(
 
 
 class JasperBlock(nn.Module):
-    __constants__ = ["residual_mode", "res", "mconv"]
+    __constants__ = ["residual_mode", "inplanes"]
 
     def __init__(
         self,
@@ -341,6 +346,7 @@ class JasperBlock(nn.Module):
         padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
 
         self.residual_mode = residual_mode
+        self.inplanes = inplanes
 
         inplanes_loop = inplanes
         conv = []
@@ -512,9 +518,16 @@ class JasperBlock(nn.Module):
     def _get_act_dropout_layer(self, activation, drop_prob=0.2):
         return [activation, nn.Dropout(p=drop_prob)]
 
-    def forward(self, xs: List[torch.Tensor]):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Dense residual blocks concat the multiple outputs into
+        # the channel dimension, so we split it back here
+        xs = rearrange(
+            x,
+            "batch (residual features) time -> residual batch features time",
+            features=self.inplanes,
+        )
         # compute forward convolutions
-        out = xs[-1]
+        out = xs[-1]  # Output of the previous layer
         out = self.mconv(out)
 
         # compute the residuals
@@ -529,6 +542,6 @@ class JasperBlock(nn.Module):
         # compute the output
         out = self.mout(out)
         if self.res is not None and self.dense_residual:
-            return xs + [out]
+            return torch.cat((x, out), dim=1)
 
-        return [out]
+        return out
