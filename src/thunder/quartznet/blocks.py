@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Original file: https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/parts/jasper.py
+# Original file: https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/parts/quartznet.py
 
 from enum import Enum
 from typing import List
@@ -22,7 +22,7 @@ import torch.nn as nn
 from einops import rearrange
 from einops.layers.torch import Rearrange
 
-jasper_activations = {
+quartznet_activations = {
     "hardtanh": nn.Hardtanh,
     "relu": nn.ReLU,
     "selu": nn.SELU,
@@ -30,7 +30,7 @@ jasper_activations = {
 
 
 class InitMode(str, Enum):
-    """Weight init methods. Used by [`init_weights`][thunder.jasper.blocks.init_weights].
+    """Weight init methods. Used by [`init_weights`][thunder.quartznet.blocks.init_weights].
 
     Note:
         Possible values are `xavier_uniform`,`xavier_normal`,`kaiming_uniform` and `kaiming_normal`
@@ -195,7 +195,7 @@ def GroupShuffle(groups: int, channels: int) -> nn.Module:
 
 
 class InterpolationMode(str, Enum):
-    """Interpolation mode. Used by [`SqueezeExcite`][thunder.jasper.blocks.SqueezeExcite] block.
+    """Interpolation mode. Used by [`SqueezeExcite`][thunder.quartznet.blocks.SqueezeExcite] block.
 
     Note:
         Possible values are `nearest`,`linear` and `area`
@@ -273,7 +273,8 @@ class SqueezeExcite(nn.Module):
 
 
 class NormalizationType(str, Enum):
-    """Normalization type. Used by [`get_normalization`][thunder.jasper.blocks.get_normalization].
+    """Normalization type.
+    Used by [`get_normalization`][thunder.quartznet.blocks.get_normalization].
 
     Note:
         Possible values are `group`,`instance`, `layer` and `batch`
@@ -289,7 +290,20 @@ def get_normalization(
     normalization: NormalizationType,
     norm_groups: int,
     out_channels: int,
-):
+) -> nn.Module:
+    """Get normalization module according to name.
+
+    Args:
+        normalization : Normalization type
+        norm_groups : Number of normalization groups (input channels)
+        out_channels : Number of resulting channels
+
+    Raises:
+        ValueError: Raised when the normalization type is not one of [`NormalizationType`][thunder.quartznet.blocks.NormalizationType]
+
+    Returns:
+        Layer corresponding to the selected normalization
+    """
     if normalization == NormalizationType.group:
         return nn.GroupNorm(num_groups=norm_groups, num_channels=out_channels)
     elif normalization == NormalizationType.instance:
@@ -305,8 +319,20 @@ def get_normalization(
         )
 
 
-class JasperBlock(nn.Module):
-    __constants__ = ["residual_mode", "inplanes"]
+class ResidualType(str, Enum):
+    """Residual connection type.
+    Used by [`QuartznetBlock`][thunder.quartznet.blocks.QuartznetBlock].
+
+    Note:
+        Possible values are `add` and `maximum`
+    """
+
+    add = "add"
+    maximum = "maximum"
+
+
+class QuartznetBlock(nn.Module):
+    __constants__ = ["inplanes"]
 
     def __init__(
         self,
@@ -318,20 +344,50 @@ class JasperBlock(nn.Module):
         stride: List[int] = [1],
         dilation: List[int] = [1],
         dropout: float = 0.2,
-        activation=nn.Hardtanh(min_val=0.0, max_val=20.0),
+        activation: nn.Module = nn.Hardtanh(min_val=0.0, max_val=20.0),
         residual: bool = True,
         groups: int = 1,
         separable: bool = False,
         heads: int = -1,
-        normalization: str = "batch",
+        normalization: NormalizationType = NormalizationType.batch,
         norm_groups: int = 1,
-        residual_mode: str = "add",
+        residual_mode: ResidualType = ResidualType.add,
         se: bool = False,
         se_reduction_ratio: int = 16,
-        se_context_window=None,
+        se_context_window: int = -1,
         se_interpolation_mode: str = "nearest",
         stride_last: bool = False,
     ):
+        """Quartznet block. This is a refactoring of the Jasperblock present on the NeMo toolkit,
+        but simplified to only support the new quartznet model. Biggest change is that
+        dense residual used on Jasper is not supported here, and masked convolutions were also removed.
+
+        Args:
+            inplanes : Number of input planes
+            planes : Number of output planes
+            repeat : Repetitions inside block.
+            kernel_size : Kernel size.
+            kernel_size_factor : Factor to multiply the original kernel size.
+            stride : Stride of each repetition.
+            dilation : Dilation of each repetition.
+            dropout : Dropout used before each activation.
+            activation : Activation layer used.
+            residual : Controls the use of residual connection.
+            groups : Number of groups of each repetition.
+            separable : Controls the use of separable convolutions.
+            heads : Controls the use of multiple heads in the convolutions.
+            normalization : Type of normalization.
+            norm_groups : Number of normalization groups.
+            residual_mode : Defines how the residual operation will work.
+            se : Controls the use of SqueezeExcite inside the block.
+            se_reduction_ratio : SqueezeExcite parameter.
+            se_context_window : SqueezeExcite parameter.
+            se_interpolation_mode : SqueezeExcite parameter.
+            stride_last : If true, only applies stride to the last convolution in the block.
+
+        Raises:
+           Raised when some incompatible configurations are passed.
+        """
         super().__init__()
         if separable and heads != -1:
             raise ValueError(
@@ -344,7 +400,6 @@ class JasperBlock(nn.Module):
         ]
         padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
 
-        self.residual_mode = residual_mode
         self.inplanes = inplanes
 
         inplanes_loop = inplanes
@@ -422,6 +477,9 @@ class JasperBlock(nn.Module):
                     stride=stride_residual,
                     bias=False,
                 )
+            )
+            self.post_res_operation = (
+                torch.add if residual_mode == ResidualType.add else torch.max
             )
         else:
             self.res = None
@@ -503,8 +561,13 @@ class JasperBlock(nn.Module):
         return [activation, nn.Dropout(p=drop_prob)]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # Dense residual blocks concat the multiple outputs into
-        # the channel dimension, so we split it back here
+        """
+        Args:
+            x : Tensor of shape (batch, features, time) where #features == inplanes
+
+        Returns:
+            Result of applying the block on the input
+        """
 
         # compute forward convolutions
         out = self.mconv(x)
@@ -512,10 +575,7 @@ class JasperBlock(nn.Module):
         # compute the residuals
         if self.res is not None:
             res_out = self.res(x)
-            if self.residual_mode == "add" or self.residual_mode == "stride_add":
-                out = out + res_out
-            else:
-                out = torch.max(out, res_out)
+            out = self.post_res_operation(out, res_out)
 
         # compute the output
         out = self.mout(out)

@@ -11,13 +11,13 @@ from hypothesis.strategies import booleans, floats, integers, lists
 from pytorch_lightning import seed_everything
 from torch import nn
 
-from thunder.jasper.blocks import (
+from thunder.quartznet.blocks import (
     Conv1dWithHeads,
     GroupShuffle,
     InitMode,
     InterpolationMode,
-    JasperBlock,
     NormalizationType,
+    QuartznetBlock,
     SqueezeExcite,
     compute_new_kernel_size,
     get_normalization,
@@ -429,12 +429,12 @@ def test_get_normalization():
         assert isinstance(norm, (nn.GroupNorm, nn.InstanceNorm1d, nn.BatchNorm1d))
 
 
-def test_jasperblock_normalization_error():
+def test_QuartznetBlock_normalization_error():
     with pytest.raises(ValueError):
-        JasperBlock(64, 64, normalization="unknown")
+        QuartznetBlock(64, 64, normalization="unknown")
 
 
-jasper_parameters = given(
+quartznet_parameters = given(
     inplanes=integers(16, 32),
     planes=integers(16, 32),
     repeat=integers(1, 4),
@@ -453,10 +453,10 @@ jasper_parameters = given(
 )
 
 
-@jasper_parameters
-def test_jasperblock_combinations(**kwargs):
+@quartznet_parameters
+def test_QuartznetBlock_combinations(**kwargs):
     try:
-        block = JasperBlock(**kwargs)
+        block = QuartznetBlock(**kwargs)
     except ValueError:
         return
     x = torch.randn(10, kwargs["inplanes"], 1337)
@@ -465,21 +465,21 @@ def test_jasperblock_combinations(**kwargs):
     assert out.shape[1] == kwargs["planes"]
 
 
-@jasper_parameters
-def test_jasperblock_update(**kwargs):
+@quartznet_parameters
+def test_QuartznetBlock_update(**kwargs):
     try:
-        block = JasperBlock(**kwargs)
+        block = QuartznetBlock(**kwargs)
     except ValueError:
         return
     x = torch.randn(10, kwargs["inplanes"], 1337)
     _test_parameters_update(block, x)
 
 
-@jasper_parameters
+@quartznet_parameters
 @settings(deadline=None)
-def test_jasperblock_independence(**kwargs):
+def test_QuartznetBlock_independence(**kwargs):
     try:
-        block = JasperBlock(**kwargs)
+        block = QuartznetBlock(**kwargs)
     except ValueError:
         return
     x = torch.randn(10, kwargs["inplanes"], 1337)
@@ -487,21 +487,21 @@ def test_jasperblock_independence(**kwargs):
 
 
 @requirescuda
-@jasper_parameters
-def test_jasperblock_device_move(**kwargs):
+@quartznet_parameters
+def test_QuartznetBlock_device_move(**kwargs):
     try:
-        block = JasperBlock(**kwargs)
+        block = QuartznetBlock(**kwargs)
     except ValueError:
         return
     x = torch.randn(10, kwargs["inplanes"], 1337)
     _test_device_move(block, x)
 
 
-@jasper_parameters
+@quartznet_parameters
 @settings(deadline=None)
-def test_jasperblock_trace(**kwargs):
+def test_QuartznetBlock_trace(**kwargs):
     try:
-        block = JasperBlock(**kwargs)
+        block = QuartznetBlock(**kwargs)
         block.eval()
     except ValueError:
         return
@@ -512,12 +512,12 @@ def test_jasperblock_trace(**kwargs):
     assert torch.allclose(block(x), block_trace(x))
 
 
-@jasper_parameters
+@quartznet_parameters
 @settings(deadline=None)
 @pytest.mark.xfail
-def test_jasperblock_script(**kwargs):
+def test_QuartznetBlock_script(**kwargs):
     try:
-        block = JasperBlock(**kwargs)
+        block = QuartznetBlock(**kwargs)
         block.eval()
     except ValueError:
         return
@@ -527,11 +527,11 @@ def test_jasperblock_script(**kwargs):
     assert torch.allclose(block(x), block_script(x))
 
 
-@jasper_parameters
+@quartznet_parameters
 @settings(deadline=None)
-def test_jasperblock_onnx(**kwargs):
+def test_QuartznetBlock_onnx(**kwargs):
     try:
-        block = JasperBlock(**kwargs)
+        block = QuartznetBlock(**kwargs)
     except ValueError:
         return
     x = torch.randn(10, kwargs["inplanes"], 1337)
@@ -539,7 +539,7 @@ def test_jasperblock_onnx(**kwargs):
         torch.onnx.export(
             block,
             (x),
-            f"{export_path}/jasperblock.onnx",
+            f"{export_path}/QuartznetBlock.onnx",
             verbose=True,
             opset_version=11,
         )
