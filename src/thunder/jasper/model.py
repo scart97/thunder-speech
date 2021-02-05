@@ -35,12 +35,9 @@ def read_config(config_path: str) -> Tuple[nn.Module, nn.Module]:
     inplanes = encoder_params["feat_in"] * encoder_params.get("frame_splicing", 1)
     jasper_conf = OmegaConf.to_container(encoder_params["jasper"])
     activation = jasper_activations[encoder_params["activation"]]()
-    residual_panes = []
 
     layers = []
     for cfg in jasper_conf:
-        if cfg.pop("residual_dense", False):
-            residual_panes.append(inplanes)
         cfg["planes"] = cfg.pop("filters")
         cfg["kernel_size"] = cfg.pop("kernel")
 
@@ -48,7 +45,6 @@ def read_config(config_path: str) -> Tuple[nn.Module, nn.Module]:
             JasperBlock(
                 inplanes=inplanes,
                 activation=activation,
-                residual_panes=residual_panes,
                 **cfg,
             )
         )
@@ -86,7 +82,7 @@ def load_jasper_weights(
     # We remove the 'encoder.' and 'decoder.' prefix from the weights to enable
     # compatibility to load with plain nn.Modules created by reading the config
     encoder_weights = {
-        k.replace("encoder.", "").replace(".conv", ""): v
+        k.replace("encoder.", "").replace(".conv", "").replace(".res.0", ".res"): v
         for k, v in weights.items()
         if "encoder" in k
     }

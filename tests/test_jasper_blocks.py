@@ -429,26 +429,6 @@ def test_get_normalization():
         assert isinstance(norm, (nn.GroupNorm, nn.InstanceNorm1d, nn.BatchNorm1d))
 
 
-def test_jasperblock_dense_residual():
-    for res_mod in ["add", "max"]:
-        block = JasperBlock(
-            64,
-            64,
-            stride=[1],
-            dilation=[1],
-            kernel_size=[33],
-            residual_panes=[64],
-            residual_mode=res_mod,
-        )
-        mdl = nn.Sequential(block, block, block)
-        x = torch.randn(10, 64, 1337)
-        out = mdl(x)
-
-        assert out.shape[0] == x.shape[0]
-        assert out.shape[1] == 4 * 64
-        assert torch.allclose(out[:, :64, :], x)
-
-
 def test_jasperblock_normalization_error():
     with pytest.raises(ValueError):
         JasperBlock(64, 64, normalization="unknown")
@@ -527,9 +507,9 @@ def test_jasperblock_trace(**kwargs):
         return
 
     x = torch.randn(10, kwargs["inplanes"], 1337)
-    block_script = torch.jit.trace(block, (x))
+    block_trace = torch.jit.trace(block, (x))
 
-    assert torch.allclose(block(x), block_script(x))
+    assert torch.allclose(block(x), block_trace(x))
 
 
 @jasper_parameters

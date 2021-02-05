@@ -2,6 +2,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.error import HTTPError
 
+import torch
 from torch import nn
 
 from thunder.jasper.model import get_jasper, read_config
@@ -24,3 +25,8 @@ def test_create_from_manifest():
         encoder, decoder = read_config(cfg)
         assert isinstance(encoder, nn.Module)
         assert isinstance(decoder, nn.Module)
+        x = torch.randn(10, encoder[0].inplanes, 1337)
+        out = encoder(x)
+        out2 = decoder(out)
+        assert out.shape[0] == x.shape[0]
+        assert out2.shape[0] == x.shape[0]

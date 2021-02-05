@@ -326,7 +326,6 @@ class JasperBlock(nn.Module):
         normalization: str = "batch",
         norm_groups: int = 1,
         residual_mode: str = "add",
-        residual_panes=[],
         se: bool = False,
         se_reduction_ratio: int = 16,
         se_context_window=None,
@@ -353,10 +352,7 @@ class JasperBlock(nn.Module):
 
         for _ in range(repeat - 1):
             # Stride last means only the last convolution in block will have stride
-            if stride_last:
-                stride_val = [1]
-            else:
-                stride_val = stride
+            stride_val = [1] if stride_last else stride
 
             conv.extend(
                 self._get_conv_bn_layer(
@@ -411,34 +407,22 @@ class JasperBlock(nn.Module):
 
         self.mconv = nn.Sequential(*conv)
 
-        res_panes = residual_panes.copy()
-        self.dense_residual = residual
-
         if residual:
-            res_list = nn.ModuleList()
-
             stride_residual = (
                 stride if stride[0] == 1 or stride_last else stride[0] ** repeat
             )
-            if len(residual_panes) == 0:
-                res_panes = [inplanes]
-                self.dense_residual = False
-            for ip in res_panes:
-                res = nn.Sequential(
-                    *self._get_conv_bn_layer(
-                        ip,
-                        planes,
-                        kernel_size=1,
-                        normalization=normalization,
-                        norm_groups=norm_groups,
-                        stride=stride_residual,
-                        bias=False,
-                    )
+
+            self.res = nn.Sequential(
+                *self._get_conv_bn_layer(
+                    inplanes,
+                    planes,
+                    kernel_size=1,
+                    normalization=normalization,
+                    norm_groups=norm_groups,
+                    stride=stride_residual,
+                    bias=False,
                 )
-
-                res_list.append(res)
-
-            self.res = res_list
+            )
         else:
             self.res = None
 
@@ -521,27 +505,18 @@ class JasperBlock(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # Dense residual blocks concat the multiple outputs into
         # the channel dimension, so we split it back here
-        xs = rearrange(
-            x,
-            "batch (residual features) time -> residual batch features time",
-            features=self.inplanes,
-        )
+
         # compute forward convolutions
-        out = xs[-1]  # Output of the previous layer
-        out = self.mconv(out)
+        out = self.mconv(x)
 
         # compute the residuals
         if self.res is not None:
-            for i, layer in enumerate(self.res):
-                res_out = layer(xs[i])
-                if self.residual_mode == "add" or self.residual_mode == "stride_add":
-                    out = out + res_out
-                else:
-                    out = torch.max(out, res_out)
+            res_out = self.res(x)
+            if self.residual_mode == "add" or self.residual_mode == "stride_add":
+                out = out + res_out
+            else:
+                out = torch.max(out, res_out)
 
         # compute the output
         out = self.mout(out)
-        if self.res is not None and self.dense_residual:
-            return torch.cat((x, out), dim=1)
-
         return out
