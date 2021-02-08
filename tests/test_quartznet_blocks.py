@@ -1,4 +1,3 @@
-from functools import partial
 from math import ceil, floor
 from tempfile import TemporaryDirectory
 from typing import List
@@ -12,7 +11,6 @@ from pytorch_lightning import seed_everything
 from torch import nn
 
 from thunder.quartznet.blocks import (
-    Conv1dWithHeads,
     GroupShuffle,
     InitMode,
     QuartznetBlock,
@@ -107,32 +105,6 @@ def test_init_linear_weights():
         init_weights(linear_layer, "unknown_init")
 
 
-def test_init_conv1d():
-    conv_layer = Conv1dWithHeads(128, 10, 11)
-    original_std = conv_layer.weight.std()
-    original_mean = conv_layer.weight.mean()
-
-    for init in InitMode:
-        init_weights(conv_layer, init)
-        assert conv_layer.weight.std() != original_std
-        assert conv_layer.weight.mean() != original_mean
-
-    with pytest.raises(ValueError):
-        init_weights(conv_layer, "unknown_init")
-
-
-def test_init_conv1d_heads():
-    conv_layer = Conv1dWithHeads(128, 10, 11, groups=128, heads=4)
-    original_std = conv_layer[1].weight.std()
-    original_mean = conv_layer[1].weight.mean()
-
-    for init in InitMode:
-        init_weights(conv_layer, init)
-        conv_layer.apply(partial(init_weights, mode=init))
-        assert conv_layer[1].weight.std() != original_std
-        assert conv_layer[1].weight.mean() != original_mean
-
-
 def test_init_batchnorm1d():
     bn_layer = nn.BatchNorm1d(128, 10)
 
@@ -210,78 +182,6 @@ def test_same_padding_ValueError(i, stride, ks, dilation):
         get_same_padding(ks, stride, dilation)
 
 
-@given(
-    in_channels=integers(1, 128),
-    out_channels=integers(1, 128),
-    kernel_size=integers(1, 128),
-    stride=integers(1, 64),
-    padding=integers(1, 64),
-)
-def test_conv1d_init(in_channels, out_channels, kernel_size, stride, padding):
-    conv1d = Conv1dWithHeads(in_channels, out_channels, kernel_size, stride, padding)
-    assert conv1d.in_channels == in_channels
-    assert conv1d.out_channels == out_channels
-    assert conv1d.kernel_size[0] == kernel_size
-    assert conv1d.stride[0] == stride
-    assert conv1d.padding[0] == padding
-
-
-def test_conv1d_error():
-    with pytest.raises(ValueError):
-        Conv1dWithHeads(128, 64, 3, heads=4)
-    with pytest.raises(ValueError):
-        Conv1dWithHeads(128, 64, 3, groups=128, heads=3)
-
-
-def test_conv1d_parameters_update():
-    x = torch.randn(10, 128, 1337)
-    conv = Conv1dWithHeads(128, 10, 3)
-    _test_parameters_update(conv, x)
-
-
-@requirescuda
-def test_conv1d_device_move():
-    conv = Conv1dWithHeads(128, 10, 3)
-    x = torch.randn(10, 128, 1337)
-    _test_device_move(conv, x)
-
-
-def test_conv1d_batch_independence():
-    conv = Conv1dWithHeads(128, 10, 3)
-    x = torch.randn(10, 128, 1337)
-    _test_batch_independence(conv, x)
-
-
-def test_conv1d_script():
-    x = torch.randn(10, 128, 1337)
-    conv = Conv1dWithHeads(128, 10, 3)
-
-    conv_script = torch.jit.script(conv)
-    assert torch.allclose(conv(x), conv_script(x))
-
-
-def test_conv1d_onnx():
-    x = torch.randn(10, 128, 1337)
-    conv = Conv1dWithHeads(128, 10, 3)
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(conv, (x), f"{export_path}/conv1d.onnx", verbose=True)
-
-
-def test_conv1d_heads_trace():
-    x = torch.randn(10, 128, 1337)
-
-    conv = Conv1dWithHeads(128, 10, 3, heads=2, groups=128)
-    conv_trace = torch.jit.trace(conv, x)
-    assert torch.allclose(conv(x), conv_trace(x))
-
-
-@pytest.mark.xfail
-def test_conv1d_heads_script():
-    # Only torch.jit.trace works with einops
-    conv = Conv1dWithHeads(128, 10, 3, heads=2, groups=128)
-    torch.jit.script(conv)
-
-
 def test_group_shuffle():
     gs = GroupShuffle(4, 128)
     x = torch.randn(10, 128, 1337)
@@ -345,7 +245,6 @@ quartznet_parameters = given(
     residual=booleans(),
     groups=integers(1, 3),
     separable=booleans(),
-    heads=integers(-1, 4).filter(lambda x: x != 0),
     stride_last=booleans(),
 )
 

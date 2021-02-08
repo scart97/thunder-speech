@@ -110,69 +110,6 @@ def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
     return kernel_size // 2
 
 
-def Conv1dWithHeads(
-    in_channels: int,
-    out_channels: int,
-    kernel_size: int,
-    stride: int = 1,
-    padding: int = 0,
-    dilation: int = 1,
-    groups: int = 1,
-    heads: int = -1,
-    bias: bool = False,
-):
-    """1d convolution with option to use multiple heads.
-
-    Args:
-        in_channels : Same as nn.Conv1d
-        out_channels : Same as nn.Conv1d
-        kernel_size : Same as nn.Conv1d
-        stride : Same as nn.Conv1d
-        padding : Same as nn.Conv1d
-        dilation : Same as nn.Conv1d
-        groups : Same as nn.Conv1d
-        bias : Same as nn.Conv1d
-        heads : Number of heads to be used. Only applicable for depthwise convolutions.
-
-    Raises:
-        ValueError: Selecting heads != -1 without doing a depthwise convolution will raise this error.
-        ValueError: When using multiple heads, the number of channels should be a multiple of the number of heads.
-    """
-    if not (heads == -1 or groups == in_channels):
-        raise ValueError("Only use heads for depthwise convolutions")
-    if not (heads == -1 or in_channels % heads == 0):
-        raise ValueError(
-            f"The number of input channels {in_channels} cannot be evenly distributed into {heads} heads"
-        )
-
-    if heads != -1:
-        in_channels = heads
-        out_channels = heads
-        groups = heads
-
-    conv = nn.Conv1d(
-        in_channels,
-        out_channels,
-        kernel_size,
-        stride=stride,
-        padding=padding,
-        dilation=dilation,
-        groups=groups,
-        bias=bias,
-    )
-    if heads != -1:
-        conv = nn.Sequential(
-            Rearrange("b (f heads) t -> (b f) heads t", heads=heads),
-            conv,
-            Rearrange(
-                "(b f) heads t -> b (f heads) t",
-                heads=heads,
-                f=out_channels // heads,
-            ),
-        )
-    return conv
-
-
 def GroupShuffle(groups: int, channels: int) -> nn.Module:
     """Group shuffle operator from shufflenet.
     Original paper: https://arxiv.org/abs/1707.01083
@@ -215,7 +152,6 @@ class QuartznetBlock(nn.Module):
         residual: bool = True,
         groups: int = 1,
         separable: bool = False,
-        heads: int = -1,
         residual_mode: ResidualType = ResidualType.add,
         stride_last: bool = False,
     ):
@@ -235,7 +171,6 @@ class QuartznetBlock(nn.Module):
             residual : Controls the use of residual connection.
             groups : Number of groups of each repetition.
             separable : Controls the use of separable convolutions.
-            heads : Controls the use of multiple heads in the convolutions.
             residual_mode : Defines how the residual operation will work.
             stride_last : If true, only applies stride to the last convolution in the block.
 
@@ -243,10 +178,6 @@ class QuartznetBlock(nn.Module):
            Raised when some incompatible configurations are passed.
         """
         super().__init__()
-        if separable and heads != -1:
-            raise ValueError(
-                "Separable convolutions are not compatible with multiple heads"
-            )
 
         kernel_size_factor = float(kernel_size_factor)
         kernel_size = [
@@ -272,7 +203,6 @@ class QuartznetBlock(nn.Module):
                     dilation=dilation,
                     padding=padding_val,
                     groups=groups,
-                    heads=heads,
                     separable=separable,
                     bias=False,
                 )
@@ -291,7 +221,6 @@ class QuartznetBlock(nn.Module):
                 dilation=dilation,
                 padding=padding_val,
                 groups=groups,
-                heads=heads,
                 separable=separable,
                 bias=False,
             )
@@ -321,45 +250,26 @@ class QuartznetBlock(nn.Module):
 
         self.mout = nn.Sequential(*self._get_act_dropout_layer(drop_prob=dropout))
 
-    def _get_conv(
-        self,
-        in_channels,
-        out_channels,
-        kernel_size,
-        heads=-1,
-        **conv_kwargs,
-    ):
-
-        return Conv1dWithHeads(
-            in_channels,
-            out_channels,
-            kernel_size,
-            heads=heads,
-            **conv_kwargs,
-        )
-
     def _get_conv_bn_layer(
         self,
         in_channels,
         out_channels,
         kernel_size=11,
         groups=1,
-        heads=-1,
         separable=False,
         **conv_kwargs,
     ):
 
         if separable:
             layers = [
-                self._get_conv(
+                nn.Conv1d(
                     in_channels,
                     in_channels,
                     kernel_size,
                     groups=in_channels,
-                    heads=heads,
                     **conv_kwargs,
                 ),
-                self._get_conv(
+                nn.Conv1d(
                     in_channels,
                     out_channels,
                     kernel_size=1,
@@ -372,7 +282,7 @@ class QuartznetBlock(nn.Module):
             ]
         else:
             layers = [
-                self._get_conv(
+                nn.Conv1d(
                     in_channels,
                     out_channels,
                     kernel_size,
