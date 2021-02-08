@@ -21,12 +21,6 @@ import torch
 import torch.nn as nn
 from einops.layers.torch import Rearrange
 
-quartznet_activations = {
-    "hardtanh": nn.Hardtanh,
-    "relu": nn.ReLU,
-    "selu": nn.SELU,
-}
-
 
 class InitMode(str, Enum):
     """Weight init methods. Used by [`init_weights`][thunder.quartznet.blocks.init_weights].
@@ -265,7 +259,6 @@ class QuartznetBlock(nn.Module):
         stride: List[int] = [1],
         dilation: List[int] = [1],
         dropout: float = 0.2,
-        activation: nn.Module = nn.Hardtanh(min_val=0.0, max_val=20.0),
         residual: bool = True,
         groups: int = 1,
         separable: bool = False,
@@ -288,7 +281,6 @@ class QuartznetBlock(nn.Module):
             stride : Stride of each repetition.
             dilation : Dilation of each repetition.
             dropout : Dropout used before each activation.
-            activation : Activation layer used.
             residual : Controls the use of residual connection.
             groups : Number of groups of each repetition.
             separable : Controls the use of separable convolutions.
@@ -339,9 +331,7 @@ class QuartznetBlock(nn.Module):
                 )
             )
 
-            conv.extend(
-                self._get_act_dropout_layer(drop_prob=dropout, activation=activation)
-            )
+            conv.extend(self._get_act_dropout_layer(drop_prob=dropout))
 
             inplanes_loop = planes
 
@@ -386,9 +376,7 @@ class QuartznetBlock(nn.Module):
         else:
             self.res = None
 
-        self.mout = nn.Sequential(
-            *self._get_act_dropout_layer(drop_prob=dropout, activation=activation)
-        )
+        self.mout = nn.Sequential(*self._get_act_dropout_layer(drop_prob=dropout))
 
     def _get_conv(
         self,
@@ -459,8 +447,8 @@ class QuartznetBlock(nn.Module):
             layers.append(GroupShuffle(groups, out_channels))
         return layers
 
-    def _get_act_dropout_layer(self, activation, drop_prob=0.2):
-        return [activation, nn.Dropout(p=drop_prob)]
+    def _get_act_dropout_layer(self, drop_prob=0.2):
+        return [nn.ReLU(True), nn.Dropout(p=drop_prob)]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """

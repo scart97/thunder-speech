@@ -10,7 +10,7 @@ from omegaconf import OmegaConf
 from torch import nn
 from torchaudio.datasets.utils import download_url, extract_archive
 
-from thunder.quartznet.blocks import QuartznetBlock, init_weights, quartznet_activations
+from thunder.quartznet.blocks import QuartznetBlock, init_weights
 
 checkpoint_archives = {
     "QuartzNet15x5Base-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-En.nemo",
@@ -33,7 +33,6 @@ def read_config(config_path: str) -> Tuple[nn.Module, nn.Module]:
     encoder_params = conf["encoder"]["params"]
     inplanes = encoder_params["feat_in"] * encoder_params.get("frame_splicing", 1)
     quartznet_conf = OmegaConf.to_container(encoder_params["jasper"])
-    activation = quartznet_activations[encoder_params["activation"]]()
 
     layers = []
     for cfg in quartznet_conf:
@@ -43,7 +42,6 @@ def read_config(config_path: str) -> Tuple[nn.Module, nn.Module]:
         layers.append(
             QuartznetBlock(
                 inplanes=inplanes,
-                activation=activation,
                 **cfg,
             )
         )
