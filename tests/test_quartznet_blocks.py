@@ -15,10 +15,8 @@ from thunder.quartznet.blocks import (
     Conv1dWithHeads,
     GroupShuffle,
     InitMode,
-    NormalizationType,
     QuartznetBlock,
     compute_new_kernel_size,
-    get_normalization,
     get_same_padding,
     init_weights,
 )
@@ -336,17 +334,6 @@ def test_group_shuffle_script():
     assert torch.allclose(gs_script(x), gs(x))
 
 
-def test_get_normalization():
-    for normtype in NormalizationType:
-        norm = get_normalization(normtype, 128, 64)
-        assert isinstance(norm, (nn.GroupNorm, nn.InstanceNorm1d, nn.BatchNorm1d))
-
-
-def test_QuartznetBlock_normalization_error():
-    with pytest.raises(ValueError):
-        QuartznetBlock(64, 64, normalization="unknown")
-
-
 quartznet_parameters = given(
     inplanes=integers(16, 32),
     planes=integers(16, 32),
@@ -359,7 +346,6 @@ quartznet_parameters = given(
     groups=integers(1, 3),
     separable=booleans(),
     heads=integers(-1, 4).filter(lambda x: x != 0),
-    norm_groups=integers(1, 4),
     stride_last=booleans(),
 )
 

@@ -187,53 +187,6 @@ def GroupShuffle(groups: int, channels: int) -> nn.Module:
     return Rearrange("b (c1 c2) t -> b (c2 c1) t", c1=groups)
 
 
-class NormalizationType(str, Enum):
-    """Normalization type.
-    Used by [`get_normalization`][thunder.quartznet.blocks.get_normalization].
-
-    Note:
-        Possible values are `group`,`instance`, `layer` and `batch`
-    """
-
-    group = "group"
-    instance = "instance"
-    layer = "layer"
-    batch = "batch"
-
-
-def get_normalization(
-    normalization: NormalizationType,
-    norm_groups: int,
-    out_channels: int,
-) -> nn.Module:
-    """Get normalization module according to name.
-
-    Args:
-        normalization : Normalization type
-        norm_groups : Number of normalization groups (input channels)
-        out_channels : Number of resulting channels
-
-    Raises:
-        ValueError: Raised when the normalization type is not one of [`NormalizationType`][thunder.quartznet.blocks.NormalizationType]
-
-    Returns:
-        Layer corresponding to the selected normalization
-    """
-    if normalization == NormalizationType.group:
-        return nn.GroupNorm(num_groups=norm_groups, num_channels=out_channels)
-    elif normalization == NormalizationType.instance:
-        return nn.InstanceNorm1d(out_channels)
-    elif normalization == NormalizationType.layer:
-        return nn.GroupNorm(num_groups=1, num_channels=out_channels)
-    elif normalization == NormalizationType.batch:
-        return nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1)
-    else:
-        raise ValueError(
-            f"Normalization method ({normalization}) does not match"
-            f" one of [batch, layer, group, instance]."
-        )
-
-
 class ResidualType(str, Enum):
     """Residual connection type.
     Used by [`QuartznetBlock`][thunder.quartznet.blocks.QuartznetBlock].
@@ -263,8 +216,6 @@ class QuartznetBlock(nn.Module):
         groups: int = 1,
         separable: bool = False,
         heads: int = -1,
-        normalization: NormalizationType = NormalizationType.batch,
-        norm_groups: int = 1,
         residual_mode: ResidualType = ResidualType.add,
         stride_last: bool = False,
     ):
@@ -285,8 +236,6 @@ class QuartznetBlock(nn.Module):
             groups : Number of groups of each repetition.
             separable : Controls the use of separable convolutions.
             heads : Controls the use of multiple heads in the convolutions.
-            normalization : Type of normalization.
-            norm_groups : Number of normalization groups.
             residual_mode : Defines how the residual operation will work.
             stride_last : If true, only applies stride to the last convolution in the block.
 
@@ -325,8 +274,6 @@ class QuartznetBlock(nn.Module):
                     groups=groups,
                     heads=heads,
                     separable=separable,
-                    normalization=normalization,
-                    norm_groups=norm_groups,
                     bias=False,
                 )
             )
@@ -346,8 +293,6 @@ class QuartznetBlock(nn.Module):
                 groups=groups,
                 heads=heads,
                 separable=separable,
-                normalization=normalization,
-                norm_groups=norm_groups,
                 bias=False,
             )
         )
@@ -364,8 +309,6 @@ class QuartznetBlock(nn.Module):
                     inplanes,
                     planes,
                     kernel_size=1,
-                    normalization=normalization,
-                    norm_groups=norm_groups,
                     stride=stride_residual,
                     bias=False,
                 )
@@ -403,8 +346,6 @@ class QuartznetBlock(nn.Module):
         groups=1,
         heads=-1,
         separable=False,
-        normalization="batch",
-        norm_groups=1,
         **conv_kwargs,
     ):
 
@@ -440,8 +381,7 @@ class QuartznetBlock(nn.Module):
                 )
             ]
 
-        norm_groups = out_channels if norm_groups == -1 else norm_groups
-        layers.append(get_normalization(normalization, norm_groups, out_channels))
+        layers.append(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1))
 
         if groups > 1:
             layers.append(GroupShuffle(groups, out_channels))
