@@ -19,7 +19,6 @@ from typing import List
 
 import torch
 import torch.nn as nn
-from einops import rearrange
 from einops.layers.torch import Rearrange
 
 quartznet_activations = {
@@ -194,84 +193,6 @@ def GroupShuffle(groups: int, channels: int) -> nn.Module:
     return Rearrange("b (c1 c2) t -> b (c2 c1) t", c1=groups)
 
 
-class InterpolationMode(str, Enum):
-    """Interpolation mode. Used by [`SqueezeExcite`][thunder.quartznet.blocks.SqueezeExcite] block.
-
-    Note:
-        Possible values are `nearest`,`linear` and `area`
-    """
-
-    nearest = "nearest"
-    linear = "linear"
-    area = "area"
-
-
-class SqueezeExcite(nn.Module):
-    def __init__(
-        self,
-        channels: int,
-        reduction_ratio: int,
-        context_window: int = -1,
-        interpolation_mode: InterpolationMode = InterpolationMode.nearest,
-        activation: nn.Module = nn.ReLU(inplace=True),
-    ):
-        """
-        Squeeze-and-Excitation sub-module.
-
-        Args:
-            channels: Input number of channels.
-            reduction_ratio: Reduction ratio for "squeeze" layer.
-            context_window: Integer number of timesteps that the context
-                should be computed over, using stride 1 average pooling.
-                If value < 1, then global context is computed.
-            interpolation_mode: Interpolation mode of timestep dimension.
-                Used only if context window is > 1.
-            activation: Intermediate activation function used.
-        """
-        super(SqueezeExcite, self).__init__()
-        self.context_window = int(context_window)
-        self.interpolation_mode = interpolation_mode
-
-        if self.context_window <= 0:
-            self.pool = nn.AdaptiveAvgPool1d(1)  # context window = T
-        else:
-            self.pool = nn.AvgPool1d(self.context_window, stride=1)
-
-        self.fc = nn.Sequential(
-            nn.Linear(channels, channels // reduction_ratio, bias=False),
-            activation,
-            nn.Linear(channels // reduction_ratio, channels, bias=False),
-        )
-        self.extra_kwargs = (
-            {"align_corners": True}
-            if self.interpolation_mode == InterpolationMode.linear
-            else {}
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
-            x : Tensor of shape (batch, channels, time)
-
-        Returns:
-            Tensor of shape (batch, channels, time)
-        """
-        batch, channels, timesteps = x.size()[:3]
-        y = self.pool(x)  # [B, C, T - context_window + 1]
-        y = rearrange(y, "b c t_pool -> b t_pool c")
-        y = self.fc(y)  # [B, T - context_window + 1, C]
-        y = rearrange(y, "b t_pool c -> b c t_pool")
-
-        if self.context_window > 0:
-            y = torch.nn.functional.interpolate(
-                y, size=timesteps, mode=self.interpolation_mode, **self.extra_kwargs
-            )
-
-        y = torch.sigmoid(y)
-
-        return x * y
-
-
 class NormalizationType(str, Enum):
     """Normalization type.
     Used by [`get_normalization`][thunder.quartznet.blocks.get_normalization].
@@ -352,10 +273,6 @@ class QuartznetBlock(nn.Module):
         normalization: NormalizationType = NormalizationType.batch,
         norm_groups: int = 1,
         residual_mode: ResidualType = ResidualType.add,
-        se: bool = False,
-        se_reduction_ratio: int = 16,
-        se_context_window: int = -1,
-        se_interpolation_mode: str = "nearest",
         stride_last: bool = False,
     ):
         """Quartznet block. This is a refactoring of the Jasperblock present on the NeMo toolkit,
@@ -379,10 +296,6 @@ class QuartznetBlock(nn.Module):
             normalization : Type of normalization.
             norm_groups : Number of normalization groups.
             residual_mode : Defines how the residual operation will work.
-            se : Controls the use of SqueezeExcite inside the block.
-            se_reduction_ratio : SqueezeExcite parameter.
-            se_context_window : SqueezeExcite parameter.
-            se_interpolation_mode : SqueezeExcite parameter.
             stride_last : If true, only applies stride to the last convolution in the block.
 
         Raises:
@@ -448,17 +361,6 @@ class QuartznetBlock(nn.Module):
                 bias=False,
             )
         )
-
-        if se:
-            conv.append(
-                SqueezeExcite(
-                    planes,
-                    reduction_ratio=se_reduction_ratio,
-                    context_window=se_context_window,
-                    interpolation_mode=se_interpolation_mode,
-                    activation=activation,
-                )
-            )
 
         self.mconv = nn.Sequential(*conv)
 

@@ -15,10 +15,8 @@ from thunder.quartznet.blocks import (
     Conv1dWithHeads,
     GroupShuffle,
     InitMode,
-    InterpolationMode,
     NormalizationType,
     QuartznetBlock,
-    SqueezeExcite,
     compute_new_kernel_size,
     get_normalization,
     get_same_padding,
@@ -338,91 +336,6 @@ def test_group_shuffle_script():
     assert torch.allclose(gs_script(x), gs(x))
 
 
-def test_squeezeexcite_retains_shape():
-    x = torch.randn(10, 128, 1337)
-    se = SqueezeExcite(128, 4)
-    assert x.shape == se(x).shape
-
-
-def test_squeezeexcite_interpolation():
-    x = torch.randn(10, 128, 1337)
-    for interp in InterpolationMode:
-        se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
-        assert x.shape == se(x).shape
-
-
-@requirescuda
-def test_squeezeexcite_device_move():
-    se = SqueezeExcite(128, 4)
-    x = torch.randn(10, 128, 1337)
-    _test_device_move(se, x)
-
-
-@requirescuda
-def test_squeezeexcite_interp_device_move():
-    for interp in InterpolationMode:
-        se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
-        x = torch.randn(10, 128, 1337)
-        _test_device_move(se, x)
-
-
-def test_squeezeexcite_batch_independence():
-    se = SqueezeExcite(128, 4)
-    x = torch.randn(10, 128, 1337)
-    _test_batch_independence(se, x)
-
-
-def test_squeezeexcite_interp_batch_independence():
-    for interp in InterpolationMode:
-        se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
-        x = torch.randn(10, 128, 1337)
-        _test_batch_independence(se, x)
-
-
-def test_se_parameters_updated():
-    se = SqueezeExcite(128, 4)
-    x = torch.randn(10, 128, 1337)
-    _test_parameters_update(se, x)
-
-
-def test_se_interp_parameters_updated():
-    for interp in InterpolationMode:
-        se = SqueezeExcite(128, 4, context_window=2, interpolation_mode=interp)
-        x = torch.randn(10, 128, 1337)
-        _test_parameters_update(se, x)
-
-
-def test_squeezeexcite_trace():
-    x_traced = torch.randn(5, 128, 137)
-    se = SqueezeExcite(128, 4)
-    se_trace = torch.jit.trace(se, x_traced)
-    # using a different shape than the traced one
-    x = torch.randn(10, 128, 1337)
-    assert torch.allclose(se_trace(x), se(x))
-
-    with TemporaryDirectory() as save_dir:
-        save_file = f"{save_dir}/shuffle.pth"
-        torch.jit.save(se_trace, save_file)
-        gs_loaded = torch.jit.load(save_file)
-        assert torch.allclose(gs_loaded(x), se(x))
-
-
-def test_squeezeexcite_onnx():
-    x = torch.randn(10, 128, 1337)
-    se = SqueezeExcite(128, 4)
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(se, x, f"{export_path}/squeeze.onnx", verbose=True)
-
-
-@pytest.mark.xfail
-def test_squeezeexcite_script():
-    # Only torch.jit.trace works with einops
-    se = SqueezeExcite(128, 4)
-    se_script = torch.jit.script(se)
-    x = torch.randn(10, 128, 1337)
-    assert torch.allclose(se_script(x), se(x))
-
-
 def test_get_normalization():
     for normtype in NormalizationType:
         norm = get_normalization(normtype, 128, 64)
@@ -447,8 +360,6 @@ quartznet_parameters = given(
     separable=booleans(),
     heads=integers(-1, 4).filter(lambda x: x != 0),
     norm_groups=integers(1, 4),
-    se=booleans(),
-    se_context_window=integers(1, 10),
     stride_last=booleans(),
 )
 
