@@ -5,7 +5,12 @@ from urllib.error import HTTPError
 import torch
 from torch import nn
 
-from thunder.quartznet.model import get_quartznet, read_config
+from thunder.quartznet.model import (
+    Quartznet5x5_encoder,
+    Quartznet15x5_encoder,
+    get_quartznet,
+    read_config,
+)
 
 
 def test_can_open_quartznet():
@@ -25,8 +30,17 @@ def test_create_from_manifest():
         encoder, decoder = read_config(cfg)
         assert isinstance(encoder, nn.Module)
         assert isinstance(decoder, nn.Module)
-        x = torch.randn(10, encoder[0].inplanes, 1337)
+        x = torch.randn(10, 64, 1337)
         out = encoder(x)
         out2 = decoder(out)
         assert out.shape[0] == x.shape[0]
+        assert not torch.isnan(out).any()
         assert out2.shape[0] == x.shape[0]
+        assert not torch.isnan(out2).any()
+
+        if "Net5x5" in cfg.name:
+            encoder2 = Quartznet5x5_encoder(64)
+            encoder2.load_state_dict(encoder.state_dict())
+        else:
+            encoder2 = Quartznet15x5_encoder(64)
+            encoder2.load_state_dict(encoder.state_dict())

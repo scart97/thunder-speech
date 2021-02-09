@@ -93,17 +93,15 @@ def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
 
 
 class QuartznetBlock(nn.Module):
-    __constants__ = ["inplanes"]
-
     def __init__(
         self,
         inplanes: int,
         planes: int,
-        repeat: int = 3,
+        repeat: int = 5,
         kernel_size: List[int] = [11],
         stride: List[int] = [1],
         dilation: List[int] = [1],
-        dropout: float = 0.2,
+        dropout: float = 0.0,
         residual: bool = True,
         separable: bool = False,
     ):
@@ -116,20 +114,15 @@ class QuartznetBlock(nn.Module):
             planes : Number of output planes
             repeat : Repetitions inside block.
             kernel_size : Kernel size.
-            kernel_size_factor : Factor to multiply the original kernel size.
             stride : Stride of each repetition.
             dilation : Dilation of each repetition.
             dropout : Dropout used before each activation.
             residual : Controls the use of residual connection.
             separable : Controls the use of separable convolutions.
-
-
         """
         super().__init__()
 
         padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
-
-        self.inplanes = inplanes
 
         inplanes_loop = inplanes
         conv = []
@@ -250,3 +243,36 @@ class QuartznetBlock(nn.Module):
         # compute the output
         out = self.mout(out)
         return out
+
+
+def stem(feat_in: int):
+    return QuartznetBlock(
+        feat_in, 256, repeat=1, kernel_size=[33], residual=False, separable=True
+    )
+
+
+def body(filters: List[int], kernel_size: List[int], repeat_blocks: int = 1):
+    layers = []
+    f_in = 256
+    for f, k in zip(filters, kernel_size):
+        for _ in range(repeat_blocks):
+            layers.append(QuartznetBlock(f_in, f, kernel_size=[k], separable=True))
+            f_in = f
+    return layers
+
+
+def pre_head():
+    return [
+        QuartznetBlock(
+            512,
+            512,
+            repeat=1,
+            dilation=[2],
+            kernel_size=[87],
+            residual=False,
+            separable=True,
+        ),
+        QuartznetBlock(
+            512, 1024, repeat=1, kernel_size=[1], residual=False, separable=False
+        ),
+    ]

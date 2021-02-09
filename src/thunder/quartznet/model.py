@@ -10,7 +10,7 @@ from omegaconf import OmegaConf
 from torch import nn
 from torchaudio.datasets.utils import download_url, extract_archive
 
-from thunder.quartznet.blocks import QuartznetBlock, init_weights
+from thunder.quartznet.blocks import QuartznetBlock, body, init_weights, pre_head, stem
 
 checkpoint_archives = {
     "QuartzNet15x5Base-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-En.nemo",
@@ -18,6 +18,24 @@ checkpoint_archives = {
     "QuartzNet5x5LS-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet5x5LS-En.nemo",
     "QuartzNet15x5NR-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5NR-En.nemo",
 }
+
+
+def Quartznet5(feat_in: int, repeat_blocks: int = 1):
+    filters = [256, 256, 512, 512, 512]
+    kernel_sizes = [33, 39, 51, 63, 75]
+    return nn.Sequential(
+        stem(feat_in),
+        *body(filters, kernel_sizes, repeat_blocks),
+        *pre_head(),
+    )
+
+
+def Quartznet5x5_encoder(feat_in: int = 64):
+    return Quartznet5(feat_in)
+
+
+def Quartznet15x5_encoder(feat_in: int = 64):
+    return Quartznet5(feat_in, repeat_blocks=3)
 
 
 def read_config(config_path: str) -> Tuple[nn.Module, nn.Module]:
