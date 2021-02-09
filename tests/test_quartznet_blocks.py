@@ -11,7 +11,6 @@ from pytorch_lightning import seed_everything
 from torch import nn
 
 from thunder.quartznet.blocks import (
-    GroupShuffle,
     InitMode,
     QuartznetBlock,
     compute_new_kernel_size,
@@ -182,58 +181,6 @@ def test_same_padding_ValueError(i, stride, ks, dilation):
         get_same_padding(ks, stride, dilation)
 
 
-def test_group_shuffle():
-    gs = GroupShuffle(4, 128)
-    x = torch.randn(10, 128, 1337)
-    out = gs(x)
-    assert out.shape == x.shape
-    assert not torch.allclose(x, out)
-
-
-@requirescuda
-def test_group_shuffle_device_move():
-    gs = GroupShuffle(4, 128)
-    x = torch.randn(10, 128, 1337)
-    _test_device_move(gs, x)
-
-
-def test_groupshuffle_batch_independence():
-    gs = GroupShuffle(4, 128)
-    x = torch.randn(10, 128, 1337)
-    _test_batch_independence(gs, x)
-
-
-def test_group_shuffle_trace():
-    x_traced = torch.randn(5, 128, 137)
-    gs = GroupShuffle(4, 128)
-    gs_trace = torch.jit.trace(gs, x_traced)
-    # using a different shape than the traced one
-    x = torch.randn(10, 128, 1337)
-    assert torch.allclose(gs_trace(x), gs(x))
-
-    with TemporaryDirectory() as save_dir:
-        save_file = f"{save_dir}/shuffle.pth"
-        torch.jit.save(gs_trace, save_file)
-        gs_loaded = torch.jit.load(save_file)
-        assert torch.allclose(gs_loaded(x), gs(x))
-
-
-def test_group_shuffle_onnx():
-    x = torch.randn(10, 128, 1337)
-    gs = GroupShuffle(4, 128)
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(gs, x, f"{export_path}/shuffle.onnx", verbose=True)
-
-
-@pytest.mark.xfail
-def test_group_shuffle_script():
-    # Only torch.jit.trace works with einops
-    gs = GroupShuffle(4, 128)
-    gs_script = torch.jit.script(gs)
-    x = torch.randn(10, 128, 1337)
-    assert torch.allclose(gs_script(x), gs(x))
-
-
 quartznet_parameters = given(
     inplanes=integers(16, 32),
     planes=integers(16, 32),
@@ -243,9 +190,7 @@ quartznet_parameters = given(
     stride=lists(integers(1, 3), min_size=1, max_size=1),
     dilation=lists(integers(1, 2), min_size=1, max_size=1),
     residual=booleans(),
-    groups=integers(1, 3),
     separable=booleans(),
-    stride_last=booleans(),
 )
 
 
@@ -284,6 +229,7 @@ def test_QuartznetBlock_independence(**kwargs):
 
 @requirescuda
 @quartznet_parameters
+@settings(deadline=None)
 def test_QuartznetBlock_device_move(**kwargs):
     try:
         block = QuartznetBlock(**kwargs)

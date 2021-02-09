@@ -19,7 +19,6 @@ from typing import List
 
 import torch
 import torch.nn as nn
-from einops.layers.torch import Rearrange
 
 
 class InitMode(str, Enum):
@@ -110,32 +109,6 @@ def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
     return kernel_size // 2
 
 
-def GroupShuffle(groups: int, channels: int) -> nn.Module:
-    """Group shuffle operator from shufflenet.
-    Original paper: https://arxiv.org/abs/1707.01083
-
-    Args:
-        groups : Number of groups to be used
-        channels : Number of channels of the input.Deprecated, only keep for compatibility with old checkpoints.
-
-    Returns:
-        Group shuffle layer
-    """
-    return Rearrange("b (c1 c2) t -> b (c2 c1) t", c1=groups)
-
-
-class ResidualType(str, Enum):
-    """Residual connection type.
-    Used by [`QuartznetBlock`][thunder.quartznet.blocks.QuartznetBlock].
-
-    Note:
-        Possible values are `add` and `maximum`
-    """
-
-    add = "add"
-    maximum = "maximum"
-
-
 class QuartznetBlock(nn.Module):
     __constants__ = ["inplanes"]
 
@@ -150,10 +123,7 @@ class QuartznetBlock(nn.Module):
         dilation: List[int] = [1],
         dropout: float = 0.2,
         residual: bool = True,
-        groups: int = 1,
         separable: bool = False,
-        residual_mode: ResidualType = ResidualType.add,
-        stride_last: bool = False,
     ):
         """Quartznet block. This is a refactoring of the Jasperblock present on the NeMo toolkit,
         but simplified to only support the new quartznet model. Biggest change is that
@@ -169,13 +139,9 @@ class QuartznetBlock(nn.Module):
             dilation : Dilation of each repetition.
             dropout : Dropout used before each activation.
             residual : Controls the use of residual connection.
-            groups : Number of groups of each repetition.
             separable : Controls the use of separable convolutions.
-            residual_mode : Defines how the residual operation will work.
-            stride_last : If true, only applies stride to the last convolution in the block.
 
-        Raises:
-           Raised when some incompatible configurations are passed.
+
         """
         super().__init__()
 
@@ -191,18 +157,15 @@ class QuartznetBlock(nn.Module):
         conv = []
 
         for _ in range(repeat - 1):
-            # Stride last means only the last convolution in block will have stride
-            stride_val = [1] if stride_last else stride
 
             conv.extend(
                 self._get_conv_bn_layer(
                     inplanes_loop,
                     planes,
                     kernel_size=kernel_size,
-                    stride=stride_val,
+                    stride=stride,
                     dilation=dilation,
                     padding=padding_val,
-                    groups=groups,
                     separable=separable,
                     bias=False,
                 )
@@ -220,7 +183,6 @@ class QuartznetBlock(nn.Module):
                 stride=stride,
                 dilation=dilation,
                 padding=padding_val,
-                groups=groups,
                 separable=separable,
                 bias=False,
             )
@@ -229,9 +191,7 @@ class QuartznetBlock(nn.Module):
         self.mconv = nn.Sequential(*conv)
 
         if residual:
-            stride_residual = (
-                stride if stride[0] == 1 or stride_last else stride[0] ** repeat
-            )
+            stride_residual = stride if stride[0] == 1 else stride[0] ** repeat
 
             self.res = nn.Sequential(
                 *self._get_conv_bn_layer(
@@ -241,9 +201,6 @@ class QuartznetBlock(nn.Module):
                     stride=stride_residual,
                     bias=False,
                 )
-            )
-            self.post_res_operation = (
-                torch.add if residual_mode == ResidualType.add else torch.max
             )
         else:
             self.res = None
@@ -255,7 +212,6 @@ class QuartznetBlock(nn.Module):
         in_channels,
         out_channels,
         kernel_size=11,
-        groups=1,
         separable=False,
         **conv_kwargs,
     ):
@@ -277,7 +233,6 @@ class QuartznetBlock(nn.Module):
                     dilation=1,
                     padding=0,
                     bias=conv_kwargs.get("bias", False),
-                    groups=groups,
                 ),
             ]
         else:
@@ -286,15 +241,12 @@ class QuartznetBlock(nn.Module):
                     in_channels,
                     out_channels,
                     kernel_size,
-                    groups=groups,
                     **conv_kwargs,
                 )
             ]
 
         layers.append(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1))
 
-        if groups > 1:
-            layers.append(GroupShuffle(groups, out_channels))
         return layers
 
     def _get_act_dropout_layer(self, drop_prob=0.2):
@@ -315,7 +267,7 @@ class QuartznetBlock(nn.Module):
         # compute the residuals
         if self.res is not None:
             res_out = self.res(x)
-            out = self.post_res_operation(out, res_out)
+            out = out + res_out
 
         # compute the output
         out = self.mout(out)
