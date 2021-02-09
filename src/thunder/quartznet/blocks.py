@@ -66,23 +66,6 @@ def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
             nn.init.zeros_(m.bias)
 
 
-def compute_new_kernel_size(kernel_size: int, kernel_width: float) -> int:
-    """Calculates the new convolutional kernel size given the factor kernel_width.
-
-    Args:
-        kernel_size: Original kernel size
-        kernel_width: Contraction or expansion factor
-
-    Returns:
-        First positive odd number that is equal or greater than kernel_size * kernel_width
-    """
-    new_kernel_size = max(int(kernel_size * kernel_width), 1)
-    # If kernel is even shape, round up to make it odd
-    if new_kernel_size % 2 == 0:
-        new_kernel_size += 1
-    return new_kernel_size
-
-
 def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
     """Calculates the padding size to obtain same padding.
         Same padding means that the output will have the
@@ -118,7 +101,6 @@ class QuartznetBlock(nn.Module):
         planes: int,
         repeat: int = 3,
         kernel_size: List[int] = [11],
-        kernel_size_factor: float = 1.0,
         stride: List[int] = [1],
         dilation: List[int] = [1],
         dropout: float = 0.2,
@@ -145,10 +127,6 @@ class QuartznetBlock(nn.Module):
         """
         super().__init__()
 
-        kernel_size_factor = float(kernel_size_factor)
-        kernel_size = [
-            compute_new_kernel_size(k, kernel_size_factor) for k in kernel_size
-        ]
         padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
 
         self.inplanes = inplanes

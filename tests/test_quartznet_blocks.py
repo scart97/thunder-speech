@@ -6,14 +6,13 @@ import pytest
 
 import torch
 from hypothesis import given, settings
-from hypothesis.strategies import booleans, floats, integers, lists
+from hypothesis.strategies import booleans, integers, lists
 from pytorch_lightning import seed_everything
 from torch import nn
 
 from thunder.quartznet.blocks import (
     InitMode,
     QuartznetBlock,
-    compute_new_kernel_size,
     get_same_padding,
     init_weights,
 )
@@ -116,22 +115,6 @@ def test_init_batchnorm1d():
         assert (bn_layer.bias == 0).all()
 
 
-def test_compute_kernel_size():
-    for kernel_size in range(1, 90):
-        for kernel_width in [0.1 * i for i in range(30)]:
-            result = compute_new_kernel_size(kernel_size, kernel_width)
-            # New kernel should be odd
-            assert result % 2 == 1
-            # And it should be positive
-            assert result > 0
-            # The kernel width should correctly control the
-            # expansion or contraction in size.
-            if kernel_width < 1.0:
-                assert result <= kernel_size
-            else:
-                assert result >= kernel_size
-
-
 def conv_outsize(i: int, p: int, k: int, s: int, d: int) -> int:
     """Calculates conv output size based on input size and params
         Based on https://arxiv.org/abs/1603.07285 Section 2.4 - Relationship 6
@@ -185,8 +168,9 @@ quartznet_parameters = given(
     inplanes=integers(16, 32),
     planes=integers(16, 32),
     repeat=integers(1, 4),
-    kernel_size=lists(integers(11, 33), min_size=1, max_size=1),
-    kernel_size_factor=floats(0.5, 2.0),
+    kernel_size=lists(
+        integers(11, 33).filter(lambda x: x % 2 == 1), min_size=1, max_size=1
+    ),
     stride=lists(integers(1, 3), min_size=1, max_size=1),
     dilation=lists(integers(1, 2), min_size=1, max_size=1),
     residual=booleans(),
@@ -256,7 +240,6 @@ def test_QuartznetBlock_trace(**kwargs):
 
 @quartznet_parameters
 @settings(deadline=None)
-@pytest.mark.xfail
 def test_QuartznetBlock_script(**kwargs):
     try:
         block = QuartznetBlock(**kwargs)
