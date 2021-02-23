@@ -1,7 +1,15 @@
 site_name: Thunder
 plugins:
-  - search
-  - mkdocstrings
+- search
+- mkdocstrings:
+    watch:
+        - src/thunder
+
+markdown_extensions:
+- admonition
+
+extra_css:
+- css/mkdocstrings.css
 
 repo_name: Thunder speech
 repo_url: https://github.com/scart97/thunder-speech

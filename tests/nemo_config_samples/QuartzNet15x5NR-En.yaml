@@ -1,0 +1,415 @@
+sample_rate: 16000
+repeat: 5
+dropout: 0.0
+separable: true
+labels:
+- ' '
+- a
+- b
+- c
+- d
+- e
+- f
+- g
+- h
+- i
+- j
+- k
+- l
+- m
+- 'n'
+- o
+- p
+- q
+- r
+- s
+- t
+- u
+- v
+- w
+- x
+- 'y'
+- z
+- ''''
+train_ds:
+  manifest_filepath: /data2/voices/train_1k.json
+  sample_rate: 16000
+  labels:
+  - ' '
+  - a
+  - b
+  - c
+  - d
+  - e
+  - f
+  - g
+  - h
+  - i
+  - j
+  - k
+  - l
+  - m
+  - 'n'
+  - o
+  - p
+  - q
+  - r
+  - s
+  - t
+  - u
+  - v
+  - w
+  - x
+  - 'y'
+  - z
+  - ''''
+  batch_size: 32
+  trim_silence: true
+  max_duration: 16.7
+  shuffle: true
+  is_tarred: false
+  tarred_audio_filepaths: null
+  augmentor:
+    rir_noise_aug:
+      prob: 0.5
+      rir_manifest_path: /data/datasets/freesound_20s/rir_noises_tarred/rir_tarred/tarred/tarred_audio_manifest.json
+      rir_tar_filepaths: /data/datasets/freesound_20s/rir_noises_tarred/rir_tarred/tarred/audio_{0..63}.tar
+      rir_prob: 0.5
+      noise_manifest_paths:
+      - /data/datasets/freesound_20s/rir_noises_tarred/noises_20s_tarred/tarred_audio_manifest.json
+      - /data/datasets/freesound_20s/rir_noises_tarred/noises_20s_tarred/tarred_audio_manifest.json
+      noise_tar_filepaths:
+      - /data/datasets/freesound_20s/rir_noises_tarred/noises_20s_tarred/audio_{0..63}.tar
+      - /data/datasets/freesound_20s/rir_noises_tarred/noises_20s_tarred/audio_{0..63}.tar
+      min_snr_db:
+      - 0
+      - 0
+      max_snr_db:
+      - 30
+      - 30
+      orig_sampling_rate:
+      - 16000
+      - 8000
+      bg_noise_manifest_paths:
+      - /data/datasets/freesound_20s/rir_noises_tarred/noises_20s_tarred/tarred_audio_manifest.json
+      - /data/datasets/freesound_20s/rir_noises_tarred/noises_20s_tarred/tarred_audio_manifest.json
+      bg_noise_tar_filepaths:
+      - /data/datasets/freesound_20s/rir_noises_tarred/noises_20s_tarred/audio_{0..63}.tar
+      - /data/datasets/freesound_20s/rir_noises_tarred/noises_20s_tarred/audio_{0..63}.tar
+      bg_min_snr_db:
+      - 10
+      - 10
+      bg_max_snr_db:
+      - 40
+      - 40
+      bg_orig_sampling_rate:
+      - 16000
+      - 8000
+    transcode_aug:
+      prob: 0.2
+  num_workers: 20
+validation_ds:
+  manifest_filepath: /data2/voices/train_1k_samp.json
+  sample_rate: 16000
+  labels:
+  - ' '
+  - a
+  - b
+  - c
+  - d
+  - e
+  - f
+  - g
+  - h
+  - i
+  - j
+  - k
+  - l
+  - m
+  - 'n'
+  - o
+  - p
+  - q
+  - r
+  - s
+  - t
+  - u
+  - v
+  - w
+  - x
+  - 'y'
+  - z
+  - ''''
+  batch_size: 32
+  shuffle: false
+preprocessor:
+  cls: nemo.collections.asr.modules.AudioToMelSpectrogramPreprocessor
+  params:
+    normalize: per_feature
+    window_size: 0.02
+    sample_rate: 16000
+    window_stride: 0.01
+    window: hann
+    features: 64
+    n_fft: 512
+    frame_splicing: 1
+    dither: 1.0e-05
+    stft_conv: false
+spec_augment:
+  cls: nemo.collections.asr.modules.SpectrogramAugmentation
+  params:
+    rect_freq: 50
+    rect_masks: 5
+    rect_time: 120
+encoder:
+  cls: nemo.collections.asr.modules.ConvASREncoder
+  params:
+    feat_in: 64
+    activation: relu
+    conv_mask: true
+    jasper:
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 256
+      kernel:
+      - 33
+      repeat: 1
+      residual: false
+      separable: true
+      stride:
+      - 2
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 256
+      kernel:
+      - 33
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 256
+      kernel:
+      - 33
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 256
+      kernel:
+      - 33
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 256
+      kernel:
+      - 39
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 256
+      kernel:
+      - 39
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 256
+      kernel:
+      - 39
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 51
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 51
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 51
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 63
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 63
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 63
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 75
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 75
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 75
+      repeat: 5
+      residual: true
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 2
+      dropout: 0.0
+      filters: 512
+      kernel:
+      - 87
+      repeat: 1
+      residual: false
+      separable: true
+      stride:
+      - 1
+    - dilation:
+      - 1
+      dropout: 0.0
+      filters: 1024
+      kernel:
+      - 1
+      repeat: 1
+      residual: false
+      stride:
+      - 1
+decoder:
+  cls: nemo.collections.asr.modules.ConvASRDecoder
+  params:
+    feat_in: 1024
+    num_classes: 28
+    vocabulary:
+    - ' '
+    - a
+    - b
+    - c
+    - d
+    - e
+    - f
+    - g
+    - h
+    - i
+    - j
+    - k
+    - l
+    - m
+    - 'n'
+    - o
+    - p
+    - q
+    - r
+    - s
+    - t
+    - u
+    - v
+    - w
+    - x
+    - 'y'
+    - z
+    - ''''
+optim:
+  name: novograd
+  lr: 0.01
+  betas:
+  - 0.8
+  - 0.5
+  weight_decay: 0.001
+  sched:
+    name: CosineAnnealing
+    warmup_steps: null
+    warmup_ratio: null
+    min_lr: 0.0
+    last_epoch: -1
+target: nemo.collections.asr.models.ctc_models.EncDecCTCModel
