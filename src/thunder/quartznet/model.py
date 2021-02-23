@@ -112,7 +112,19 @@ def load_quartznet_weights(
     return encoder, decoder
 
 
-def get_quartznet(name: str, checkpoint_folder: str) -> Tuple[nn.Module, nn.Module]:
+def load_from_nemo(checkpoint_path: str) -> Tuple[nn.Module, nn.Module]:
+    with TemporaryDirectory() as extract_path:
+        extract_path = Path(extract_path)
+        extract_archive(str(checkpoint_path), extract_path)
+        encoder, decoder = load_quartznet_weights(
+            extract_path / "model_config.yaml", extract_path / "model_weights.ckpt"
+        )
+    return encoder, decoder
+
+
+def get_quartznet(
+    name: str, checkpoint_folder: str = None
+) -> Tuple[nn.Module, nn.Module]:
     """Get quartznet model by idenfitier.
         This method downloads the checkpoint, creates the corresponding model
         and load the weights.
@@ -124,21 +136,21 @@ def get_quartznet(name: str, checkpoint_folder: str) -> Tuple[nn.Module, nn.Modu
     Returns:
         Encoder and decoder Modules with the checkpoint weights loaded
     """
+    if checkpoint_folder is None:
+        checkpoint_folder = Path.home() / ".thunder"
+
     url = checkpoint_archives[name]
-    download_url(
-        url,
-        download_folder=checkpoint_folder,
-        resume=True,
-    )
     filename = url.split("/")[-1]
     checkpoint_path = Path(checkpoint_folder) / filename
-    with TemporaryDirectory() as extract_path:
-        extract_path = Path(extract_path)
-        extract_archive(str(checkpoint_path), extract_path)
-        encoder, decoder = load_quartznet_weights(
-            extract_path / "model_config.yaml", extract_path / "model_weights.ckpt"
+    if not checkpoint_path.exists():
+        download_url(
+            url,
+            download_folder=checkpoint_folder,
+            resume=True,
         )
-    return encoder, decoder
+    filename = url.split("/")[-1]
+
+    return load_from_nemo(checkpoint_path)
 
 
 if __name__ == "__main__":
