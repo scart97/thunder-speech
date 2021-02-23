@@ -5,11 +5,11 @@ from urllib.error import HTTPError
 import torch
 from torch import nn
 
+from thunder.quartznet.compatibility import get_quartznet, read_config
 from thunder.quartznet.model import (
     Quartznet5x5_encoder,
     Quartznet15x5_encoder,
-    get_quartznet,
-    read_config,
+    Quartznet_decoder,
 )
 
 
@@ -44,3 +44,5 @@ def test_create_from_manifest():
         else:
             encoder2 = Quartznet15x5_encoder(64)
             encoder2.load_state_dict(encoder.state_dict())
+        decoder2 = Quartznet_decoder(1024, 28)
+        decoder2.load_state_dict(decoder[0].state_dict())
