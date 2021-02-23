@@ -49,5 +49,5 @@ def test_create_from_manifest():
         else:
             encoder2 = Quartznet15x5_encoder(64)
             encoder2.load_state_dict(encoder.state_dict())
-        decoder2 = Quartznet_decoder(1024, 28)
+        decoder2 = Quartznet_decoder(28)
         decoder2.load_state_dict(decoder[0].state_dict())
