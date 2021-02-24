@@ -15,7 +15,8 @@ from thunder.librosa_compat import create_fb_matrix
 @pytest.mark.parametrize("SR", [8000, 16000, 22000, 44100])
 @pytest.mark.parametrize("n_mels", [32, 40, 64, 80, 96, 128])
 @pytest.mark.parametrize("htk", [True, False])
-def test_mel_filters(N_FFT, SR, n_mels, htk):
+@pytest.mark.filterwarnings("ignore")
+def test_mel_filters_compatibility(N_FFT, SR, n_mels, htk):
     librosa = pytest.importorskip("librosa")
 
     lib = librosa.filters.mel(SR, N_FFT, n_mels=n_mels, htk=htk)
@@ -30,3 +31,29 @@ def test_mel_filters(N_FFT, SR, n_mels, htk):
         htk=htk,
     )
     assert torch.allclose(tor, lib, atol=1e-6)
+
+
+def test_create_fb_matrix_norm_error():
+    with pytest.raises(ValueError):
+        create_fb_matrix(
+            10,
+            n_mels=10,
+            sample_rate=10,
+            f_min=0,
+            f_max=10,
+            norm="this_should_cause_error",
+            htk=True,
+        )
+
+
+def test_create_fb_matrix_warning():
+    with pytest.warns(UserWarning):
+        create_fb_matrix(
+            int(1 + 128 // 2),
+            n_mels=128,
+            sample_rate=16000,
+            f_min=0,
+            f_max=16000 / 2,
+            norm="slaney",
+            htk=True,
+        )

@@ -1,12 +1,12 @@
 import math
 import warnings
-from typing import Optional, Union
+from typing import Optional
 
 import torch
 from torch import Tensor
 
 
-def hz_to_mel(frequencies: Union[int, Tensor], htk: bool = False) -> Union[int, Tensor]:
+def hz_to_mel(frequencies: int, htk: bool = False) -> int:
     """This is a direct port of librosa.core.conver.hz_to_mel to work with torchaudio.
 
     Args:
@@ -31,18 +31,14 @@ def hz_to_mel(frequencies: Union[int, Tensor], htk: bool = False) -> Union[int, 
     min_log_mel = (min_log_hz - f_min) / f_sp  # same (Mels)
     logstep = math.log(6.4) / 27.0  # step size for log region
 
-    if torch.is_tensor(frequencies):
-        # If we have array data, vectorize
-        log_t = frequencies >= min_log_hz
-        mels[log_t] = min_log_mel + math.log(frequencies[log_t] / min_log_hz) / logstep
-    elif frequencies >= min_log_hz:
+    if frequencies >= min_log_hz:
         # If we have scalar data, heck directly
         mels = min_log_mel + math.log(frequencies / min_log_hz) / logstep
 
     return mels
 
 
-def mel_to_hz(mels: Union[int, Tensor], htk: bool = False) -> Union[int, Tensor]:
+def mel_to_hz(mels: Tensor, htk: bool = False) -> Tensor:
     """This is a direct port of librosa.core.conver.mel_to_hz to work with torchaudio.
 
     Args:
@@ -65,13 +61,8 @@ def mel_to_hz(mels: Union[int, Tensor], htk: bool = False) -> Union[int, Tensor]
     min_log_mel = (min_log_hz - f_min) / f_sp  # same (Mels)
     logstep = math.log(6.4) / 27.0  # step size for log region
 
-    if torch.is_tensor(mels):
-        # If we have vector data, vectorize
-        log_t = mels >= min_log_mel
-        freqs[log_t] = min_log_hz * (logstep * (mels[log_t] - min_log_mel)).exp()
-    elif mels >= min_log_mel:
-        # If we have scalar data, check directly
-        freqs = min_log_hz * math.exp(logstep * (mels - min_log_mel))
+    log_t = mels >= min_log_mel
+    freqs[log_t] = min_log_hz * (logstep * (mels[log_t] - min_log_mel)).exp()
 
     return freqs
 
