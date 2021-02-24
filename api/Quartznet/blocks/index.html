@@ -10,7 +10,7 @@
       
       
       <link rel="shortcut icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.0">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.1">
     
     
       
@@ -18,7 +18,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.a3f8f96a.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.1655a90d.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.7fa14f5b.min.css">
@@ -221,14 +221,14 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
       
-      <label class="md-nav__link" for="nav-2">
+      <label class="md-nav__link" for="__nav_2">
         Api
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Api" data-md-level="1">
-        <label class="md-nav__title" for="nav-2">
+        <label class="md-nav__title" for="__nav_2">
           <span class="md-nav__icon md-icon"></span>
           Api
         </label>
@@ -245,14 +245,14 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-1" type="checkbox" id="nav-2-1" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1" type="checkbox" id="__nav_2_1" checked>
       
-      <label class="md-nav__link" for="nav-2-1">
+      <label class="md-nav__link" for="__nav_2_1">
         Quartznet
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Quartznet" data-md-level="2">
-        <label class="md-nav__title" for="nav-2-1">
+        <label class="md-nav__title" for="__nav_2_1">
           <span class="md-nav__icon md-icon"></span>
           Quartznet
         </label>
@@ -332,6 +332,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#thunder.quartznet.blocks.body" class="md-nav__link">
+    body()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#thunder.quartznet.blocks.get_same_padding" class="md-nav__link">
     get_same_padding()
   </a>
@@ -345,10 +352,29 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.blocks.stem" class="md-nav__link">
+    stem()
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility/" class="md-nav__link">
+        Compatibility
+      </a>
     </li>
   
 
@@ -441,6 +467,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#thunder.quartznet.blocks.body" class="md-nav__link">
+    body()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#thunder.quartznet.blocks.get_same_padding" class="md-nav__link">
     get_same_padding()
   </a>
@@ -450,6 +483,13 @@
         <li class="md-nav__item">
   <a href="#thunder.quartznet.blocks.init_weights" class="md-nav__link">
     init_weights()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.blocks.stem" class="md-nav__link">
+    stem()
   </a>
   
 </li>
@@ -473,6 +513,7 @@
 <h2 class="hidden-toc" id="thunder.quartznet.blocks" style="visibility: hidden; position: absolute;">
         </h2>
 <div class="doc doc-contents first">
+<p>Basic building blocks to create the Quartznet model</p>
 <div class="doc doc-children">
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="thunder.quartznet.blocks.InitMode">
@@ -786,6 +827,113 @@ dense residual used on Jasper is not supported here, and masked convolutions wer
 </div>
 </div>
 <div class="doc doc-object doc-function">
+<h2 class="doc doc-heading" id="thunder.quartznet.blocks.body">
+
+<code class="highlight language-python"><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+
+
+      </h2>
+<div class="doc doc-contents ">
+<p>Creates the body of the Quartznet model. That is the middle part.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>filters</code></td>
+<td><code>List[int]</code></td>
+<td>
+<p>List of filters inside each block in the body.</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>kernel_size</code></td>
+<td><code>List[int]</code></td>
+<td>
+<p>Corresponding list of kernel sizes for each block. Should have the same length as the first argument.</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>repeat_blocks</code></td>
+<td><code>int</code></td>
+<td>
+<p>Number of repetitions of each block inside the body.</p>
+</td>
+<td><code>1</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List[thunder.quartznet.blocks.QuartznetBlock]</code></td>
+<td>
+<p>List of layers that form the body of the network.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<details class="quote">
+          <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
+          <div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="nf">body</span><span class="p">(</span>
+    <span class="n">filters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">kernel_size</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">repeat_blocks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">QuartznetBlock</span><span class="p">]:</span>
+    <span class="sd">"""Creates the body of the Quartznet model. That is the middle part.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filters : List of filters inside each block in the body.</span>
+<span class="sd">        kernel_size : Corresponding list of kernel sizes for each block. Should have the same length as the first argument.</span>
+<span class="sd">        repeat_blocks : Number of repetitions of each block inside the body.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List of layers that form the body of the network.</span>
+<span class="sd">    """</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">f_in</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat_blocks</span><span class="p">):</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QuartznetBlock</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">separable</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="n">f_in</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="n">layers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">QuartznetBlock</span><span class="p">(</span>
+                <span class="n">f_in</span><span class="p">,</span>
+                <span class="mi">512</span><span class="p">,</span>
+                <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">dilation</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">kernel_size</span><span class="o">=</span><span class="p">[</span><span class="mi">87</span><span class="p">],</span>
+                <span class="n">residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">separable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">QuartznetBlock</span><span class="p">(</span>
+                <span class="mi">512</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">separable</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">layers</span>
+</code></pre>
+</div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-function">
 <h2 class="doc doc-heading" id="thunder.quartznet.blocks.get_same_padding">
 
 <code class="highlight language-python"><span class="n">get_same_padding</span><span class="p">(</span><span class="n">kernel_size</span><span class="p">,</span> <span class="n">stride</span><span class="p">,</span> <span class="n">dilation</span><span class="p">)</span></code>
@@ -996,6 +1144,73 @@ There's no return, the operation occurs inplace.</p>
 </details>
 </div>
 </div>
+<div class="doc doc-object doc-function">
+<h2 class="doc doc-heading" id="thunder.quartznet.blocks.stem">
+
+<code class="highlight language-python"><span class="n">stem</span><span class="p">(</span><span class="n">feat_in</span><span class="p">)</span></code>
+
+
+      </h2>
+<div class="doc doc-contents ">
+<p>Creates the Quartznet stem. That is the first block of the model, that process the input directly.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feat_in</code></td>
+<td><code>int</code></td>
+<td>
+<p>Number of input features</p>
+</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QuartznetBlock</code></td>
+<td>
+<p>Quartznet stem block</p>
+</td>
+</tr>
+</tbody>
+</table>
+<details class="quote">
+          <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
+          <div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="nf">stem</span><span class="p">(</span><span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuartznetBlock</span><span class="p">:</span>
+    <span class="sd">"""Creates the Quartznet stem. That is the first block of the model, that process the input directly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        feat_in : Number of input features</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Quartznet stem block</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">QuartznetBlock</span><span class="p">(</span>
+        <span class="n">feat_in</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">[</span><span class="mi">33</span><span class="p">],</span> <span class="n">residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">separable</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+</code></pre>
+</div>
+</details>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -1031,13 +1246,13 @@ There's no return, the operation occurs inplace.</p>
         </a>
       
       
-        <a href="../model/" class="md-footer__link md-footer__link--next" rel="next">
+        <a href="../compatibility/" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Model
+              Compatibility
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -1065,10 +1280,10 @@ There's no return, the operation occurs inplace.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../../assets/javascripts/workers/search.217ffd95.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../../assets/javascripts/workers/search.f5903571.min.js", "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.926459b3.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.4e3fea51.min.js"></script>
       
     
   </body>
