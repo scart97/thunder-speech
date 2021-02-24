@@ -1,4 +1,4 @@
-"""All of the stuff to load the quartznet checkpoint
+"""Helper functions to load the Quartznet model from original Nemo released checkpoint files.
 """
 
 # This source code is licensed under the MIT license found in the
@@ -74,6 +74,11 @@ def load_quartznet_weights(
 ) -> Tuple[nn.Module, nn.Module]:
     """Load quartznet/Quartznet model from data present inside .nemo file
 
+    Args:
+        config_path : Path to the .yaml configuration file.
+        weights_path : Path to the pytorch weights checkpoint
+
+
     Returns:
         Encoder and decoder Modules with the checkpoint weights loaded
     """
@@ -100,6 +105,14 @@ def load_quartznet_weights(
 
 
 def load_from_nemo(checkpoint_path: str) -> Tuple[nn.Module, nn.Module]:
+    """Creates the model from the .nemo checkpoint file and load the weights.
+
+    Args:
+        checkpoint_path : Path to the .nemo checkpoint file
+
+    Returns:
+        Both encoder and decoder.
+    """
     with TemporaryDirectory() as extract_path:
         extract_path = Path(extract_path)
         extract_archive(str(checkpoint_path), extract_path)

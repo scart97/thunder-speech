@@ -1,3 +1,6 @@
+"""Basic building blocks to create the Quartznet model
+"""
+
 # Copyright (c) 2020, NVIDIA CORPORATION.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -270,9 +273,9 @@ def body(
     """Creates the body of the Quartznet model. That is the middle part.
 
     Args:
-        filters : List of filter inside each block in the body.
+        filters : List of filters inside each block in the body.
         kernel_size : Corresponding list of kernel sizes for each block. Should have the same length as the first argument.
-        repeat_blocks : Number of repetitions of each block inside the body. Defaults to 1.
+        repeat_blocks : Number of repetitions of each block inside the body.
 
     Returns:
         List of layers that form the body of the network.

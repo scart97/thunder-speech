@@ -1,4 +1,4 @@
-"""All of the stuff to load the quartznet checkpoint
+"""Functionality to quickly create a new quartznet model.
 """
 
 # This source code is licensed under the MIT license found in the
