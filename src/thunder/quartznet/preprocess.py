@@ -40,9 +40,10 @@
 
 import math
 
-import librosa
 import torch
 import torch.nn as nn
+
+from thunder.librosa_compat import create_fb_matrix
 
 
 class FeatureBatchNormalizer(nn.Module):
@@ -145,11 +146,15 @@ class PowerSpectrum(nn.Module):
 class MelScale(nn.Module):
     def __init__(self, sample_rate, n_fft, nfilt, log_scale=True):
         super().__init__()
-        filterbanks = torch.tensor(
-            librosa.filters.mel(
-                sample_rate, n_fft, n_mels=nfilt, fmin=0.0, fmax=sample_rate / 2
-            ),
-            dtype=torch.float,
+
+        filterbanks = create_fb_matrix(
+            int(1 + n_fft // 2),
+            n_mels=nfilt,
+            sample_rate=sample_rate,
+            f_min=0,
+            f_max=sample_rate / 2,
+            norm="slaney",
+            htk=True,
         ).unsqueeze(0)
         self.register_buffer("fb", filterbanks)
         self.log_scale = log_scale
