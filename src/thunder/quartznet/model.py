@@ -6,7 +6,7 @@
 
 # Copyright (c) 2021 scart97
 
-import torch
+
 from torch import nn
 
 from thunder.quartznet.blocks import body, init_weights, pre_head, stem
@@ -64,7 +64,7 @@ def Quartznet_decoder(num_classes: int) -> nn.Module:
     Returns:
         Pytorch model of the decoder
     """
-    decoder = torch.nn.Conv1d(
+    decoder = nn.Conv1d(
         1024,
         num_classes + 1,
         kernel_size=1,
