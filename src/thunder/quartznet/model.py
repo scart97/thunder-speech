@@ -9,7 +9,7 @@
 
 from torch import nn
 
-from thunder.quartznet.blocks import body, init_weights, pre_head, stem
+from thunder.quartznet.blocks import body, init_weights, stem
 
 
 def Quartznet5(feat_in: int, repeat_blocks: int = 1) -> nn.Module:
@@ -27,7 +27,6 @@ def Quartznet5(feat_in: int, repeat_blocks: int = 1) -> nn.Module:
     return nn.Sequential(
         stem(feat_in),
         *body(filters, kernel_sizes, repeat_blocks),
-        *pre_head(),
     )
 
 

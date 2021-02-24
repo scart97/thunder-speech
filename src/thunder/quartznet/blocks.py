@@ -250,34 +250,53 @@ class QuartznetBlock(nn.Module):
         return out
 
 
-def stem(feat_in: int):
+def stem(feat_in: int) -> QuartznetBlock:
+    """Creates the Quartznet stem. That is the first block of the model, that process the input directly.
+
+    Args:
+        feat_in : Number of input features
+
+    Returns:
+        Quartznet stem block
+    """
     return QuartznetBlock(
         feat_in, 256, repeat=1, kernel_size=[33], residual=False, separable=True
     )
 
 
-def body(filters: List[int], kernel_size: List[int], repeat_blocks: int = 1):
+def body(
+    filters: List[int], kernel_size: List[int], repeat_blocks: int = 1
+) -> List[QuartznetBlock]:
+    """Creates the body of the Quartznet model. That is the middle part.
+
+    Args:
+        filters : List of filter inside each block in the body.
+        kernel_size : Corresponding list of kernel sizes for each block. Should have the same length as the first argument.
+        repeat_blocks : Number of repetitions of each block inside the body. Defaults to 1.
+
+    Returns:
+        List of layers that form the body of the network.
+    """
     layers = []
     f_in = 256
     for f, k in zip(filters, kernel_size):
         for _ in range(repeat_blocks):
             layers.append(QuartznetBlock(f_in, f, kernel_size=[k], separable=True))
             f_in = f
+    layers.extend(
+        [
+            QuartznetBlock(
+                f_in,
+                512,
+                repeat=1,
+                dilation=[2],
+                kernel_size=[87],
+                residual=False,
+                separable=True,
+            ),
+            QuartznetBlock(
+                512, 1024, repeat=1, kernel_size=[1], residual=False, separable=False
+            ),
+        ]
+    )
     return layers
-
-
-def pre_head():
-    return [
-        QuartznetBlock(
-            512,
-            512,
-            repeat=1,
-            dilation=[2],
-            kernel_size=[87],
-            residual=False,
-            separable=True,
-        ),
-        QuartznetBlock(
-            512, 1024, repeat=1, kernel_size=[1], residual=False, separable=False
-        ),
-    ]
