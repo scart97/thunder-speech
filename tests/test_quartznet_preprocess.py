@@ -6,9 +6,11 @@
 from tempfile import TemporaryDirectory
 
 import torch
+from hypothesis import given
+from hypothesis.strategies import floats
 
 from tests.utils import _test_batch_independence, _test_device_move, requirescuda
-from thunder.quartznet.preprocess import FeatureBatchNormalizer
+from thunder.quartznet.preprocess import DitherAudio, FeatureBatchNormalizer
 
 
 def test_normalize_preserve_shape():
@@ -46,6 +48,7 @@ def test_normalize_device_move():
 
 def test_normalize_trace():
     norm = FeatureBatchNormalizer()
+    norm.eval()
     x = torch.randn(10, 40, 1337)
     norm_trace = torch.jit.trace(norm, (x))
 
@@ -54,6 +57,7 @@ def test_normalize_trace():
 
 def test_normalize_script():
     norm = FeatureBatchNormalizer()
+    norm.eval()
     x = torch.randn(10, 40, 1337)
     norm_script = torch.jit.script(norm)
 
@@ -62,6 +66,7 @@ def test_normalize_script():
 
 def test_normalize_onnx():
     norm = FeatureBatchNormalizer()
+    norm.eval()
     x = torch.randn(10, 40, 1337)
 
     with TemporaryDirectory() as export_path:
@@ -69,6 +74,83 @@ def test_normalize_onnx():
             norm,
             (x),
             f"{export_path}/Normalize.onnx",
+            verbose=True,
+            opset_version=11,
+        )
+
+
+@given(floats())
+def test_dither_retains_shape(dither_magnitude):
+    dither = DitherAudio(dither_magnitude)
+    x = torch.randn(10, 1337)
+    out = dither(x)
+    assert out.shape[0] == x.shape[0]
+    assert out.shape[1] == x.shape[1]
+
+
+@given(floats())
+def test_dither_eval_mode_retain_input(dither_magnitude):
+    dither = DitherAudio(dither_magnitude)
+    dither.eval()
+    x = torch.randn(10, 1337)
+    out = dither(x)
+    assert torch.allclose(out, x)
+
+
+@given(floats(min_value=1e-6))
+def test_dither_changes_input(dither_magnitude):
+    dither = DitherAudio(dither_magnitude)
+    x = torch.randn(10, 1337)
+    out = dither(x)
+    assert not torch.allclose(out, x)
+
+
+@given(floats())
+def test_dither_batch_independence(dither_magnitude):
+    dither = DitherAudio(dither_magnitude)
+    x = torch.randn(10, 1337)
+    _test_batch_independence(dither, x)
+
+
+@requirescuda
+@given(floats())
+def test_dither_device_move(dither_magnitude):
+    dither = DitherAudio(dither_magnitude)
+    x = torch.randn(10, 1337)
+    _test_device_move(dither, x)
+
+
+@given(floats())
+def test_dither_trace(dither_magnitude):
+    dither = DitherAudio(dither_magnitude)
+    dither.eval()
+    x = torch.randn(10, 1337)
+    dither_trace = torch.jit.trace(dither, (x))
+
+    assert torch.allclose(dither(x), dither_trace(x))
+
+
+@given(floats())
+def test_dither_script(dither_magnitude):
+    dither = DitherAudio(dither_magnitude)
+    dither.eval()
+    x = torch.randn(10, 1337)
+    dither_script = torch.jit.script(dither)
+
+    assert torch.allclose(dither(x), dither_script(x))
+
+
+@given(floats())
+def test_dither_onnx(dither_magnitude):
+    dither = DitherAudio(dither_magnitude)
+    dither.eval()
+    x = torch.randn(10, 1337)
+
+    with TemporaryDirectory() as export_path:
+        torch.onnx.export(
+            dither,
+            (x),
+            f"{export_path}/Dither.onnx",
             verbose=True,
             opset_version=11,
         )
