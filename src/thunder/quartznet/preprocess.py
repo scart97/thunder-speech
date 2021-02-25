@@ -51,21 +51,12 @@ class FeatureBatchNormalizer(nn.Module):
         super().__init__()
         self.div_guard = 1e-5
 
-    def forward(self, x):
-        x_mean = torch.zeros((x.shape[0], x.shape[1]), dtype=x.dtype, device=x.device)
-        x_std = torch.zeros((x.shape[0], x.shape[1]), dtype=x.dtype, device=x.device)
-
-        for i in range(x.shape[0]):
-            if x[i, :, :].shape[1] == 1:
-                raise ValueError(
-                    "normalize_batch received a tensor of length 1. This will result "
-                    "in torch.std() returning nan"
-                )
-            x_mean[i, :] = x[i, :, :].mean(dim=1)
-            x_std[i, :] = x[i, :, :].std(dim=1)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x_mean = x.mean(dim=2, keepdim=True).detach()
+        x_std = x.std(dim=2, keepdim=True).detach()
         # make sure x_std is not zero
         x_std += self.div_guard
-        return (x - x_mean.unsqueeze(2)) / x_std.unsqueeze(2)
+        return (x - x_mean) / x_std
 
 
 class DitherAudio(nn.Module):
