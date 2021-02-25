@@ -10,7 +10,11 @@ from hypothesis import given
 from hypothesis.strategies import floats
 
 from tests.utils import _test_batch_independence, _test_device_move, requirescuda
-from thunder.quartznet.preprocess import DitherAudio, FeatureBatchNormalizer
+from thunder.quartznet.preprocess import (
+    DitherAudio,
+    FeatureBatchNormalizer,
+    PreEmphasisFilter,
+)
 
 
 def test_normalize_preserve_shape():
@@ -151,6 +155,78 @@ def test_dither_onnx(dither_magnitude):
             dither,
             (x),
             f"{export_path}/Dither.onnx",
+            verbose=True,
+            opset_version=11,
+        )
+
+
+preemph_params = given(floats(min_value=0.000001, max_value=0.999999999))
+
+
+@preemph_params
+def test_preemph_filter_retain_shape(preemph):
+    filt = PreEmphasisFilter(preemph)
+    x = torch.randn(10, 1337)
+    out = filt(x)
+    assert out.shape[0] == x.shape[0]
+    assert out.shape[1] == x.shape[1]
+
+
+def test_preemph_filter_zero_gain():
+    # With zero gain the output should be the input
+    filt = PreEmphasisFilter(0.0)
+    x = torch.randn(10, 1337)
+    out = filt(x)
+    assert torch.allclose(out, x)
+
+
+@preemph_params
+def test_preemph_filter_changes_input(preemph):
+    filt = PreEmphasisFilter(preemph)
+    x = torch.randn(10, 1337)
+    out = filt(x)
+    assert not torch.allclose(out, x)
+
+
+@requirescuda
+@preemph_params
+def test_preemph_filter_device_move(preemph):
+    filt = PreEmphasisFilter(preemph)
+    x = torch.randn(10, 1337)
+    _test_device_move(filt, x)
+
+
+@preemph_params
+def test_preemph_filter_trace(preemph):
+    filt = PreEmphasisFilter(preemph)
+    filt.eval()
+    x = torch.randn(10, 1337)
+    filt_trace = torch.jit.trace(filt, (x))
+
+    assert torch.allclose(filt(x), filt_trace(x))
+
+
+@preemph_params
+def test_preemph_filter_script(preemph):
+    filt = PreEmphasisFilter(preemph)
+    filt.eval()
+    x = torch.randn(10, 1337)
+    filt_script = torch.jit.script(filt)
+
+    assert torch.allclose(filt(x), filt_script(x))
+
+
+@preemph_params
+def test_preemph_filter_onnx(preemph):
+    filt = PreEmphasisFilter(preemph)
+    filt.eval()
+    x = torch.randn(10, 1337)
+
+    with TemporaryDirectory() as export_path:
+        torch.onnx.export(
+            filt,
+            (x),
+            f"{export_path}/PreemphFilter.onnx",
             verbose=True,
             opset_version=11,
         )
