@@ -5,14 +5,17 @@
 
 from tempfile import TemporaryDirectory
 
+import pytest
+
 import torch
 from hypothesis import given
-from hypothesis.strategies import floats
+from hypothesis.strategies import floats, integers, none, one_of
 
 from tests.utils import _test_batch_independence, _test_device_move, requirescuda
 from thunder.quartznet.preprocess import (
     DitherAudio,
     FeatureBatchNormalizer,
+    PowerSpectrum,
     PreEmphasisFilter,
 )
 
@@ -229,4 +232,79 @@ def test_preemph_filter_onnx(preemph):
             f"{export_path}/PreemphFilter.onnx",
             verbose=True,
             opset_version=11,
+        )
+
+
+powerspec_params = given(
+    n_window_size=integers(min_value=16, max_value=128),
+    n_window_stride=integers(min_value=8, max_value=64),
+    n_fft=one_of(none(), integers(min_value=128, max_value=256)),
+)
+
+
+@powerspec_params
+def test_powerspectrum_shape(**kwargs):
+    spec = PowerSpectrum(**kwargs)
+    x = torch.randn(10, 1337)
+    out = spec(x)
+    assert out.shape[0] == x.shape[0]
+    assert out.shape[1] == int(1 + spec.n_fft // 2)
+    assert out.shape[2] == int(1 + x.shape[1] // spec.hop_length)
+    assert len(out.shape) == 3
+
+
+@given(n_window_size=integers(max_value=0), n_window_stride=integers(max_value=0))
+def test_powerspec_raises(**kwargs):
+    with pytest.raises(ValueError):
+        PowerSpectrum(**kwargs)
+
+
+@requirescuda
+@powerspec_params
+def test_powerspectrum_device_move(**kwargs):
+    spec = PowerSpectrum(**kwargs)
+    x = torch.randn(10, 1337)
+    _test_device_move(spec, x)
+
+
+@powerspec_params
+def test_powerspectrum_trace(**kwargs):
+    spec = PowerSpectrum(**kwargs)
+    spec.eval()
+    x = torch.randn(10, 1337)
+    spec_trace = torch.jit.trace(spec, (x))
+
+    assert torch.allclose(spec(x), spec_trace(x))
+
+
+@powerspec_params
+def test_powerspectrum_script(**kwargs):
+    spec = PowerSpectrum(**kwargs)
+    spec.eval()
+    x = torch.randn(10, 1337)
+    spec_script = torch.jit.script(spec)
+
+    assert torch.allclose(spec(x), spec_script(x))
+
+
+@pytest.mark.xfail
+@powerspec_params
+def test_powerspectrum_onnx(**kwargs):
+    # ONNX doesn't support fft or stft computation
+    # There's suggestions to hack it using conv1d
+    # but that's no acceptable solution to a really
+    # common operator.
+    # https://github.com/pytorch/pytorch/issues/31317
+    # https://github.com/onnx/onnx/issues/1646
+    # https://github.com/onnx/onnx/pull/2625
+    spec = PowerSpectrum(**kwargs)
+    spec.eval()
+    x = torch.randn(10, 1337)
+
+    with TemporaryDirectory() as export_path:
+        torch.onnx.export(
+            spec,
+            (x),
+            f"{export_path}/Powerspectrum.onnx",
+            verbose=True,
         )
