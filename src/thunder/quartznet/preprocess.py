@@ -90,7 +90,6 @@ class PowerSpectrum(nn.Module):
         n_window_size=320,
         n_window_stride=160,
         n_fft=None,
-        nfilt=64,
     ):
         super().__init__()
         if (
@@ -105,7 +104,6 @@ class PowerSpectrum(nn.Module):
                 f"{self} got an invalid value for either n_window_size or "
                 f"n_window_stride. Both must be positive ints."
             )
-        self.nfilt = nfilt
         self.win_length = n_window_size
         self.hop_length = n_window_stride
         self.n_fft = n_fft or 2 ** math.ceil(math.log2(self.win_length))
@@ -115,8 +113,6 @@ class PowerSpectrum(nn.Module):
 
     @torch.no_grad()
     def forward(self, x):
-        # disable autocast to get full range of stft values
-        # with torch.cuda.amp.autocast(enabled=False):
         x = torch.stft(
             x,
             n_fft=self.n_fft,
@@ -138,15 +134,19 @@ class MelScale(nn.Module):
     def __init__(self, sample_rate, n_fft, nfilt, log_scale=True):
         super().__init__()
 
-        filterbanks = create_fb_matrix(
-            int(1 + n_fft // 2),
-            n_mels=nfilt,
-            sample_rate=sample_rate,
-            f_min=0,
-            f_max=sample_rate / 2,
-            norm="slaney",
-            htk=True,
-        ).unsqueeze(0)
+        filterbanks = (
+            create_fb_matrix(
+                int(1 + n_fft // 2),
+                n_mels=nfilt,
+                sample_rate=sample_rate,
+                f_min=0,
+                f_max=sample_rate / 2,
+                norm="slaney",
+                htk=True,
+            )
+            .transpose(0, 1)
+            .unsqueeze(0)
+        )
         self.register_buffer("fb", filterbanks)
         self.log_scale = log_scale
 
@@ -178,7 +178,6 @@ def FilterbankFeatures(
             n_window_size=n_window_size,
             n_window_stride=n_window_stride,
             n_fft=n_fft,
-            nfilt=nfilt,
         ),
         MelScale(sample_rate=sample_rate, n_fft=n_fft, nfilt=nfilt),
         FeatureBatchNormalizer(),
