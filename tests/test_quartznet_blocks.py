@@ -17,6 +17,7 @@ from tests.utils import (
     _test_batch_independence,
     _test_device_move,
     _test_parameters_update,
+    mark_slow,
     requirescuda,
 )
 from thunder.quartznet.blocks import (
@@ -128,6 +129,7 @@ def test_QuartznetBlock_combinations(**kwargs):
     assert out.shape[1] == kwargs["planes"]
 
 
+@mark_slow
 @quartznet_parameters
 def test_QuartznetBlock_update(**kwargs):
     try:
@@ -138,6 +140,7 @@ def test_QuartznetBlock_update(**kwargs):
     _test_parameters_update(block, x)
 
 
+@mark_slow
 @quartznet_parameters
 @settings(deadline=None)
 def test_QuartznetBlock_independence(**kwargs):
@@ -149,6 +152,7 @@ def test_QuartznetBlock_independence(**kwargs):
     _test_batch_independence(block, x)
 
 
+@mark_slow
 @requirescuda
 @quartznet_parameters
 @settings(deadline=None)
@@ -161,6 +165,7 @@ def test_QuartznetBlock_device_move(**kwargs):
     _test_device_move(block, x)
 
 
+@mark_slow
 @quartznet_parameters
 @settings(deadline=None)
 def test_QuartznetBlock_trace(**kwargs):
@@ -176,6 +181,7 @@ def test_QuartznetBlock_trace(**kwargs):
     assert torch.allclose(block(x), block_trace(x))
 
 
+@mark_slow
 @quartznet_parameters
 @settings(deadline=None)
 def test_QuartznetBlock_script(**kwargs):
@@ -190,6 +196,7 @@ def test_QuartznetBlock_script(**kwargs):
     assert torch.allclose(block(x), block_script(x))
 
 
+@mark_slow
 @quartznet_parameters
 @settings(deadline=None)
 def test_QuartznetBlock_onnx(**kwargs):

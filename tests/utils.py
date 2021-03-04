@@ -3,7 +3,7 @@
 
 # Copyright (c) 2021 scart97
 
-
+import os
 from typing import List
 
 import pytest
@@ -15,6 +15,10 @@ from torch import nn
 requirescuda = pytest.mark.skipif(
     not torch.cuda.is_available(), reason="This test requires cuda."
 )
+
+
+mark_slow = pytest.mark.skipif(not os.getenv("RUN_SLOW"), reason="Skip slow tests")
+
 
 # ##############################################
 # Awesome resource on deep learning testing.
