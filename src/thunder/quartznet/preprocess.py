@@ -39,9 +39,10 @@
 # Copyright (c) 2021 scart97
 
 import math
+from typing import Optional
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 from thunder.librosa_compat import create_fb_matrix
 
@@ -60,12 +61,12 @@ class FeatureBatchNormalizer(nn.Module):
 
 
 class DitherAudio(nn.Module):
-    def __init__(self, dither=1e-5):
+    def __init__(self, dither: float = 1e-5):
         super().__init__()
         self.dither = dither
 
     @torch.no_grad()
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.training:
             return x + self.dither * torch.randn_like(x)
         else:
@@ -73,12 +74,12 @@ class DitherAudio(nn.Module):
 
 
 class PreEmphasisFilter(nn.Module):
-    def __init__(self, preemph=0.97):
+    def __init__(self, preemph: float = 0.97):
         super().__init__()
         self.preemph = preemph
 
     @torch.no_grad()
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return torch.cat(
             (x[:, 0].unsqueeze(1), x[:, 1:] - self.preemph * x[:, :-1]), dim=1
         )
@@ -87,19 +88,12 @@ class PreEmphasisFilter(nn.Module):
 class PowerSpectrum(nn.Module):
     def __init__(
         self,
-        n_window_size=320,
-        n_window_stride=160,
-        n_fft=None,
+        n_window_size: int = 320,
+        n_window_stride: int = 160,
+        n_fft: Optional[int] = None,
     ):
         super().__init__()
-        if (
-            n_window_size is None
-            or n_window_stride is None
-            or not isinstance(n_window_size, int)
-            or not isinstance(n_window_stride, int)
-            or n_window_size <= 0
-            or n_window_stride <= 0
-        ):
+        if n_window_size <= 0 or n_window_stride <= 0:
             raise ValueError(
                 f"{self} got an invalid value for either n_window_size or "
                 f"n_window_stride. Both must be positive ints."
@@ -112,7 +106,7 @@ class PowerSpectrum(nn.Module):
         self.register_buffer("window", window_tensor)
 
     @torch.no_grad()
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = torch.stft(
             x,
             n_fft=self.n_fft,
@@ -131,7 +125,9 @@ class PowerSpectrum(nn.Module):
 
 
 class MelScale(nn.Module):
-    def __init__(self, sample_rate, n_fft, nfilt, log_scale=True):
+    def __init__(
+        self, sample_rate: int, n_fft: int, nfilt: int, log_scale: bool = True
+    ):
         super().__init__()
 
         filterbanks = (
@@ -151,7 +147,7 @@ class MelScale(nn.Module):
         self.log_scale = log_scale
 
     @torch.no_grad()
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         # dot with filterbank energies
         x = torch.matmul(self.fb.to(x.dtype), x)
         # log features
@@ -162,15 +158,15 @@ class MelScale(nn.Module):
 
 
 def FilterbankFeatures(
-    sample_rate=16000,
-    n_window_size=320,
-    n_window_stride=160,
-    n_fft=512,
-    preemph=0.97,
-    nfilt=64,
-    dither=1e-5,
+    sample_rate: int = 16000,
+    n_window_size: int = 320,
+    n_window_stride: int = 160,
+    n_fft: int = 512,
+    preemph: float = 0.97,
+    nfilt: int = 64,
+    dither: float = 1e-5,
     **kwargs,
-):
+) -> nn.Module:
     return nn.Sequential(
         DitherAudio(dither=dither),
         PreEmphasisFilter(preemph=preemph),
