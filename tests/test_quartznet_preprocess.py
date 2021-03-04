@@ -11,10 +11,16 @@ import torch
 from hypothesis import given
 from hypothesis.strategies import floats, integers, none, one_of
 
-from tests.utils import _test_batch_independence, _test_device_move, requirescuda
+from tests.utils import (
+    _test_batch_independence,
+    _test_device_move,
+    mark_slow,
+    requirescuda,
+)
 from thunder.quartznet.preprocess import (
     DitherAudio,
     FeatureBatchNormalizer,
+    MelScale,
     PowerSpectrum,
     PreEmphasisFilter,
 )
@@ -219,6 +225,7 @@ def test_preemph_filter_script(preemph):
     assert torch.allclose(filt(x), filt_script(x))
 
 
+@mark_slow
 @preemph_params
 def test_preemph_filter_onnx(preemph):
     filt = PreEmphasisFilter(preemph)
@@ -267,6 +274,7 @@ def test_powerspectrum_device_move(**kwargs):
     _test_device_move(spec, x)
 
 
+@mark_slow
 @powerspec_params
 def test_powerspectrum_trace(**kwargs):
     spec = PowerSpectrum(**kwargs)
@@ -306,5 +314,77 @@ def test_powerspectrum_onnx(**kwargs):
             spec,
             (x),
             f"{export_path}/Powerspectrum.onnx",
+            verbose=True,
+        )
+
+
+melscale_params = given(
+    sample_rate=integers(min_value=8000, max_value=9000),
+    n_fft=integers(min_value=500, max_value=512),
+    nfilt=integers(min_value=60, max_value=64),
+)
+
+
+@melscale_params
+def test_melscale_shape(**kwargs):
+    mel = MelScale(**kwargs)
+    x = torch.randn(10, int(1 + kwargs["n_fft"] // 2), 137).abs()
+    out = mel(x)
+    assert out.shape[0] == x.shape[0]
+    assert out.shape[1] == kwargs["nfilt"]
+    assert out.shape[2] == x.shape[2]
+    assert not torch.isnan(out).any()
+
+
+@melscale_params
+def test_melscale_zero_guard(**kwargs):
+    mel = MelScale(**kwargs)
+    x = torch.zeros((10, int(1 + kwargs["n_fft"] // 2), 137))
+    out = mel(x)
+    assert not torch.isnan(out).any()
+    assert torch.isfinite(out).all()
+
+
+@requirescuda
+@melscale_params
+def test_melscale_device_move(**kwargs):
+    mel = MelScale(**kwargs)
+    x = torch.randn(10, int(1 + kwargs["n_fft"] // 2), 137).abs()
+    _test_device_move(mel, x)
+
+
+@mark_slow
+@melscale_params
+def test_melscale_trace(**kwargs):
+    mel = MelScale(**kwargs)
+    mel.eval()
+    x = torch.randn(10, int(1 + kwargs["n_fft"] // 2), 137).abs()
+    mel_trace = torch.jit.trace(mel, (x))
+
+    assert torch.allclose(mel(x), mel_trace(x))
+
+
+@melscale_params
+def test_melscale_script(**kwargs):
+    mel = MelScale(**kwargs)
+    mel.eval()
+    x = torch.randn(10, int(1 + kwargs["n_fft"] // 2), 137).abs()
+    mel_script = torch.jit.script(mel)
+
+    assert torch.allclose(mel(x), mel_script(x))
+
+
+@mark_slow
+@melscale_params
+def test_melscale_onnx(**kwargs):
+    mel = MelScale(**kwargs)
+    mel.eval()
+    x = torch.randn(10, int(1 + kwargs["n_fft"] // 2), 137).abs()
+
+    with TemporaryDirectory() as export_path:
+        torch.onnx.export(
+            mel,
+            (x),
+            f"{export_path}/melscale.onnx",
             verbose=True,
         )
