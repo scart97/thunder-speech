@@ -44,7 +44,7 @@ def _test_parameters_update(model: nn.Module, x: List[torch.Tensor]):
             assert (torch.sum(param.grad ** 2) != 0.0).all()
 
 
-def _test_device_move(model: nn.Module, x: torch.Tensor):
+def _test_device_move(model: nn.Module, x: torch.Tensor, atol: float = 1e-4):
     model.eval()
     seed_everything(42)
     outputs_cpu = model(x)
@@ -57,7 +57,7 @@ def _test_device_move(model: nn.Module, x: torch.Tensor):
     model = model.cpu()
     outputs_back_on_cpu = model(x.cpu())
     model.train()
-    assert torch.allclose(outputs_cpu, outputs_gpu.cpu(), atol=1e-4)
+    assert torch.allclose(outputs_cpu, outputs_gpu.cpu(), atol=atol)
     assert torch.allclose(outputs_cpu, outputs_back_on_cpu)
 
 

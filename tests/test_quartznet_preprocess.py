@@ -8,7 +8,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 import torch
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis.strategies import floats, integers, none, one_of
 
 from tests.utils import (
@@ -20,6 +20,7 @@ from tests.utils import (
 from thunder.quartznet.preprocess import (
     DitherAudio,
     FeatureBatchNormalizer,
+    FilterbankFeatures,
     MelScale,
     PowerSpectrum,
     PreEmphasisFilter,
@@ -386,5 +387,73 @@ def test_melscale_onnx(**kwargs):
             mel,
             (x),
             f"{export_path}/melscale.onnx",
+            verbose=True,
+        )
+
+
+filterbank_params = given(
+    sample_rate=integers(8000, 9000),
+    n_window_size=integers(min_value=16, max_value=128),
+    n_window_stride=integers(min_value=8, max_value=64),
+    n_fft=integers(min_value=500, max_value=512),
+    preemph=floats(min_value=0.9, max_value=0.99),
+    nfilt=integers(min_value=60, max_value=64),
+    dither=floats(min_value=-1000.0, max_value=1000.0),
+)
+
+
+@filterbank_params
+def test_filterbank_shape(**kwargs):
+    fb = FilterbankFeatures(**kwargs)
+    x = torch.randn(10, 1337)
+    out = fb(x)
+    assert out.shape[0] == x.shape[0]
+
+
+@requirescuda
+@filterbank_params
+@settings(deadline=None)
+def test_filterbank_device_move(**kwargs):
+    fb = FilterbankFeatures(**kwargs)
+    x = torch.randn(10, 1337)
+    # Relaxed tolerance because of log operation
+    # inside the Melscale
+    _test_device_move(fb, x, atol=1e-3)
+
+
+@mark_slow
+@filterbank_params
+def test_filterbank_trace(**kwargs):
+    fb = FilterbankFeatures(**kwargs)
+    fb.eval()
+    x = torch.randn(10, 1337)
+    fb_trace = torch.jit.trace(fb, (x))
+
+    assert torch.allclose(fb(x), fb_trace(x))
+
+
+@mark_slow
+@filterbank_params
+def test_filterbank_script(**kwargs):
+    fb = FilterbankFeatures(**kwargs)
+    fb.eval()
+    x = torch.randn(10, 1337)
+    fb_script = torch.jit.script(fb)
+
+    assert torch.allclose(fb(x), fb_script(x))
+
+
+@pytest.mark.xfail
+@filterbank_params
+def test_filterbank_onnx(**kwargs):
+    fb = FilterbankFeatures(**kwargs)
+    fb.eval()
+    x = torch.randn(10, 1337)
+
+    with TemporaryDirectory() as export_path:
+        torch.onnx.export(
+            fb,
+            (x),
+            f"{export_path}/filterbank.onnx",
             verbose=True,
         )
