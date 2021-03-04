@@ -1,3 +1,7 @@
+"""Functionality to preprocess the audio input in the same way
+that the Quartznet model expects it.
+"""
+
 # Copyright (c) 2020, NVIDIA CORPORATION.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,10 +53,15 @@ from thunder.librosa_compat import create_fb_matrix
 
 class FeatureBatchNormalizer(nn.Module):
     def __init__(self):
+        """Normalize batch at the feature dimension."""
         super().__init__()
         self.div_guard = 1e-5
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x : Tensor of shape (batch, features, time)
+        """
         x_mean = x.mean(dim=2, keepdim=True).detach()
         x_std = x.std(dim=2, keepdim=True).detach()
         # make sure x_std is not zero
@@ -62,11 +71,24 @@ class FeatureBatchNormalizer(nn.Module):
 
 class DitherAudio(nn.Module):
     def __init__(self, dither: float = 1e-5):
+        """Add some dithering to the audio tensor.
+
+        Note:
+            From wikipedia: Dither is an intentionally applied
+            form of noise used to randomize quantization error.
+
+        Args:
+            dither : Amount of dither to add.
+        """
         super().__init__()
         self.dither = dither
 
     @torch.no_grad()
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x : Tensor of shape (batch, time)
+        """
         if self.training:
             return x + self.dither * torch.randn_like(x)
         else:
@@ -75,11 +97,25 @@ class DitherAudio(nn.Module):
 
 class PreEmphasisFilter(nn.Module):
     def __init__(self, preemph: float = 0.97):
+        """Applies preemphasis filtering to the audio signal.
+        This is a classic signal processing function to emphasise
+        the high frequency portion of the content compared to the
+        low frequency. It applies a FIR filter of the form:
+
+        `y[n] = y[n] - preemph * y[n-1]`
+
+        Args:
+            preemph : Filter control factor.
+        """
         super().__init__()
         self.preemph = preemph
 
     @torch.no_grad()
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x : Tensor of shape (batch, time)
+        """
         return torch.cat(
             (x[:, 0].unsqueeze(1), x[:, 1:] - self.preemph * x[:, :-1]), dim=1
         )
@@ -92,6 +128,17 @@ class PowerSpectrum(nn.Module):
         n_window_stride: int = 160,
         n_fft: Optional[int] = None,
     ):
+        """Calculates the power spectrum of the audio signal, following the same
+        method as used in NEMO.
+
+        Args:
+            n_window_size : Number of elements in the window size.
+            n_window_stride : Number of elements in the window stride.
+            n_fft : Number of fourier features.
+
+        Raises:
+            ValueError: Raised when incompatible parameters are passed.
+        """
         super().__init__()
         if n_window_size <= 0 or n_window_stride <= 0:
             raise ValueError(
@@ -107,6 +154,10 @@ class PowerSpectrum(nn.Module):
 
     @torch.no_grad()
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x : Tensor of shape (batch, time)
+        """
         x = torch.stft(
             x,
             n_fft=self.n_fft,
@@ -128,6 +179,16 @@ class MelScale(nn.Module):
     def __init__(
         self, sample_rate: int, n_fft: int, nfilt: int, log_scale: bool = True
     ):
+        """Convert a spectrogram to Mel scale, following the default
+        formula of librosa instead of the one used by torchaudio.
+        Also converts to log scale.
+
+        Args:
+            sample_rate : Sampling rate of the signal
+            n_fft : Number of fourier features
+            nfilt : Number of output mel filters to use
+            log_scale : Controls if the output should also be applied a log scale.
+        """
         super().__init__()
 
         filterbanks = (
@@ -148,6 +209,10 @@ class MelScale(nn.Module):
 
     @torch.no_grad()
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x : Tensor of shape (batch, features, time)
+        """
         # dot with filterbank energies
         x = torch.matmul(self.fb.to(x.dtype), x)
         # log features
@@ -167,6 +232,20 @@ def FilterbankFeatures(
     dither: float = 1e-5,
     **kwargs,
 ) -> nn.Module:
+    """Creates the Filterbank features used in the Quartznet model.
+
+    Args:
+        sample_rate : Sampling rate of the signal
+        n_window_size : Number of elements in the window size.
+        n_window_stride : Number of elements in the window stride.
+        n_fft : Number of fourier features.
+        preemph : Preemphasis filtering control factor.
+        nfilt : Number of output mel filters to use
+        dither : Amount of dither to add.
+
+    Returns:
+        Module that computes the features based on raw audio tensor.
+    """
     return nn.Sequential(
         DitherAudio(dither=dither),
         PreEmphasisFilter(preemph=preemph),
