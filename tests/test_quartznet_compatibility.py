@@ -4,12 +4,12 @@
 # Copyright (c) 2021 scart97
 
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from urllib.error import HTTPError
 
 import torch
 from torch import nn
 
+from tests.utils import mark_slow
 from thunder.quartznet.compatibility import get_quartznet, read_config
 from thunder.quartznet.model import (
     Quartznet5x5_encoder,
@@ -18,17 +18,18 @@ from thunder.quartznet.model import (
 )
 
 
+@mark_slow
 def test_can_open_quartznet():
     # Quartznet 5x5 is small (25mb), so it can be downloaded while testing.
     try:
-        with TemporaryDirectory() as tmpdir:
-            encoder, decoder = get_quartznet("QuartzNet5x5LS-En", tmpdir)
-            assert isinstance(encoder, nn.Module)
-            assert isinstance(decoder, nn.Module)
+        encoder, decoder = get_quartznet("QuartzNet5x5LS-En")
+        assert isinstance(encoder, nn.Module)
+        assert isinstance(decoder, nn.Module)
     except HTTPError:
         return
 
 
+@mark_slow
 def test_create_from_manifest():
     path = Path("tests/nemo_config_samples")
     for cfg in path.glob("*.yaml"):
