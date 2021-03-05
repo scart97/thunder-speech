@@ -4,7 +4,6 @@
 # Copyright (c) 2021 scart97
 
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from urllib.error import HTTPError
 
 import torch
@@ -23,10 +22,9 @@ from thunder.quartznet.model import (
 def test_can_open_quartznet():
     # Quartznet 5x5 is small (25mb), so it can be downloaded while testing.
     try:
-        with TemporaryDirectory() as tmpdir:
-            encoder, decoder = get_quartznet("QuartzNet5x5LS-En", tmpdir)
-            assert isinstance(encoder, nn.Module)
-            assert isinstance(decoder, nn.Module)
+        encoder, decoder = get_quartznet("QuartzNet5x5LS-En")
+        assert isinstance(encoder, nn.Module)
+        assert isinstance(decoder, nn.Module)
     except HTTPError:
         return
 

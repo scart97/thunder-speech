@@ -125,12 +125,12 @@ def load_from_nemo(checkpoint_path: str) -> Tuple[nn.Module, nn.Module]:
 def get_quartznet(
     name: str, checkpoint_folder: str = None
 ) -> Tuple[nn.Module, nn.Module]:
-    """Get quartznet model by idenfitier.
+    """Get quartznet model by identifier.
         This method downloads the checkpoint, creates the corresponding model
         and load the weights.
 
     Args:
-        name: Model idenfitier. Check checkpoint_archives.keys()
+        name: Model identifier. Check checkpoint_archives.keys()
         checkpoint_folder: Folder where the checkpoint will be saved to.
 
     Returns:
@@ -138,6 +138,7 @@ def get_quartznet(
     """
     if checkpoint_folder is None:
         checkpoint_folder = Path.home() / ".thunder"
+        checkpoint_folder.mkdir(exist_ok=True)
 
     url = checkpoint_archives[name]
     filename = url.split("/")[-1]
