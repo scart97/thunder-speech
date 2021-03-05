@@ -149,6 +149,5 @@ def get_quartznet(
             download_folder=checkpoint_folder,
             resume=True,
         )
-    filename = url.split("/")[-1]
 
     return load_from_nemo(checkpoint_path)
