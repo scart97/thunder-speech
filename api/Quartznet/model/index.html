@@ -10,7 +10,7 @@
       
       
       <link rel="shortcut icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.1">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.4">
     
     
       
@@ -18,7 +18,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.1655a90d.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.77f3fd56.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.7fa14f5b.min.css">
@@ -35,6 +35,8 @@
       
     
     
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="../../../css/mkdocstrings.css">
     
@@ -234,7 +236,6 @@
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
-          
             
   
   
@@ -257,7 +258,6 @@
           Quartznet
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
-          
           
             
   
@@ -357,6 +357,18 @@
   
 
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../preprocess/" class="md-nav__link">
+        Preprocess
+      </a>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -442,136 +454,149 @@
                   <h1>Model</h1>
                 
                 <div class="doc doc-object doc-module">
-<h2 class="hidden-toc" id="thunder.quartznet.model" style="visibility: hidden; position: absolute;">
-        </h2>
-<div class="doc doc-contents first">
-<p>Functionality to quickly create a new quartznet model.</p>
-<div class="doc doc-children">
-<div class="doc doc-object doc-function">
-<h2 class="doc doc-heading" id="thunder.quartznet.model.Quartznet15x5_encoder">
 
+<a id="thunder.quartznet.model"></a>
+    <div class="doc doc-contents first">
+
+      <p>Functionality to quickly create a new quartznet model.</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="thunder.quartznet.model.Quartznet15x5_encoder" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">Quartznet15x5_encoder</span><span class="p">(</span><span class="n">feat_in</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span></code>
 
 
-      </h2>
-<div class="doc doc-contents ">
-<p>Build encoder corresponding to the Quartznet15x5 model.</p>
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Build encoder corresponding to the Quartznet15x5 model.</p>
+
 <p><strong>Parameters:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>feat_in</code></td>
-<td><code>int</code></td>
-<td>
-<p>Number of input features to the model.</p>
-</td>
-<td><code>64</code></td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>feat_in</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of input features to the model.</p></td>
+        <td><code>64</code></td>
+      </tr>
+  </tbody>
 </table>
 <p><strong>Returns:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Module</code></td>
-<td>
-<p>Pytorch model of the encoder</p>
-</td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Module</code></td>
+      <td><p>Pytorch model of the encoder</p></td>
+    </tr>
+  </tbody>
 </table>
-<details class="quote">
+        <details class="quote">
           <summary>Source code in <code>thunder/quartznet/model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">Quartznet15x5_encoder</span><span class="p">(</span><span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
-    <span class="sd">"""Build encoder corresponding to the Quartznet15x5 model.</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">Quartznet15x5_encoder</span><span class="p">(</span><span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Build encoder corresponding to the Quartznet15x5 model.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        feat_in : Number of input features to the model.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Pytorch model of the encoder</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Quartznet5</span><span class="p">(</span><span class="n">feat_in</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-</code></pre>
-</div>
-</details>
-</div>
-</div>
-<div class="doc doc-object doc-function">
-<h2 class="doc doc-heading" id="thunder.quartznet.model.Quartznet5">
+</code></pre></div>
+        </details>
+    </div>
 
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="thunder.quartznet.model.Quartznet5" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">Quartznet5</span><span class="p">(</span><span class="n">feat_in</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
 
 
-      </h2>
-<div class="doc doc-contents ">
-<p>Basic Quartznet encoder setup. Can be used to build either Quartznet5x5 or Quartznet15x5,</p>
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Basic Quartznet encoder setup. Can be used to build either Quartznet5x5 or Quartznet15x5,</p>
+
 <p><strong>Parameters:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>feat_in</code></td>
-<td><code>int</code></td>
-<td>
-<p>Number of input features to the model.</p>
-</td>
-<td><em>required</em></td>
-</tr>
-<tr>
-<td><code>repeat_blocks</code></td>
-<td><code>int</code></td>
-<td>
-<p>Number of repetitions of each block.</p>
-</td>
-<td><code>1</code></td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>feat_in</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of input features to the model.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>repeat_blocks</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of repetitions of each block.</p></td>
+        <td><code>1</code></td>
+      </tr>
+  </tbody>
 </table>
 <p><strong>Returns:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Module</code></td>
-<td>
-<p>Pytorch model corresponding to the encoder.</p>
-</td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Module</code></td>
+      <td><p>Pytorch model corresponding to the encoder.</p></td>
+    </tr>
+  </tbody>
 </table>
-<details class="quote">
+        <details class="quote">
           <summary>Source code in <code>thunder/quartznet/model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">Quartznet5</span><span class="p">(</span><span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
-    <span class="sd">"""Basic Quartznet encoder setup. Can be used to build either Quartznet5x5 or Quartznet15x5,</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">Quartznet5</span><span class="p">(</span><span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Basic Quartznet encoder setup. Can be used to build either Quartznet5x5 or Quartznet15x5,</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        feat_in : Number of input features to the model.</span>
@@ -579,142 +604,148 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Pytorch model corresponding to the encoder.</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">filters</span> <span class="o">=</span> <span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">]</span>
     <span class="n">kernel_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="mi">75</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
         <span class="n">stem</span><span class="p">(</span><span class="n">feat_in</span><span class="p">),</span>
         <span class="o">*</span><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="p">),</span>
     <span class="p">)</span>
-</code></pre>
-</div>
-</details>
-</div>
-</div>
-<div class="doc doc-object doc-function">
-<h2 class="doc doc-heading" id="thunder.quartznet.model.Quartznet5x5_encoder">
+</code></pre></div>
+        </details>
+    </div>
 
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="thunder.quartznet.model.Quartznet5x5_encoder" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">Quartznet5x5_encoder</span><span class="p">(</span><span class="n">feat_in</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span></code>
 
 
-      </h2>
-<div class="doc doc-contents ">
-<p>Build encoder corresponding to the Quartznet5x5 model.</p>
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Build encoder corresponding to the Quartznet5x5 model.</p>
+
 <p><strong>Parameters:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>feat_in</code></td>
-<td><code>int</code></td>
-<td>
-<p>Number of input features to the model.</p>
-</td>
-<td><code>64</code></td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>feat_in</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of input features to the model.</p></td>
+        <td><code>64</code></td>
+      </tr>
+  </tbody>
 </table>
 <p><strong>Returns:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Module</code></td>
-<td>
-<p>Pytorch model of the encoder</p>
-</td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Module</code></td>
+      <td><p>Pytorch model of the encoder</p></td>
+    </tr>
+  </tbody>
 </table>
-<details class="quote">
+        <details class="quote">
           <summary>Source code in <code>thunder/quartznet/model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">Quartznet5x5_encoder</span><span class="p">(</span><span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
-    <span class="sd">"""Build encoder corresponding to the Quartznet5x5 model.</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">Quartznet5x5_encoder</span><span class="p">(</span><span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Build encoder corresponding to the Quartznet5x5 model.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        feat_in : Number of input features to the model.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Pytorch model of the encoder</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Quartznet5</span><span class="p">(</span><span class="n">feat_in</span><span class="p">)</span>
-</code></pre>
-</div>
-</details>
-</div>
-</div>
-<div class="doc doc-object doc-function">
-<h2 class="doc doc-heading" id="thunder.quartznet.model.Quartznet_decoder">
+</code></pre></div>
+        </details>
+    </div>
 
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="thunder.quartznet.model.Quartznet_decoder" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">Quartznet_decoder</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)</span></code>
 
 
-      </h2>
-<div class="doc doc-contents ">
-<p>Build the Quartznet decoder.</p>
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Build the Quartznet decoder.</p>
+
 <p><strong>Parameters:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>num_classes</code></td>
-<td><code>int</code></td>
-<td>
-<p>Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.</p>
-</td>
-<td><em>required</em></td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>num_classes</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
 </table>
 <p><strong>Returns:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Module</code></td>
-<td>
-<p>Pytorch model of the decoder</p>
-</td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Module</code></td>
+      <td><p>Pytorch model of the decoder</p></td>
+    </tr>
+  </tbody>
 </table>
-<details class="quote">
+        <details class="quote">
           <summary>Source code in <code>thunder/quartznet/model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">Quartznet_decoder</span><span class="p">(</span><span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
-    <span class="sd">"""Build the Quartznet decoder.</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">Quartznet_decoder</span><span class="p">(</span><span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Build the Quartznet decoder.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        num_classes : Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.</span>
+<span class="sd">        num_classes : Number of output classes of the model. It&#39;s the size of the vocabulary, excluding the blank symbol.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Pytorch model of the decoder</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">decoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv1d</span><span class="p">(</span>
         <span class="mi">1024</span><span class="p">,</span>
         <span class="n">num_classes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
@@ -723,14 +754,22 @@
     <span class="p">)</span>
     <span class="n">decoder</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">init_weights</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">decoder</span>
-</code></pre>
-</div>
-</details>
-</div>
-</div>
-</div>
-</div>
-</div>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
                 
               
               
@@ -763,6 +802,20 @@
         </a>
       
       
+        <a href="../preprocess/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Preprocess
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
     </nav>
   
   <div class="md-footer-meta md-typeset">
@@ -783,10 +836,10 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../../assets/javascripts/workers/search.f5903571.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../../assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.4e3fea51.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.9b151c6a.min.js"></script>
       
     
   </body>
