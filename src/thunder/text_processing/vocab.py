@@ -1,14 +1,16 @@
 from typing import List
 
+from thunder.text_processing.tokenizer import Token
+
 
 class Vocab:
     def __init__(
         self,
-        initial_vocab_tokens: List[str],
-        pad_token: str = "<pad>",
-        unknown_token: str = "<unk>",
-        start_token: str = "<bos>",
-        end_token: str = "<eos>",
+        initial_vocab_tokens: List[Token],
+        pad_token: Token = "<pad>",
+        unknown_token: Token = "<unk>",
+        start_token: Token = "<bos>",
+        end_token: Token = "<eos>",
     ):
         """Class that represents a vocabulary, with the related methods
         to numericalize a sequence of tokens into numbers, and do the
@@ -34,7 +36,7 @@ class Vocab:
         ] + initial_vocab_tokens
         self.stoi = {token: i for i, token in enumerate(self.itos)}
 
-    def numericalize(self, tokens: List[str]) -> List[int]:
+    def numericalize(self, tokens: List[Token]) -> List[int]:
         """Function to transform a list of tokens into the corresponding numeric representation.
 
         Args:
@@ -45,7 +47,7 @@ class Vocab:
         """
         return [self.stoi.get(it, self.unknown_idx) for it in tokens]
 
-    def decode_into_text(self, indices: List[int]) -> List[str]:
+    def decode_into_text(self, indices: List[int]) -> List[Token]:
         """Function to transform back a list of numbers into the corresponding
         tokens.
 
@@ -57,7 +59,7 @@ class Vocab:
         """
         return [self.itos[it] for it in indices]
 
-    def add_special_tokens(self, tokens: List[str]) -> List[str]:
+    def add_special_tokens(self, tokens: List[Token]) -> List[Token]:
         """Function to add the special start and end tokens to some
         tokenized text.
 
