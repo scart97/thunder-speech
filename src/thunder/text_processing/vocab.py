@@ -1,16 +1,17 @@
 from typing import List
 
-from thunder.text_processing.tokenizer import Token
+import torch
+from torch import nn
 
 
-class Vocab:
+class Vocab(nn.Module):
     def __init__(
         self,
-        initial_vocab_tokens: List[Token],
-        pad_token: Token = "<pad>",
-        unknown_token: Token = "<unk>",
-        start_token: Token = "<bos>",
-        end_token: Token = "<eos>",
+        initial_vocab_tokens: List[str],
+        pad_token: str = "<pad>",
+        unknown_token: str = "<unk>",
+        start_token: str = "<bos>",
+        end_token: str = "<eos>",
     ):
         """Class that represents a vocabulary, with the related methods
         to numericalize a sequence of tokens into numbers, and do the
@@ -23,10 +24,13 @@ class Vocab:
             start_token : Token that will represent the beginning of the sequence.
             end_token : Token that will represent the end of the sequence.
         """
+        super().__init__()
         self.pad_token = pad_token
         self.unknown_token = unknown_token
         self.start_token = start_token
         self.end_token = end_token
+        # There's no problem if the blank_idx == pad_idx
+        self.blank_token = self.pad_token
 
         self.itos = [
             pad_token,
@@ -35,8 +39,17 @@ class Vocab:
             end_token,
         ] + initial_vocab_tokens
         self.stoi = {token: i for i, token in enumerate(self.itos)}
+        self.update_special_idx()
 
-    def numericalize(self, tokens: List[Token]) -> List[int]:
+    def update_special_idx(self):
+        self.pad_idx = self.itos.index(self.pad_token)
+        self.unknown_idx = self.itos.index(self.unknown_token)
+        self.start_idx = self.itos.index(self.start_token)
+        self.end_idx = self.itos.index(self.end_token)
+        self.blank_idx = self.itos.index(self.blank_token)
+
+    @torch.jit.export
+    def numericalize(self, tokens: List[str]) -> torch.Tensor:
         """Function to transform a list of tokens into the corresponding numeric representation.
 
         Args:
@@ -45,9 +58,12 @@ class Vocab:
         Returns:
             The corresponding numeric representation
         """
-        return [self.stoi.get(it, self.unknown_idx) for it in tokens]
+        return torch.tensor(
+            [self.stoi.get(it, self.unknown_idx) for it in tokens], dtype=torch.long
+        )
 
-    def decode_into_text(self, indices: List[int]) -> List[Token]:
+    @torch.jit.export
+    def decode_into_text(self, indices: torch.Tensor) -> List[str]:
         """Function to transform back a list of numbers into the corresponding
         tokens.
 
@@ -59,7 +75,8 @@ class Vocab:
         """
         return [self.itos[it] for it in indices]
 
-    def add_special_tokens(self, tokens: List[Token]) -> List[Token]:
+    @torch.jit.export
+    def add_special_tokens(self, tokens: List[str]) -> List[str]:
         """Function to add the special start and end tokens to some
         tokenized text.
 
@@ -70,27 +87,3 @@ class Vocab:
             Text with the special tokens added.
         """
         return [self.start_token] + tokens + [self.end_token]
-
-    @property
-    def unknown_idx(self):
-        return self.itos.index(self.unknown_token)
-
-    @property
-    def start_idx(self):
-        return self.itos.index(self.start_token)
-
-    @property
-    def end_idx(self):
-        return self.itos.index(self.end_token)
-
-    @property
-    def pad_idx(self):
-        return self.itos.index(self.pad_token)
-
-    @property
-    def blank_token(self):
-        return self.pad_token
-
-    @property
-    def blank_idx(self):
-        return self.pad_idx

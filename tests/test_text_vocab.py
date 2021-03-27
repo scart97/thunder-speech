@@ -2,12 +2,17 @@ from string import ascii_lowercase
 
 import pytest
 
+import torch
+
 from thunder.text_processing.vocab import Vocab
 
 
-@pytest.fixture
-def simple_vocab():
-    return Vocab(initial_vocab_tokens=[" "] + list(ascii_lowercase))
+@pytest.fixture(params=[True, False])
+def simple_vocab(request):
+    vocab = Vocab(initial_vocab_tokens=[" "] + list(ascii_lowercase))
+    if request.param:
+        return torch.jit.script(vocab)
+    return vocab
 
 
 def test_vocab_mapping_is_bidirectionally_correct(simple_vocab: Vocab):
@@ -23,7 +28,8 @@ def test_vocab_blank_is_not_the_unknown(simple_vocab: Vocab):
 
 def test_numericalize_adds_unknown_token(simple_vocab: Vocab):
     out = simple_vocab.numericalize(["a", "b", "c", "$"])
-    assert out == [5, 6, 7, simple_vocab.unknown_idx]
+    expected = torch.Tensor([5, 6, 7, simple_vocab.unknown_idx])
+    assert (out == expected).all()
 
 
 def test_numericalize_decode_is_bidirectionally_correct(simple_vocab: Vocab):
