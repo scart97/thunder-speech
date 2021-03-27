@@ -17,7 +17,11 @@ def test_lower_text(inp):
 @given(text())
 def test_normalize_text(inp):
     normalized = normalize_text(inp)
-    assert normalized.isascii()
+    if hasattr(normalized, "isascii"):
+        # Only exists on python 3.7+
+        assert normalized.isascii()
+    # this will raise an exception if the text is not normalized
+    normalized.encode("ascii")
 
 
 def test_normalize_text_specific_inputs():
