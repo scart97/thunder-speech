@@ -1,13 +1,7 @@
 from typing import List
 
 
-class Token(str):
-    """Tokens are just semantically special strings, but share all the functionality."""
-
-    pass
-
-
-def word_tokenizer(text: str) -> List[Token]:
+def word_tokenizer(text: str) -> List[str]:
     """Tokenize input text splitting into words
 
     Args:
@@ -19,7 +13,7 @@ def word_tokenizer(text: str) -> List[Token]:
     return text.split()
 
 
-def char_tokenizer(text: str) -> List[Token]:
+def char_tokenizer(text: str) -> List[str]:
     """Tokenize input text splitting into characters
 
     Args:
