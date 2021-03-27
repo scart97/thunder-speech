@@ -1,6 +1,7 @@
 from typing import List
 
 import torch
+from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 
 from thunder.text_processing.preprocess import lower_text, normalize_text
@@ -9,7 +10,7 @@ from thunder.text_processing.vocab import Vocab
 from thunder.utils import chain_calls
 
 
-class BatchTextTransformer:
+class BatchTextTransformer(nn.Module):
     def __init__(
         self,
         vocab: Vocab,
@@ -28,6 +29,7 @@ class BatchTextTransformer:
             after_tokenize : Functions to be applied after the tokenization but before numericalization. Defaults to None.
             after_numericalize : Functions to be applied at the end of the pipeline. Defaults to torch.LongTensor.
         """
+        super().__init__()
         self.vocab = vocab
         self.tokenize_func = tokenize_func
         self.preprocessing_transforms = preprocessing_transforms
@@ -44,8 +46,9 @@ class BatchTextTransformer:
             tokenized = [self.after_tokenize(x) for x in tokenized]
 
         expanded_tokenized = [self.vocab.add_special_tokens(x) for x in tokenized]
-        encoded = [self.vocab.numericalize(it) for it in expanded_tokenized]
-        encoded = [torch.LongTensor(it).to(device=device) for it in encoded]
+        encoded = [
+            self.vocab.numericalize(x).to(device=device) for x in expanded_tokenized
+        ]
         if self.after_numericalize is not None:
             encoded = [self.after_numericalize(x) for x in encoded]
 
@@ -59,3 +62,28 @@ class BatchTextTransformer:
             return encoded, lengths
         else:
             return encoded
+
+    @torch.jit.export
+    def decode_prediction(self, predictions: torch.Tensor) -> List[str]:
+        """
+        Args:
+            predictions : Tensor of shape (batch, vocab_len, time)
+
+        Returns:
+            A list of decoded strings, one for each element in the batch.
+        """
+        decoded = predictions.argmax(1)
+        out_list: List[str] = []
+
+        for element in decoded:
+            # Remove consecutive repeated elements
+            element = torch.unique_consecutive(element)
+            # Map back to string
+            out = self.vocab.decode_into_text(element)
+            # Join prediction into one string
+            out = "".join(out)
+            # Remove the blank token from output
+            out = out.replace(self.vocab.blank_token, "")
+            out_list.append(out)
+
+        return out_list
