@@ -1,6 +1,11 @@
 from pathlib import Path
 
-from thunder.utils import chain_calls, get_files
+from thunder.utils import chain_calls, get_default_cache_folder, get_files
+
+
+def test_get_default_cache_folder():
+    path = get_default_cache_folder()
+    assert path.exists()
 
 
 def test_get_files_exist():

@@ -4,6 +4,12 @@ from pathlib import Path
 from typing import Callable, List, Union
 
 
+def get_default_cache_folder() -> Path:
+    folder = Path.home() / ".thunder"
+    folder.mkdir(exist_ok=True)
+    return folder
+
+
 def get_files(directory: Union[str, Path], extension: str) -> List[Path]:
     """Find all files in directory with extension.
 

@@ -16,6 +16,7 @@ from torch import nn
 from torchaudio.datasets.utils import download_url, extract_archive
 
 from thunder.quartznet.blocks import QuartznetBlock, init_weights
+from thunder.utils import get_default_cache_folder
 
 checkpoint_archives = {
     "QuartzNet15x5Base-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-En.nemo",
@@ -137,8 +138,7 @@ def get_quartznet(
         Encoder and decoder Modules with the checkpoint weights loaded
     """
     if checkpoint_folder is None:
-        checkpoint_folder = Path.home() / ".thunder"
-        checkpoint_folder.mkdir(exist_ok=True)
+        checkpoint_folder = get_default_cache_folder()
 
     url = checkpoint_archives[name]
     filename = url.split("/")[-1]
