@@ -3,8 +3,28 @@ import os
 from pathlib import Path
 from typing import Callable, List, Union
 
+import torchaudio
+
+
+def audio_len(item: Union[Path, str]) -> float:
+    """Returns the length of the audio file
+
+    Args:
+        item : Audio path
+
+    Returns:
+        Lenght in seconds of the audio
+    """
+    metadata = torchaudio.info(item)
+    return metadata.num_frames / metadata.sample_rate
+
 
 def get_default_cache_folder() -> Path:
+    """Get the default folder where the cached stuff will be saved.
+
+    Returns:
+        Path of the cache folder.
+    """
     folder = Path.home() / ".thunder"
     folder.mkdir(exist_ok=True)
     return folder

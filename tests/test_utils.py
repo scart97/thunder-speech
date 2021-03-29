@@ -1,6 +1,13 @@
 from pathlib import Path
 
-from thunder.utils import chain_calls, get_default_cache_folder, get_files
+from thunder.utils import audio_len, chain_calls, get_default_cache_folder, get_files
+
+
+def test_audio_len(sample_data):
+    audio_files = get_files(sample_data, ".wav")
+    audio_length = audio_len(audio_files[0])
+    assert audio_length > 0.0
+    assert isinstance(audio_length, float)
 
 
 def test_get_default_cache_folder():
