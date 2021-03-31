@@ -71,7 +71,7 @@ def Quartznet_decoder(num_classes: int, input_channels: int = 1024) -> nn.Module
     """
     decoder = nn.Conv1d(
         input_channels,
-        num_classes + 1,
+        num_classes,
         kernel_size=1,
         bias=True,
     )
