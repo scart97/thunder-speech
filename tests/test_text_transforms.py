@@ -24,7 +24,7 @@ def tfm(simple_vocab, request):
 @pytest.fixture
 def blank_input(simple_vocab):
     # A tensor full of blank probabilities
-    x = torch.zeros(1, len(simple_vocab.itos), 100)
+    x = torch.zeros(1, len(simple_vocab), 100)
     x[:, simple_vocab.blank_idx, :] = 1
     return x
 
@@ -38,7 +38,7 @@ def test_encode_text(tfm: BatchTextTransformer):
     encoded, encoded_lens = tfm.encode(["Hello world", "Oi"], return_length=True)
     assert len(encoded) == 2
     assert len(encoded_lens) == 2
-    expected = torch.Tensor([2, 12, 9, 16, 16, 19, 4, 27, 19, 22, 16, 8, 3])
+    expected = torch.Tensor([29, 8, 5, 12, 12, 15, 0, 23, 15, 18, 12, 4, 30])
     assert (encoded[0] == expected).all()
     assert encoded_lens[0] == 13
     assert encoded_lens[1] == 4

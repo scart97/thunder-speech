@@ -28,7 +28,7 @@ def test_vocab_blank_is_not_the_unknown(simple_vocab: Vocab):
 
 def test_numericalize_adds_unknown_token(simple_vocab: Vocab):
     out = simple_vocab.numericalize(["a", "b", "c", "$"])
-    expected = torch.Tensor([5, 6, 7, simple_vocab.unknown_idx])
+    expected = torch.Tensor([1, 2, 3, simple_vocab.unknown_idx])
     assert (out == expected).all()
 
 

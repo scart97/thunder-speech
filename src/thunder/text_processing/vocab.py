@@ -12,6 +12,7 @@ class Vocab(nn.Module):
         unknown_token: str = "<unk>",
         start_token: str = "<bos>",
         end_token: str = "<eos>",
+        nemo_compat: bool = False,
     ):
         """Class that represents a vocabulary, with the related methods
         to numericalize a sequence of tokens into numbers, and do the
@@ -23,6 +24,7 @@ class Vocab(nn.Module):
             unknown_token : Token that will represent unknown elements. Notice that this is different than the blank used by ctc.
             start_token : Token that will represent the beginning of the sequence.
             end_token : Token that will represent the end of the sequence.
+            nemo_compat: Compatibility mode to work with original Nemo models.
         """
         super().__init__()
         self.pad_token = pad_token
@@ -31,13 +33,14 @@ class Vocab(nn.Module):
         self.end_token = end_token
         # There's no problem if the blank_idx == pad_idx
         self.blank_token = self.pad_token
+        self.nemo_compat = nemo_compat
 
-        self.itos = [
+        self.itos = initial_vocab_tokens + [
             pad_token,
             unknown_token,
             start_token,
             end_token,
-        ] + initial_vocab_tokens
+        ]
         self.stoi = {token: i for i, token in enumerate(self.itos)}
         self.update_special_idx()
 
@@ -47,6 +50,12 @@ class Vocab(nn.Module):
         self.start_idx = self.itos.index(self.start_token)
         self.end_idx = self.itos.index(self.end_token)
         self.blank_idx = self.itos.index(self.blank_token)
+
+    def __len__(self):
+        if self.nemo_compat:
+            return len(self.itos) - 3
+        else:
+            return len(self.itos)
 
     @torch.jit.export
     def numericalize(self, tokens: List[str]) -> torch.Tensor:
