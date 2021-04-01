@@ -1,3 +1,8 @@
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Copyright (c) 2021 scart97
+
 from pathlib import Path
 
 from thunder.utils import audio_len, chain_calls, get_default_cache_folder, get_files
