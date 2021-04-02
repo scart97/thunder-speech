@@ -9,19 +9,19 @@
       
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.0">
     
     
       
-        <title>Thunder</title>
+        <title>Tokenize - Thunder</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.33e2939f.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.33e2939f.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ef6f36e2.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ef6f36e2.min.css">
         
       
     
@@ -36,9 +36,9 @@
     
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="css/mkdocstrings.css">
+      <link rel="stylesheet" href="../../../css/mkdocstrings.css">
     
     
       
@@ -55,7 +55,7 @@
     <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
   
     
-    <script>function __prefix(e){return new URL(".",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    <script>function __prefix(e){return new URL("../../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -63,7 +63,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#thunder-speech" class="md-skip">
+        <a href="#thunder.text_processing.tokenizer" class="md-skip">
           Skip to content
         </a>
       
@@ -74,7 +74,7 @@
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="Thunder" class="md-header__button md-logo" aria-label="Thunder" data-md-component="logo">
+    <a href="../../.." title="Thunder" class="md-header__button md-logo" aria-label="Thunder" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -93,7 +93,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Tokenize
             
           </span>
         </div>
@@ -167,7 +167,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="Thunder" class="md-nav__button md-logo" aria-label="Thunder" data-md-component="logo">
+    <a href="../../.." title="Thunder" class="md-nav__button md-logo" aria-label="Thunder" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -197,49 +197,11 @@
 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Home
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
         Home
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#note" class="md-nav__link">
-    Note
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -252,7 +214,7 @@
   
   
     <li class="md-nav__item">
-      <a href="quick%20reference%20guide/" class="md-nav__link">
+      <a href="../../../quick%20reference%20guide/" class="md-nav__link">
         Quick reference guide
       </a>
     </li>
@@ -265,12 +227,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
       
       <label class="md-nav__link" for="__nav_3">
         Api
@@ -288,7 +252,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/utils/" class="md-nav__link">
+      <a href="../../utils/" class="md-nav__link">
         Utils
       </a>
     </li>
@@ -321,7 +285,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Data/dataloader%20utils/" class="md-nav__link">
+      <a href="../../Data/dataloader%20utils/" class="md-nav__link">
         Dataloader utils
       </a>
     </li>
@@ -333,7 +297,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Data/datamodule/" class="md-nav__link">
+      <a href="../../Data/datamodule/" class="md-nav__link">
         Datamodule
       </a>
     </li>
@@ -345,7 +309,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Data/dataset/" class="md-nav__link">
+      <a href="../../Data/dataset/" class="md-nav__link">
         Dataset
       </a>
     </li>
@@ -384,7 +348,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Quartznet/blocks/" class="md-nav__link">
+      <a href="../../Quartznet/blocks/" class="md-nav__link">
         Blocks
       </a>
     </li>
@@ -396,7 +360,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Quartznet/compatibility/" class="md-nav__link">
+      <a href="../../Quartznet/compatibility/" class="md-nav__link">
         Compatibility
       </a>
     </li>
@@ -408,7 +372,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Quartznet/model/" class="md-nav__link">
+      <a href="../../Quartznet/model/" class="md-nav__link">
         Model
       </a>
     </li>
@@ -420,7 +384,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Quartznet/module/" class="md-nav__link">
+      <a href="../../Quartznet/module/" class="md-nav__link">
         Module
       </a>
     </li>
@@ -432,7 +396,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Quartznet/preprocess/" class="md-nav__link">
+      <a href="../../Quartznet/preprocess/" class="md-nav__link">
         Preprocess
       </a>
     </li>
@@ -448,12 +412,14 @@
             
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" checked>
       
       <label class="md-nav__link" for="__nav_3_4">
         Text Processing
@@ -471,7 +437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Text%20Processing/preprocess/" class="md-nav__link">
+      <a href="../preprocess/" class="md-nav__link">
         Preprocess
       </a>
     </li>
@@ -481,11 +447,59 @@
             
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="api/Text%20Processing/tokenize/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Tokenize
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Tokenize
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.text_processing.tokenizer" class="md-nav__link">
+    thunder.text_processing.tokenizer
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.text_processing.tokenizer.char_tokenizer" class="md-nav__link">
+    char_tokenizer()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.text_processing.tokenizer.word_tokenizer" class="md-nav__link">
+    word_tokenizer()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -495,7 +509,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Text%20Processing/transform/" class="md-nav__link">
+      <a href="../transform/" class="md-nav__link">
         Transform
       </a>
     </li>
@@ -507,7 +521,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api/Text%20Processing/vocab/" class="md-nav__link">
+      <a href="../vocab/" class="md-nav__link">
         Vocab
       </a>
     </li>
@@ -541,8 +555,6 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -551,8 +563,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#note" class="md-nav__link">
-    Note
+  <a href="#thunder.text_processing.tokenizer" class="md-nav__link">
+    thunder.text_processing.tokenizer
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.text_processing.tokenizer.char_tokenizer" class="md-nav__link">
+    char_tokenizer()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.text_processing.tokenizer.word_tokenizer" class="md-nav__link">
+    word_tokenizer()
   </a>
   
 </li>
@@ -570,13 +596,169 @@
               
                 
                 
-                <p><a href="https://codecov.io/gh/scart97/thunder-speech"><img alt="codecov" src="https://codecov.io/gh/scart97/thunder-speech/branch/master/graph/badge.svg?token=USCEGEGM3D" /></a></p>
-<p><img alt="Test" src="https://github.com/scart97/thunder-speech/workflows/Test/badge.svg" /></p>
-<h1 id="thunder-speech">Thunder speech</h1>
-<p>A Hackable speech recognition library.</p>
-<h2 id="note">Note</h2>
-<p>This project has been set up using PyScaffold 3.3. For details and usage
-information on PyScaffold see https://pyscaffold.org/.</p>
+                  <h1>Tokenize</h1>
+                
+                <div class="doc doc-object doc-module">
+
+<a id="thunder.text_processing.tokenizer"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="thunder.text_processing.tokenizer.char_tokenizer" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">char_tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Tokenize input text splitting into characters</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>text</code></td>
+        <td><code>str</code></td>
+        <td><p>Input text</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>List[str]</code></td>
+      <td><p>Tokenized text</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>thunder/text_processing/tokenizer.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">char_tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Tokenize input text splitting into characters</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text : Input text</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tokenized text</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="thunder.text_processing.tokenizer.word_tokenizer" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">word_tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Tokenize input text splitting into words</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>text</code></td>
+        <td><code>str</code></td>
+        <td><p>Input text</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>List[str]</code></td>
+      <td><p>Tokenized text</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>thunder/text_processing/tokenizer.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">word_tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Tokenize input text splitting into words</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text : Input text</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tokenized text</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
                 
               
               
@@ -595,14 +777,28 @@ information on PyScaffold see https://pyscaffold.org/.</p>
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
+        <a href="../preprocess/" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Preprocess
+            </div>
+          </div>
+        </a>
       
-        <a href="quick%20reference%20guide/" class="md-footer__link md-footer__link--next" rel="next">
+      
+        <a href="../transform/" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Quick reference guide
+              Transform
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -631,10 +827,10 @@ information on PyScaffold see https://pyscaffold.org/.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d892486b.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d892486b.min.js"></script>
       
     
   </body>

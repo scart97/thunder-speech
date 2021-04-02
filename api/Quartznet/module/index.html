@@ -1,0 +1,1376 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.0">
+    
+    
+      
+        <title>Module - Thunder</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.33e2939f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ef6f36e2.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../css/mkdocstrings.css">
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL("../../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#thunder.quartznet.module" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Thunder" class="md-header__button md-logo" aria-label="Thunder" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Thunder
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Module
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/scart97/thunder-speech" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Thunder speech
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Thunder" class="md-nav__button md-logo" aria-label="Thunder" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    Thunder
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/scart97/thunder-speech" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Thunder speech
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../quick%20reference%20guide/" class="md-nav__link">
+        Quick reference guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        Api
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Api" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Api
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/" class="md-nav__link">
+        Utils
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_2" type="checkbox" id="__nav_3_2" >
+      
+      <label class="md-nav__link" for="__nav_3_2">
+        Data
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Data" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Data
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Data/dataloader%20utils/" class="md-nav__link">
+        Dataloader utils
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Data/datamodule/" class="md-nav__link">
+        Datamodule
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Data/dataset/" class="md-nav__link">
+        Dataset
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" type="checkbox" id="__nav_3_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3_3">
+        Quartznet
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Quartznet" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Quartznet
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../blocks/" class="md-nav__link">
+        Blocks
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility/" class="md-nav__link">
+        Compatibility
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model/" class="md-nav__link">
+        Model
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Module
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Module
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.module" class="md-nav__link">
+    thunder.quartznet.module
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule" class="md-nav__link">
+    QuartznetModule
+  </a>
+  
+    <nav class="md-nav" aria-label="QuartznetModule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.configure_optimizers" class="md-nav__link">
+    configure_optimizers()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.forward" class="md-nav__link">
+    forward()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.predict" class="md-nav__link">
+    predict()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.training_step" class="md-nav__link">
+    training_step()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.validation_step" class="md-nav__link">
+    validation_step()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../preprocess/" class="md-nav__link">
+        Preprocess
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" >
+      
+      <label class="md-nav__link" for="__nav_3_4">
+        Text Processing
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Text Processing" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_4">
+          <span class="md-nav__icon md-icon"></span>
+          Text Processing
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Text%20Processing/preprocess/" class="md-nav__link">
+        Preprocess
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Text%20Processing/tokenize/" class="md-nav__link">
+        Tokenize
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Text%20Processing/transform/" class="md-nav__link">
+        Transform
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Text%20Processing/vocab/" class="md-nav__link">
+        Vocab
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.module" class="md-nav__link">
+    thunder.quartznet.module
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule" class="md-nav__link">
+    QuartznetModule
+  </a>
+  
+    <nav class="md-nav" aria-label="QuartznetModule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.configure_optimizers" class="md-nav__link">
+    configure_optimizers()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.forward" class="md-nav__link">
+    forward()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.predict" class="md-nav__link">
+    predict()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.training_step" class="md-nav__link">
+    training_step()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#thunder.quartznet.module.QuartznetModule.validation_step" class="md-nav__link">
+    validation_step()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                  <h1>Module</h1>
+                
+                <div class="doc doc-object doc-module">
+
+<a id="thunder.quartznet.module"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="thunder.quartznet.module.QuartznetModule" class="doc doc-heading">
+        <code>QuartznetModule</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="thunder.quartznet.module.QuartznetModule.configure_optimizers" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Choose what optimizers and learning-rate schedulers to use in your optimization.
+Normally you'd need one. But in the case of GANs or similar you might have multiple.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code></code></td>
+      <td><p>Any of these 6 options.</p>
+<ul>
+<li>Single optimizer.</li>
+<li>List or Tuple - List of optimizers.</li>
+<li>Two lists - The first list has multiple optimizers, the second a list of LR schedulers (or lr_dict).</li>
+<li>Dictionary, with an 'optimizer' key, and (optionally) a 'lr_scheduler'
+  key whose value is a single LR scheduler or lr_dict.</li>
+<li>Tuple of dictionaries as described, with an optional 'frequency' key.</li>
+<li>None - Fit will run without any optimizer.</li>
+</ul></td>
+    </tr>
+  </tbody>
+</table>      <div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The 'frequency' value is an int corresponding to the number of sequential batches
+optimized with the specific optimizer. It should be given to none or to all of the optimizers.
+There is a difference between passing multiple optimizers in a list,
+and passing multiple optimizers in dictionaries with a frequency of 1:
+In the former case, all optimizers will operate on the given batch in each optimization step.
+In the latter, only one optimizer will operate on the given batch at every step.</p>
+<p>The lr_dict is a dictionary which contains the scheduler and its associated configuration.
+The default configuration is shown below.</p>
+<p>.. code-block:: python</p>
+<div class="highlight"><pre><span></span><code>{
+    &#39;scheduler&#39;: lr_scheduler, # The LR scheduler instance (required)
+    &#39;interval&#39;: &#39;epoch&#39;, # The unit of the scheduler&#39;s step size
+    &#39;frequency&#39;: 1, # The frequency of the scheduler
+    &#39;reduce_on_plateau&#39;: False, # For ReduceLROnPlateau scheduler
+    &#39;monitor&#39;: &#39;val_loss&#39;, # Metric for ReduceLROnPlateau to monitor
+    &#39;strict&#39;: True, # Whether to crash the training if `monitor` is not found
+    &#39;name&#39;: None, # Custom name for LearningRateMonitor to use
+}
+</code></pre></div>
+<p>Only the <code>scheduler</code> key is required, the rest will be set to the defaults above.</p>
+</div>
+<p>Examples::</p>
+<div class="highlight"><pre><span></span><code># most cases
+def configure_optimizers(self):
+    opt = Adam(self.parameters(), lr=1e-3)
+    return opt
+
+# multiple optimizer case (e.g.: GAN)
+def configure_optimizers(self):
+    generator_opt = Adam(self.model_gen.parameters(), lr=0.01)
+    disriminator_opt = Adam(self.model_disc.parameters(), lr=0.02)
+    return generator_opt, disriminator_opt
+
+# example with learning rate schedulers
+def configure_optimizers(self):
+    generator_opt = Adam(self.model_gen.parameters(), lr=0.01)
+    disriminator_opt = Adam(self.model_disc.parameters(), lr=0.02)
+    discriminator_sched = CosineAnnealing(discriminator_opt, T_max=10)
+    return [generator_opt, disriminator_opt], [discriminator_sched]
+
+# example with step-based learning rate schedulers
+def configure_optimizers(self):
+    gen_opt = Adam(self.model_gen.parameters(), lr=0.01)
+    dis_opt = Adam(self.model_disc.parameters(), lr=0.02)
+    gen_sched = {&#39;scheduler&#39;: ExponentialLR(gen_opt, 0.99),
+                 &#39;interval&#39;: &#39;step&#39;}  # called after each training step
+    dis_sched = CosineAnnealing(discriminator_opt, T_max=10) # called every epoch
+    return [gen_opt, dis_opt], [gen_sched, dis_sched]
+
+# example with optimizer frequencies
+# see training procedure in `Improved Training of Wasserstein GANs`, Algorithm 1
+# https://arxiv.org/abs/1704.00028
+def configure_optimizers(self):
+    gen_opt = Adam(self.model_gen.parameters(), lr=0.01)
+    dis_opt = Adam(self.model_disc.parameters(), lr=0.02)
+    n_critic = 5
+    return (
+        {&#39;optimizer&#39;: dis_opt, &#39;frequency&#39;: n_critic},
+        {&#39;optimizer&#39;: gen_opt, &#39;frequency&#39;: 1}
+    )
+</code></pre></div>
+<p>Note:</p>
+<div class="highlight"><pre><span></span><code>Some things to know:
+
+- Lightning calls ``.backward()`` and ``.step()`` on each optimizer
+  and learning rate scheduler as needed.
+
+- If you use 16-bit precision (``precision=16``), Lightning will automatically
+  handle the optimizers for you.
+
+- If you use multiple optimizers, :meth:`training_step` will have an additional
+  ``optimizer_idx`` parameter.
+
+- If you use LBFGS Lightning handles the closure function automatically for you.
+
+- If you use multiple optimizers, gradients will be calculated only
+  for the parameters of current optimizer at each training step.
+
+- If you need to control how often those optimizers step or override the
+  default ``.step()`` schedule, override the :meth:`optimizer_step` hook.
+
+- If you only want to call a learning rate scheduler every ``x`` step or epoch,
+  or want to monitor a custom metric, you can specify these in a lr_dict:
+
+  .. code-block:: python
+
+      {
+          &#39;scheduler&#39;: lr_scheduler,
+          &#39;interval&#39;: &#39;step&#39;,  # or &#39;epoch&#39;
+          &#39;monitor&#39;: &#39;val_f1&#39;,
+          &#39;frequency&#39;: x,
+      }
+</code></pre></div>
+
+        <details class="quote">
+          <summary>Source code in <code>thunder/quartznet/module.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+        <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="thunder.quartznet.module.QuartznetModule.forward" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Same as :meth:<code>torch.nn.Module.forward()</code>, however in Lightning you want this to define
+the operations you want to use for prediction (i.e.: on a server or as a feature extractor).</p>
+<p>Normally you'd call <code>self()</code> from your :meth:<code>training_step</code> method.
+This makes it easy to write a complex system for training with the outputs
+you'd want in a prediction setting.</p>
+<p>You may also find the :func:<code>~pytorch_lightning.core.decorators.auto_move_data</code> decorator useful
+when using the module outside Lightning in a production setting.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>*args</code></td>
+        <td><code></code></td>
+        <td><p>Whatever you decide to pass into the forward method.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>**kwargs</code></td>
+        <td><code></code></td>
+        <td><p>Keyword arguments are also possible.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Tensor</code></td>
+      <td><p>Predicted output</p></td>
+    </tr>
+  </tbody>
+</table>      <p>Examples::</p>
+<div class="highlight"><pre><span></span><code># example if we were using this model as a feature extractor
+def forward(self, x):
+    feature_maps = self.convnet(x)
+    return feature_maps
+
+def training_step(self, batch, batch_idx):
+    x, y = batch
+    feature_maps = self(x)
+    logits = self.classifier(feature_maps)
+
+    # ...
+    return loss
+
+# splitting it this way allows model to be used a feature extractor
+model = MyModelAbove()
+
+inputs = server.get_request()
+results = model(inputs)
+server.write_results(results)
+
+# -------------
+# This is in stark contrast to torch.nn.Module where normally you would have this:
+def forward(self, batch):
+    x, y = batch
+    feature_maps = self.convnet(x)
+    logits = self.classifier(feature_maps)
+    return logits
+</code></pre></div>
+
+        <details class="quote">
+          <summary>Source code in <code>thunder/quartznet/module.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">encoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">encoded</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="thunder.quartznet.module.QuartznetModule.predict" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Use this function with trainer.predict(...). Override if you need to add any processing logic.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>thunder/quartznet/module.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
+<span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_pipeline</span><span class="o">.</span><span class="n">decode_prediction</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="thunder.quartznet.module.QuartznetModule.training_step" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Here you compute and return the training loss and some additional metrics for e.g.
+the progress bar or logger.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>batch</code></td>
+        <td><code></code></td>
+        <td><p>class:<code>~torch.Tensor</code> | (:class:<code>~torch.Tensor</code>, ...) | [:class:<code>~torch.Tensor</code>, ...]):
+The output of your :class:<code>~torch.utils.data.DataLoader</code>. A tensor, tuple or list.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>batch_idx</code></td>
+        <td><code>int</code></td>
+        <td><p>Integer displaying index of this batch</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>optimizer_idx</code></td>
+        <td><code>int</code></td>
+        <td><p>When using multiple optimizers, this argument will also be present.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>hiddens(</code></td>
+        <td><code></code></td>
+        <td><p>class:<code>~torch.Tensor</code>): Passed in if
+:paramref:<code>~pytorch_lightning.trainer.trainer.Trainer.truncated_bptt_steps</code> &gt; 0.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Any of.
+
+- </code></td>
+      <td><p>class:<code>~torch.Tensor</code> - The loss tensor
+- <code>dict</code> - A dictionary. Can include any keys, but must include the key <code>'loss'</code>
+- <code>None</code> - Training will skip to the next batch</p></td>
+    </tr>
+  </tbody>
+</table>      <div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Returning <code>None</code> is currently not supported for multi-GPU or TPU, or with 16-bit precision enabled.</p>
+</div>
+<p>In this step you'd normally do the forward pass and calculate the loss for a batch.
+You can also do fancier things like multiple forward passes or something model specific.</p>
+<p>Example::</p>
+<div class="highlight"><pre><span></span><code>def training_step(self, batch, batch_idx):
+    x, y, z = batch
+    out = self.encoder(x)
+    loss = self.loss(out, x)
+    return loss
+</code></pre></div>
+<p>If you define multiple optimizers, this step will be called with an additional
+<code>optimizer_idx</code> parameter.</p>
+<p>.. code-block:: python</p>
+<div class="highlight"><pre><span></span><code># Multiple optimizers (e.g.: GANs)
+def training_step(self, batch, batch_idx, optimizer_idx):
+    if optimizer_idx == 0:
+        # do training_step with encoder
+    if optimizer_idx == 1:
+        # do training_step with decoder
+</code></pre></div>
+<p>If you add truncated back propagation through time you will also get an additional
+argument with the hidden states of the previous step.</p>
+<p>.. code-block:: python</p>
+<div class="highlight"><pre><span></span><code># Truncated back-propagation through time
+def training_step(self, batch, batch_idx, hiddens):
+    # hiddens are the hidden states from the previous truncated backprop step
+    ...
+    out, hiddens = self.lstm(data, hiddens)
+    ...
+    return {&#39;loss&#39;: loss, &#39;hiddens&#39;: hiddens}
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The loss value shown in the progress bar is smoothed (averaged) over the last values,
+so it differs from the actual loss returned in train/validation step.</p>
+</div>
+
+        <details class="quote">
+          <summary>Source code in <code>thunder/quartznet/module.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+    <span class="n">audio</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">texts</span> <span class="o">=</span> <span class="n">batch</span>
+    <span class="n">y</span><span class="p">,</span> <span class="n">y_lens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_texts</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+
+    <span class="n">probs</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="n">probs</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># NCT -&gt; TNC</span>
+    <span class="n">logprobs</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LogSoftmax</span><span class="p">(</span><span class="mi">2</span><span class="p">)(</span><span class="n">probs</span><span class="p">)</span>
+    <span class="n">audio_lens</span> <span class="o">=</span> <span class="p">(</span><span class="n">audio_lens</span> <span class="o">*</span> <span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">y_lens</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loss</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="thunder.quartznet.module.QuartznetModule.validation_step" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Operates on a single batch of data from the validation set.
+In this step you'd might generate examples or calculate anything of interest like accuracy.</p>
+<p>.. code-block:: python</p>
+<div class="highlight"><pre><span></span><code># the pseudocode for these calls
+val_outs = []
+for val_batch in val_data:
+    out = validation_step(val_batch)
+    val_outs.append(out)
+validation_epoch_end(val_outs)
+</code></pre></div>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>batch</code></td>
+        <td><code></code></td>
+        <td><p>class:<code>~torch.Tensor</code> | (:class:<code>~torch.Tensor</code>, ...) | [:class:<code>~torch.Tensor</code>, ...]):
+The output of your :class:<code>~torch.utils.data.DataLoader</code>. A tensor, tuple or list.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>batch_idx</code></td>
+        <td><code>int</code></td>
+        <td><p>The index of this batch</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>dataloader_idx</code></td>
+        <td><code>int</code></td>
+        <td><p>The index of the dataloader that produced this batch
+(only if multiple val dataloaders used)</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code></code></td>
+      <td><p>Any of.</p>
+<ul>
+<li>Any object or value</li>
+<li><code>None</code> - Validation will skip to the next batch</li>
+</ul></td>
+    </tr>
+  </tbody>
+</table>      <p>.. code-block:: python</p>
+<div class="highlight"><pre><span></span><code># pseudocode of order
+val_outs = []
+for val_batch in val_data:
+    out = validation_step(val_batch)
+    if defined(&#39;validation_step_end&#39;):
+        out = validation_step_end(out)
+    val_outs.append(out)
+val_outs = validation_epoch_end(val_outs)
+</code></pre></div>
+<p>.. code-block:: python</p>
+<div class="highlight"><pre><span></span><code># if you have one val dataloader:
+def validation_step(self, batch, batch_idx)
+
+# if you have multiple val dataloaders:
+def validation_step(self, batch, batch_idx, dataloader_idx)
+</code></pre></div>
+<p>Examples::</p>
+<div class="highlight"><pre><span></span><code># CASE 1: A single validation dataset
+def validation_step(self, batch, batch_idx):
+    x, y = batch
+
+    # implement your own
+    out = self(x)
+    loss = self.loss(out, y)
+
+    # log 6 example images
+    # or generated text... or whatever
+    sample_imgs = x[:6]
+    grid = torchvision.utils.make_grid(sample_imgs)
+    self.logger.experiment.add_image(&#39;example_images&#39;, grid, 0)
+
+    # calculate acc
+    labels_hat = torch.argmax(out, dim=1)
+    val_acc = torch.sum(y == labels_hat).item() / (len(y) * 1.0)
+
+    # log the outputs!
+    self.log_dict({&#39;val_loss&#39;: loss, &#39;val_acc&#39;: val_acc})
+</code></pre></div>
+<p>If you pass in multiple val dataloaders, :meth:<code>validation_step</code> will have an additional argument.</p>
+<p>.. code-block:: python</p>
+<div class="highlight"><pre><span></span><code># CASE 2: multiple validation dataloaders
+def validation_step(self, batch, batch_idx, dataloader_idx):
+    # dataloader_idx tells you which dataset this is.
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you don't need to validate you don't need to implement this method.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When the :meth:<code>validation_step</code> is called, the model has been put in eval mode
+and PyTorch gradients have been disabled. At the end of validation,
+the model goes back to training mode and gradients are enabled.</p>
+</div>
+
+        <details class="quote">
+          <summary>Source code in <code>thunder/quartznet/module.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+    <span class="n">audio</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">texts</span> <span class="o">=</span> <span class="n">batch</span>
+    <span class="n">y</span><span class="p">,</span> <span class="n">y_lens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_texts</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+
+    <span class="n">probs</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="n">probs</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># NCT -&gt; TNC</span>
+    <span class="n">logprobs</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LogSoftmax</span><span class="p">(</span><span class="mi">2</span><span class="p">)(</span><span class="n">probs</span><span class="p">)</span>
+    <span class="n">audio_lens</span> <span class="o">=</span> <span class="p">(</span><span class="n">audio_lens</span> <span class="o">*</span> <span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">y_lens</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;val_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loss</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../model/" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Model
+            </div>
+          </div>
+        </a>
+      
+      
+        <a href="../preprocess/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Preprocess
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d892486b.min.js"></script>
+      
+    
+  </body>
+</html>
