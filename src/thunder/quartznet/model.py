@@ -7,13 +7,21 @@
 # Copyright (c) 2021 scart97
 
 
+from typing import List
+
 from torch import nn
 
 from thunder.quartznet.blocks import body, init_weights, stem
 
 
-def Quartznet5(feat_in: int, repeat_blocks: int = 1) -> nn.Module:
-    """Basic Quartznet encoder setup. Can be used to build either Quartznet5x5 or Quartznet15x5,
+def Quartznet5(
+    feat_in: int,
+    filters: List[int] = [256, 256, 512, 512, 512],
+    kernel_sizes: List[int] = [33, 39, 51, 63, 75],
+    repeat_blocks: int = 1,
+) -> nn.Module:
+    """Basic Quartznet encoder setup.
+    Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (repeat_blocks=3)
 
     Args:
         feat_in : Number of input features to the model.
@@ -22,8 +30,6 @@ def Quartznet5(feat_in: int, repeat_blocks: int = 1) -> nn.Module:
     Returns:
         Pytorch model corresponding to the encoder.
     """
-    filters = [256, 256, 512, 512, 512]
-    kernel_sizes = [33, 39, 51, 63, 75]
     return nn.Sequential(
         stem(feat_in),
         *body(filters, kernel_sizes, repeat_blocks),
@@ -54,7 +60,7 @@ def Quartznet15x5_encoder(feat_in: int = 64) -> nn.Module:
     return Quartznet5(feat_in, repeat_blocks=3)
 
 
-def Quartznet_decoder(num_classes: int) -> nn.Module:
+def Quartznet_decoder(num_classes: int, input_channels: int = 1024) -> nn.Module:
     """Build the Quartznet decoder.
 
     Args:
@@ -64,8 +70,8 @@ def Quartznet_decoder(num_classes: int) -> nn.Module:
         Pytorch model of the decoder
     """
     decoder = nn.Conv1d(
-        1024,
-        num_classes + 1,
+        input_channels,
+        num_classes,
         kernel_size=1,
         bias=True,
     )

@@ -263,7 +263,13 @@ def stem(feat_in: int) -> QuartznetBlock:
         Quartznet stem block
     """
     return QuartznetBlock(
-        feat_in, 256, repeat=1, kernel_size=[33], residual=False, separable=True
+        feat_in,
+        256,
+        repeat=1,
+        stride=[2],
+        kernel_size=[33],
+        residual=False,
+        separable=True,
     )
 
 
