@@ -10,7 +10,7 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
 from .dataloader_utils import BucketingSampler, asr_collate
-from .dataset import ManifestSpeechDataset
+from .dataset import BaseSpeechDataset, ManifestSpeechDataset
 
 
 class BaseDataModule(LightningDataModule):
@@ -27,7 +27,7 @@ class BaseDataModule(LightningDataModule):
         self.force_mono = force_mono
         self.sr = sr
 
-    def get_dataset(self, split: str):
+    def get_dataset(self, split: str) -> BaseSpeechDataset:
         raise NotImplementedError()
 
     def setup(self, stage):
@@ -36,7 +36,7 @@ class BaseDataModule(LightningDataModule):
         self.val_dataset = self.get_dataset(split="valid")
         self.test_dataset = self.get_dataset(split="test")
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         return DataLoader(
             self.train_dataset,
             batch_sampler=self.sampler,
@@ -44,7 +44,7 @@ class BaseDataModule(LightningDataModule):
             num_workers=self.num_workers,
         )
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         return DataLoader(
             self.val_dataset,
             batch_size=self.bs,
@@ -53,7 +53,7 @@ class BaseDataModule(LightningDataModule):
             num_workers=self.num_workers,
         )
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         return DataLoader(
             self.test_dataset,
             batch_size=self.bs,
@@ -63,7 +63,12 @@ class BaseDataModule(LightningDataModule):
         )
 
     @property
-    def steps_per_epoch(self):
+    def steps_per_epoch(self) -> int:
+        """Number of steps for each training epoch. Used for learning rate scheduling.
+
+        Returns:
+            Number of steps
+        """
         return len(self.sampler)
 
 
