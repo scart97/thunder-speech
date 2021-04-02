@@ -4,6 +4,7 @@
 # Copyright (c) 2021 scart97
 
 from string import ascii_lowercase
+from urllib.error import HTTPError
 
 import pytest
 
@@ -21,21 +22,24 @@ from thunder.utils import get_default_cache_folder
 @mark_slow
 def test_expected_prediction_from_pretrained_model():
     # Loading the sample file
-    folder = get_default_cache_folder()
-    download_url(
-        "https://github.com/fastaudio/10_Speakers_Sample/raw/76f365de2f4d282ec44450d68f5b88de37b8b7ad/train/f0001_us_f0001_00001.wav",
-        download_folder=str(folder),
-        filename="f0001_us_f0001_00001.wav",
-        resume=True,
-    )
-    # Preparing data and model
-    module = QuartznetModule.load_from_nemo(checkpoint_name="QuartzNet5x5LS-En")
-    audio, sr = torchaudio.load(folder / "f0001_us_f0001_00001.wav")
-    assert sr == 16000
+    try:
+        folder = get_default_cache_folder()
+        download_url(
+            "https://github.com/fastaudio/10_Speakers_Sample/raw/76f365de2f4d282ec44450d68f5b88de37b8b7ad/train/f0001_us_f0001_00001.wav",
+            download_folder=str(folder),
+            filename="f0001_us_f0001_00001.wav",
+            resume=True,
+        )
+        # Preparing data and model
+        module = QuartznetModule.load_from_nemo(checkpoint_name="QuartzNet5x5LS-En")
+        audio, sr = torchaudio.load(folder / "f0001_us_f0001_00001.wav")
+        assert sr == 16000
 
-    output = module.predict(audio)
-    expected = "the world needs opportunities for new leaders and new ideas"
-    assert output[0].strip() == expected
+        output = module.predict(audio)
+        expected = "the world needs opportunities for new leaders and new ideas"
+        assert output[0].strip() == expected
+    except HTTPError:
+        return
 
 
 @mark_slow
