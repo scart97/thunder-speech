@@ -57,14 +57,12 @@ class BatchTextTransformer(nn.Module):
         if self.after_numericalize is not None:
             encoded = [self.after_numericalize(x) for x in encoded]
 
-        encoded = pad_sequence(
+        encoded_batched = pad_sequence(
             encoded, batch_first=True, padding_value=self.vocab.pad_idx
         )
         if return_length:
-            lengths = torch.LongTensor([len(it) for it in expanded_tokenized]).to(
-                device=device
-            )
-            return encoded, lengths
+            lengths = torch.LongTensor([len(it) for it in encoded]).to(device=device)
+            return encoded_batched, lengths
         else:
             return encoded
 
