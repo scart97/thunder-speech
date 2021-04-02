@@ -49,3 +49,33 @@ probs = model(audio)
 # If you also want the transcriptions:
 transcriptions = model.text_pipeline.decode_prediction(probs)
 ```
+
+
+## How to finetune a model if I already have the nemo manifests prepared?
+
+``` python
+import pytorch_lightning as pl
+
+from thunder.data.datamodule import ManifestDatamodule
+from thunder.quartznet.module import QuartznetModule
+
+dm = ManifestDatamodule(
+    train_manifest="/path/to/train_manifest.json",
+    val_manifest="/path/to/val_manifest.json",
+    test_manifest="/path/to/test_manifest.json",
+)
+
+model = QuartznetModule.load_from_nemo("QuartzNet5x5LS-En")
+
+trainer = pl.Trainer(
+    gpus=-1, # Use all gpus
+    max_epochs=10,
+)
+
+trainer.fit(model=model, datamodule=dm)
+```
+
+!!! danger
+    This will probably have a subpar result right now, as I'm still working on
+    properly fine tuning (freeze encoder at the start, learning rate scheduling,
+    better defaults)
