@@ -65,7 +65,7 @@ dm = ManifestDatamodule(
     test_manifest="/path/to/test_manifest.json",
 )
 
-model = QuartznetModule.load_from_nemo("QuartzNet5x5LS-En")
+model = QuartznetModule.load_from_nemo(checkpoint_name="QuartzNet5x5LS-En")
 
 trainer = pl.Trainer(
     gpus=-1, # Use all gpus
