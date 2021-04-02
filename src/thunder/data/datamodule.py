@@ -3,7 +3,6 @@
 
 # Copyright (c) 2021 scart97
 
-import json
 from pathlib import Path
 
 from pytorch_lightning import LightningDataModule
@@ -28,6 +27,15 @@ class BaseDataModule(LightningDataModule):
         self.sr = sr
 
     def get_dataset(self, split: str) -> BaseSpeechDataset:
+        """Function to get the corresponding dataset to the specified split.
+        This should be implemented by subclasses.
+
+        Args:
+            split : One of "train", "valid" or "test".
+
+        Returns:
+            The corresponding dataset.
+        """
         raise NotImplementedError()
 
     def setup(self, stage):
@@ -97,6 +105,4 @@ class ManifestDatamodule(BaseDataModule):
 
     def get_dataset(self, split: str):
         file = Path(self.manifest_mapping[split])
-        items = [json.loads(line) for line in file.read_text().strip().splitlines()]
-        sorted_items = list(sorted(items, key=lambda x: x["duration"]))
-        return ManifestSpeechDataset(sorted_items, self.force_mono, self.sr)
+        return ManifestSpeechDataset(file, self.force_mono, self.sr)

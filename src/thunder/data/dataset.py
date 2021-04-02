@@ -3,6 +3,8 @@
 
 # Copyright (c) 2021 scart97
 
+import json
+from pathlib import Path
 from typing import Any, Iterable, Tuple
 
 import torchaudio
@@ -89,7 +91,19 @@ class BaseSpeechDataset(Dataset):
 
 
 class ManifestSpeechDataset(BaseSpeechDataset):
-    """Dataset that loads from nemo manifest files."""
+    def __init__(self, file: Path, force_mono: bool, sr: int):
+        """Dataset that loads from nemo manifest files.
+
+        Args:
+            file : Nemo manifest file.
+            force_mono : If true, convert all the loaded samples to mono.
+            sr : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
+        """
+        # Reading from the manifest file
+        items = [json.loads(line) for line in file.read_text().strip().splitlines()]
+        # Sort items for efficient batching later.
+        sorted_items = list(sorted(items, key=lambda x: x["duration"]))
+        super().__init__(sorted_items, force_mono=force_mono, sr=sr)
 
     def open_audio(self, item: dict) -> Tuple[Tensor, int]:
         return torchaudio.load(item["audio_filepath"])
