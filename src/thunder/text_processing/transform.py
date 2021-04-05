@@ -70,15 +70,14 @@ class BatchTextTransformer(nn.Module):
     def decode_prediction(self, predictions: torch.Tensor) -> List[str]:
         """
         Args:
-            predictions : Tensor of shape (batch, vocab_len, time)
+            predictions : Tensor of shape (batch, time)
 
         Returns:
             A list of decoded strings, one for each element in the batch.
         """
-        decoded = predictions.argmax(1)
         out_list: List[str] = []
 
-        for element in decoded:
+        for element in predictions:
             # Remove consecutive repeated elements
             element = torch.unique_consecutive(element)
             # Map back to string

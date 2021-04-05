@@ -47,7 +47,7 @@ model = torch.jit.load("model_ready_for_inference.pt")
 audio, sr = torchaudio.load(audio_name)
 probs = model(audio)
 # If you also want the transcriptions:
-transcriptions = model.text_pipeline.decode_prediction(probs)
+transcriptions = model.text_pipeline.decode_prediction(probs.argmax(1))
 ```
 
 
