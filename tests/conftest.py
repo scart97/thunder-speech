@@ -22,13 +22,12 @@ from thunder.utils import audio_len, get_default_cache_folder, get_files
 def sample_data():
     path = get_default_cache_folder()
     download_url(
-        "http://www02.smt.ufrj.br/~igor.quintanilha/lapsbm-test.tar.gz",
+        "https://github.com/scart97/lapsbm-backup/archive/refs/tags/lapsbm-ci.tar.gz",
         download_folder=path,
         resume=True,
     )
-    out_path = path / "lapsbm-test"
-    extract_archive(path / "lapsbm-test.tar.gz", out_path)
-    return out_path
+    extract_archive(path / "lapsbm-backup-lapsbm-ci.tar.gz", path)
+    return path / "lapsbm-backup-lapsbm-ci"
 
 
 @pytest.fixture(scope="session")
