@@ -10,8 +10,10 @@ from typing import List
 import pytorch_lightning as pl
 import torch
 from torch import nn
+from torch.nn.functional import log_softmax
 from torchaudio.datasets.utils import extract_archive
 
+from thunder.metrics import CER, WER
 from thunder.quartznet.compatibility import (
     download_checkpoint,
     load_quartznet_weights,
@@ -59,6 +61,9 @@ class QuartznetModule(pl.LightningModule):
         self.decoder = self.build_decoder(1024, len(vocab))
         self.text_pipeline = BatchTextTransformer(vocab=vocab)
         self.loss_func = nn.CTCLoss(blank=vocab.blank_idx, zero_infinity=True)
+        # Metrics
+        self.val_cer = CER()
+        self.val_wer = WER()
 
     def build_decoder(self, decoder_input_channels: int, vocab_size: int):
         return Quartznet_decoder(
@@ -73,35 +78,43 @@ class QuartznetModule(pl.LightningModule):
     @torch.jit.export
     def predict(self, x: torch.Tensor) -> List[str]:
         pred = self(x)
-        return self.text_pipeline.decode_prediction(pred)
+        return self.text_pipeline.decode_prediction(pred.argmax(1))
 
-    def process_texts(self, texts):
-        return self.text_pipeline.encode(texts, device=self.device)
+    def calculate_loss(self, probabilities, y, audio_lens, y_lens):
+
+        # Change from (batch, #vocab, time) to (time, batch, #vocab)
+        probabilities = probabilities.permute(2, 0, 1)
+        logprobs = log_softmax(probabilities, dim=2)
+        # Calculate the logprobs correct length based on the
+        # normalized original lengths
+        audio_lens = (audio_lens * logprobs.shape[0]).long()
+        return self.loss_func(logprobs, y, audio_lens, y_lens)
 
     def training_step(self, batch, batch_idx):
         audio, audio_lens, texts = batch
-        y, y_lens = self.process_texts(texts)
+        y, y_lens = self.text_pipeline.encode(texts, device=self.device)
 
-        probs = self(audio)
-        probs = probs.permute(2, 0, 1)  # NCT -> TNC
-        logprobs = nn.LogSoftmax(2)(probs)
-        audio_lens = (audio_lens * probs.shape[0]).long()
-        loss = self.loss_func(logprobs, y, audio_lens, y_lens)
+        probabilities = self(audio)
+        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
 
-        self.log("train_loss", loss)
+        self.log("loss/train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         audio, audio_lens, texts = batch
-        y, y_lens = self.process_texts(texts)
+        y, y_lens = self.text_pipeline.encode(texts, device=self.device)
 
-        probs = self(audio)
-        probs = probs.permute(2, 0, 1)  # NCT -> TNC
-        logprobs = nn.LogSoftmax(2)(probs)
-        audio_lens = (audio_lens * probs.shape[0]).long()
-        loss = self.loss_func(logprobs, y, audio_lens, y_lens)
+        probabilities = self(audio)
+        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
 
-        self.log("val_loss", loss)
+        decoded_preds = self.text_pipeline.decode_prediction(probabilities.argmax(1))
+        decoded_targets = self.text_pipeline.decode_prediction(y)
+        self.val_cer(decoded_preds, decoded_targets)
+        self.val_wer(decoded_preds, decoded_targets)
+
+        self.log("loss/val_loss", loss)
+        self.log("metrics/cer", self.val_cer, on_epoch=True)
+        self.log("metrics/wer", self.val_wer, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
