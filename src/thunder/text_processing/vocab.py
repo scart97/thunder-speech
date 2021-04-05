@@ -91,7 +91,7 @@ class Vocab(nn.Module):
         Returns:
             Corresponding tokens
         """
-        return [self.itos[it] for it in indices if it != self.pad_idx]
+        return [self.itos[it] for it in indices]
 
     @torch.jit.export
     def add_special_tokens(self, tokens: List[str]) -> List[str]:

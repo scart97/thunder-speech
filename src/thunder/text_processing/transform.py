@@ -64,7 +64,7 @@ class BatchTextTransformer(nn.Module):
             lengths = torch.LongTensor([len(it) for it in encoded]).to(device=device)
             return encoded_batched, lengths
         else:
-            return encoded
+            return encoded_batched
 
     @torch.jit.export
     def decode_prediction(self, predictions: torch.Tensor) -> List[str]:
@@ -84,8 +84,9 @@ class BatchTextTransformer(nn.Module):
             out = self.vocab.decode_into_text(element)
             # Join prediction into one string
             out = "".join(out)
-            # Remove the blank token from output
+            # Remove the blank and pad token from output
             out = out.replace(self.vocab.blank_token, "")
+            out = out.replace(self.vocab.pad_token, "")
             out_list.append(out)
 
         return out_list
