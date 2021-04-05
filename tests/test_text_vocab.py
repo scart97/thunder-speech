@@ -8,7 +8,10 @@ from string import ascii_lowercase
 import pytest
 
 import torch
+from hypothesis import given
+from hypothesis.strategies import text
 
+from thunder.text_processing.tokenizer import char_tokenizer
 from thunder.text_processing.vocab import Vocab
 
 
@@ -62,3 +65,15 @@ def test_special_idx_are_different(simple_vocab: Vocab):
     )
     # There's no problem if the blank_idx == pad_idx
     assert len(all_tokens) >= 4
+
+
+@given(text(min_size=1, max_size=100))
+def test_nemo_compat_mode(sample):
+    vocab = Vocab(initial_vocab_tokens=["a", "b", "c"], nemo_compat=True)
+    assert len(vocab) == 4
+    assert vocab.blank_idx == 3
+
+    out = vocab.numericalize(char_tokenizer(sample))
+    if out.numel() > 0:
+        assert out.max() < 4
+        assert out.min() >= 0
