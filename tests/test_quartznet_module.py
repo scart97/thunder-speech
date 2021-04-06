@@ -50,6 +50,7 @@ def test_dev_run_train(sample_manifest):
         train_manifest=sample_manifest,
         val_manifest=sample_manifest,
         test_manifest=sample_manifest,
+        num_workers=0,
     )
     trainer = pl.Trainer(
         fast_dev_run=True, logger=None, checkpoint_callback=None, gpus=-1
