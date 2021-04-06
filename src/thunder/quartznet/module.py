@@ -57,13 +57,24 @@ class QuartznetModule(pl.LightningModule):
 
         self.encoder = Quartznet5(nfilt, filters, kernel_sizes, repeat_blocks)
 
-        vocab = Vocab(initial_vocab_tokens, nemo_compat=nemo_compat_vocab)
-        self.decoder = self.build_decoder(1024, len(vocab))
-        self.text_pipeline = BatchTextTransformer(vocab=vocab)
-        self.loss_func = nn.CTCLoss(blank=vocab.blank_idx, zero_infinity=True)
+        self.text_pipeline = self.build_text_pipeline(
+            initial_vocab_tokens, nemo_compat_vocab
+        )
+        self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))
+        self.loss_func = nn.CTCLoss(
+            blank=self.text_pipeline.vocab.blank_idx, zero_infinity=True
+        )
         # Metrics
         self.val_cer = CER()
         self.val_wer = WER()
+        # Example input is one second of fake audio
+        self.example_input_array = torch.randn((10, sample_rate))
+
+    def build_text_pipeline(
+        self, initial_vocab_tokens: List[str], nemo_compat_vocab: bool
+    ) -> BatchTextTransformer:
+        vocab = Vocab(initial_vocab_tokens, nemo_compat=nemo_compat_vocab)
+        return BatchTextTransformer(vocab=vocab)
 
     def build_decoder(self, decoder_input_channels: int, vocab_size: int):
         return Quartznet_decoder(
@@ -151,3 +162,11 @@ class QuartznetModule(pl.LightningModule):
         # bug (case 1) or will be ignored (case 2).
         module.eval()
         return module
+
+    def change_vocab(self, new_vocab_tokens: List[str]):
+        # Updating hparams so that the saved model can be correctly loaded
+        self.hparams.initial_vocab_tokens = new_vocab_tokens
+        self.hparams.nemo_compat_vocab = False
+
+        self.text_pipeline = self.build_text_pipeline(new_vocab_tokens, False)
+        self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))
