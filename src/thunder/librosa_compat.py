@@ -108,8 +108,7 @@ def create_fb_matrix(
         f_max : Maximum frequency (Hz)
         n_mels : Number of mel filterbanks
         sample_rate : Sample rate of the audio waveform
-        norm : If 'slaney', divide the triangular mel weights by the width of the mel band
-        (area normalization).
+        norm : If 'slaney', divide the triangular mel weights by the width of the mel band (area normalization).
         htk : Use htk formula for mel scale or not.
 
     Returns:
