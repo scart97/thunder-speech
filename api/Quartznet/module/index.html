@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.0">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
     
     
       
@@ -18,7 +18,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.33e2939f.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.9299cb39.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ef6f36e2.min.css">
@@ -252,6 +252,30 @@
   
   
     <li class="md-nav__item">
+      <a href="../../librosa%20compatibility/" class="md-nav__link">
+        Librosa compatibility
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        Metrics
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../utils/" class="md-nav__link">
         Utils
       </a>
@@ -267,14 +291,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_2" type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" >
       
-      <label class="md-nav__link" for="__nav_3_2">
+      <label class="md-nav__link" for="__nav_3_4">
         Data
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Data" data-md-level="2">
-        <label class="md-nav__title" for="__nav_3_2">
+        <label class="md-nav__title" for="__nav_3_4">
           <span class="md-nav__icon md-icon"></span>
           Data
         </label>
@@ -332,14 +356,14 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" type="checkbox" id="__nav_3_3" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_5" type="checkbox" id="__nav_3_5" checked>
       
-      <label class="md-nav__link" for="__nav_3_3">
+      <label class="md-nav__link" for="__nav_3_5">
         Quartznet
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Quartznet" data-md-level="2">
-        <label class="md-nav__title" for="__nav_3_3">
+        <label class="md-nav__title" for="__nav_3_5">
           <span class="md-nav__icon md-icon"></span>
           Quartznet
         </label>
@@ -501,14 +525,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_6" type="checkbox" id="__nav_3_6" >
       
-      <label class="md-nav__link" for="__nav_3_4">
+      <label class="md-nav__link" for="__nav_3_6">
         Text Processing
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Text Processing" data-md-level="2">
-        <label class="md-nav__title" for="__nav_3_4">
+        <label class="md-nav__title" for="__nav_3_6">
           <span class="md-nav__icon md-icon"></span>
           Text Processing
         </label>
@@ -711,6 +735,9 @@
 
 
 
+
+
+
   <div class="doc doc-object doc-method">
 
 
@@ -849,7 +876,7 @@ def configure_optimizers(self):
           <summary>Source code in <code>thunder/quartznet/module.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+        <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">()),</span>
         <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
@@ -983,13 +1010,12 @@ def forward(self, batch):
           <div class="highlight"><pre><span></span><code><span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
 <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_pipeline</span><span class="o">.</span><span class="n">decode_prediction</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_pipeline</span><span class="o">.</span><span class="n">decode_prediction</span><span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 </code></pre></div>
         </details>
     </div>
 
   </div>
-
 
 
 
@@ -1109,15 +1135,12 @@ so it differs from the actual loss returned in train/validation step.</p>
           <summary>Source code in <code>thunder/quartznet/module.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
     <span class="n">audio</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">texts</span> <span class="o">=</span> <span class="n">batch</span>
-    <span class="n">y</span><span class="p">,</span> <span class="n">y_lens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_texts</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+    <span class="n">y</span><span class="p">,</span> <span class="n">y_lens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_pipeline</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
-    <span class="n">probs</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
-    <span class="n">probs</span> <span class="o">=</span> <span class="n">probs</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># NCT -&gt; TNC</span>
-    <span class="n">logprobs</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LogSoftmax</span><span class="p">(</span><span class="mi">2</span><span class="p">)(</span><span class="n">probs</span><span class="p">)</span>
-    <span class="n">audio_lens</span> <span class="o">=</span> <span class="p">(</span><span class="n">audio_lens</span> <span class="o">*</span> <span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">y_lens</span><span class="p">)</span>
+    <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">y_lens</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;loss/train_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">loss</span>
 </code></pre></div>
         </details>
@@ -1261,15 +1284,19 @@ the model goes back to training mode and gradients are enabled.</p>
           <summary>Source code in <code>thunder/quartznet/module.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
     <span class="n">audio</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">texts</span> <span class="o">=</span> <span class="n">batch</span>
-    <span class="n">y</span><span class="p">,</span> <span class="n">y_lens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_texts</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+    <span class="n">y</span><span class="p">,</span> <span class="n">y_lens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_pipeline</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
-    <span class="n">probs</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
-    <span class="n">probs</span> <span class="o">=</span> <span class="n">probs</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># NCT -&gt; TNC</span>
-    <span class="n">logprobs</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LogSoftmax</span><span class="p">(</span><span class="mi">2</span><span class="p">)(</span><span class="n">probs</span><span class="p">)</span>
-    <span class="n">audio_lens</span> <span class="o">=</span> <span class="p">(</span><span class="n">audio_lens</span> <span class="o">*</span> <span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">y_lens</span><span class="p">)</span>
+    <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_loss</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">audio_lens</span><span class="p">,</span> <span class="n">y_lens</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;val_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+    <span class="n">decoded_preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_pipeline</span><span class="o">.</span><span class="n">decode_prediction</span><span class="p">(</span><span class="n">probabilities</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">decoded_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_pipeline</span><span class="o">.</span><span class="n">decode_prediction</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">val_cer</span><span class="p">(</span><span class="n">decoded_preds</span><span class="p">,</span> <span class="n">decoded_targets</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">val_wer</span><span class="p">(</span><span class="n">decoded_preds</span><span class="p">,</span> <span class="n">decoded_targets</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;loss/val_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;metrics/cer&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_cer</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;metrics/wer&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_wer</span><span class="p">,</span> <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">loss</span>
 </code></pre></div>
         </details>
@@ -1369,7 +1396,7 @@ the model goes back to training mode and gradients are enabled.</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d892486b.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.7353b375.min.js"></script>
       
     
   </body>
