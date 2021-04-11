@@ -130,7 +130,7 @@ class QuartznetModule(pl.LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(
-            self.parameters(),
+            filter(lambda p: p.requires_grad, self.parameters()),
             lr=self.hparams.learning_rate,
         )
 
