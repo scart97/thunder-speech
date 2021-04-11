@@ -53,7 +53,7 @@ def test_encode_text(tfm: BatchTextTransformer):
 
 
 def test_decoder_remove_blanks(tfm: BatchTextTransformer, blank_input):
-    out = tfm.decode_prediction(blank_input)
+    out = tfm.decode_prediction(blank_input.argmax(1))
 
     assert len(out) == 1
     assert isinstance(out, list)
@@ -67,7 +67,7 @@ def test_decoder_simple_sequence(tfm: BatchTextTransformer, blank_input):
     blank_input[:, a_idx, :10] = 2  # a
     blank_input[:, b_idx, 15:20] = 2  # b
 
-    out = tfm.decode_prediction(blank_input)
+    out = tfm.decode_prediction(blank_input.argmax(1))
 
     assert len(out) == 1
     assert isinstance(out, list)
@@ -79,7 +79,7 @@ def test_decoder_repeat_same_element(tfm: BatchTextTransformer, blank_input):
     a_idx = tfm.vocab.stoi["a"]
     blank_input[:, a_idx, :10] = 2  # a
     blank_input[:, a_idx, 15:20] = 2  # a
-    out = tfm.decode_prediction(blank_input)
+    out = tfm.decode_prediction(blank_input.argmax(1))
 
     assert len(out) == 1
     assert isinstance(out, list)

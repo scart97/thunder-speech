@@ -50,6 +50,7 @@ def test_dev_run_train(sample_manifest):
         train_manifest=sample_manifest,
         val_manifest=sample_manifest,
         test_manifest=sample_manifest,
+        num_workers=0,
     )
     trainer = pl.Trainer(
         fast_dev_run=True, logger=None, checkpoint_callback=None, gpus=-1
@@ -69,3 +70,13 @@ def test_script_module():
 def test_try_to_load_without_parameters_raises_error():
     with pytest.raises(ValueError):
         QuartznetModule.load_from_nemo()
+
+
+def test_change_vocab():
+    module = QuartznetModule(list(ascii_lowercase))
+    module.change_vocab(["a", "b", "c"])
+    assert module.hparams.initial_vocab_tokens == ["a", "b", "c"]
+    # comparing to 10 to account for the 3 initial tokens plus
+    # the few special tokens automatically added.
+    assert len(module.text_pipeline.vocab) < 10
+    assert module.decoder.out_channels < 10

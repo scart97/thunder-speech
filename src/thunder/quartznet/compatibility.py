@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import torch
+import wget
 from omegaconf import OmegaConf
 from torch import nn
-from torchaudio.datasets.utils import download_url
 
 from thunder.utils import get_default_cache_folder
 
@@ -41,11 +41,7 @@ def download_checkpoint(name: str, checkpoint_folder: str = None) -> Path:
     filename = url.split("/")[-1]
     checkpoint_path = Path(checkpoint_folder) / filename
     if not checkpoint_path.exists():
-        download_url(
-            url,
-            download_folder=checkpoint_folder,
-            resume=True,
-        )
+        wget.download(url, out=str(checkpoint_path))
 
     return checkpoint_path
 

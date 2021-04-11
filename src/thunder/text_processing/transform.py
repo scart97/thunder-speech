@@ -57,38 +57,36 @@ class BatchTextTransformer(nn.Module):
         if self.after_numericalize is not None:
             encoded = [self.after_numericalize(x) for x in encoded]
 
-        encoded = pad_sequence(
+        encoded_batched = pad_sequence(
             encoded, batch_first=True, padding_value=self.vocab.pad_idx
         )
         if return_length:
-            lengths = torch.LongTensor([len(it) for it in expanded_tokenized]).to(
-                device=device
-            )
-            return encoded, lengths
+            lengths = torch.LongTensor([len(it) for it in encoded]).to(device=device)
+            return encoded_batched, lengths
         else:
-            return encoded
+            return encoded_batched
 
     @torch.jit.export
     def decode_prediction(self, predictions: torch.Tensor) -> List[str]:
         """
         Args:
-            predictions : Tensor of shape (batch, vocab_len, time)
+            predictions : Tensor of shape (batch, time)
 
         Returns:
             A list of decoded strings, one for each element in the batch.
         """
-        decoded = predictions.argmax(1)
         out_list: List[str] = []
 
-        for element in decoded:
+        for element in predictions:
             # Remove consecutive repeated elements
             element = torch.unique_consecutive(element)
             # Map back to string
             out = self.vocab.decode_into_text(element)
             # Join prediction into one string
             out = "".join(out)
-            # Remove the blank token from output
+            # Remove the blank and pad token from output
             out = out.replace(self.vocab.blank_token, "")
+            out = out.replace(self.vocab.pad_token, "")
             out_list.append(out)
 
         return out_list

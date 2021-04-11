@@ -10,8 +10,10 @@ from typing import List
 import pytorch_lightning as pl
 import torch
 from torch import nn
+from torch.nn.functional import log_softmax
 from torchaudio.datasets.utils import extract_archive
 
+from thunder.metrics import CER, WER
 from thunder.quartznet.compatibility import (
     download_checkpoint,
     load_quartznet_weights,
@@ -55,10 +57,24 @@ class QuartznetModule(pl.LightningModule):
 
         self.encoder = Quartznet5(nfilt, filters, kernel_sizes, repeat_blocks)
 
+        self.text_pipeline = self.build_text_pipeline(
+            initial_vocab_tokens, nemo_compat_vocab
+        )
+        self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))
+        self.loss_func = nn.CTCLoss(
+            blank=self.text_pipeline.vocab.blank_idx, zero_infinity=True
+        )
+        # Metrics
+        self.val_cer = CER()
+        self.val_wer = WER()
+        # Example input is one second of fake audio
+        self.example_input_array = torch.randn((10, sample_rate))
+
+    def build_text_pipeline(
+        self, initial_vocab_tokens: List[str], nemo_compat_vocab: bool
+    ) -> BatchTextTransformer:
         vocab = Vocab(initial_vocab_tokens, nemo_compat=nemo_compat_vocab)
-        self.decoder = self.build_decoder(1024, len(vocab))
-        self.text_pipeline = BatchTextTransformer(vocab=vocab)
-        self.loss_func = nn.CTCLoss(blank=vocab.blank_idx, zero_infinity=True)
+        return BatchTextTransformer(vocab=vocab)
 
     def build_decoder(self, decoder_input_channels: int, vocab_size: int):
         return Quartznet_decoder(
@@ -73,40 +89,48 @@ class QuartznetModule(pl.LightningModule):
     @torch.jit.export
     def predict(self, x: torch.Tensor) -> List[str]:
         pred = self(x)
-        return self.text_pipeline.decode_prediction(pred)
+        return self.text_pipeline.decode_prediction(pred.argmax(1))
 
-    def process_texts(self, texts):
-        return self.text_pipeline.encode(texts, device=self.device)
+    def calculate_loss(self, probabilities, y, audio_lens, y_lens):
+
+        # Change from (batch, #vocab, time) to (time, batch, #vocab)
+        probabilities = probabilities.permute(2, 0, 1)
+        logprobs = log_softmax(probabilities, dim=2)
+        # Calculate the logprobs correct length based on the
+        # normalized original lengths
+        audio_lens = (audio_lens * logprobs.shape[0]).long()
+        return self.loss_func(logprobs, y, audio_lens, y_lens)
 
     def training_step(self, batch, batch_idx):
         audio, audio_lens, texts = batch
-        y, y_lens = self.process_texts(texts)
+        y, y_lens = self.text_pipeline.encode(texts, device=self.device)
 
-        probs = self(audio)
-        probs = probs.permute(2, 0, 1)  # NCT -> TNC
-        logprobs = nn.LogSoftmax(2)(probs)
-        audio_lens = (audio_lens * probs.shape[0]).long()
-        loss = self.loss_func(logprobs, y, audio_lens, y_lens)
+        probabilities = self(audio)
+        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
 
-        self.log("train_loss", loss)
+        self.log("loss/train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         audio, audio_lens, texts = batch
-        y, y_lens = self.process_texts(texts)
+        y, y_lens = self.text_pipeline.encode(texts, device=self.device)
 
-        probs = self(audio)
-        probs = probs.permute(2, 0, 1)  # NCT -> TNC
-        logprobs = nn.LogSoftmax(2)(probs)
-        audio_lens = (audio_lens * probs.shape[0]).long()
-        loss = self.loss_func(logprobs, y, audio_lens, y_lens)
+        probabilities = self(audio)
+        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
 
-        self.log("val_loss", loss)
+        decoded_preds = self.text_pipeline.decode_prediction(probabilities.argmax(1))
+        decoded_targets = self.text_pipeline.decode_prediction(y)
+        self.val_cer(decoded_preds, decoded_targets)
+        self.val_wer(decoded_preds, decoded_targets)
+
+        self.log("loss/val_loss", loss)
+        self.log("metrics/cer", self.val_cer, on_epoch=True)
+        self.log("metrics/wer", self.val_wer, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
         return torch.optim.Adam(
-            self.parameters(),
+            filter(lambda p: p.requires_grad, self.parameters()),
             lr=self.hparams.learning_rate,
         )
 
@@ -138,3 +162,11 @@ class QuartznetModule(pl.LightningModule):
         # bug (case 1) or will be ignored (case 2).
         module.eval()
         return module
+
+    def change_vocab(self, new_vocab_tokens: List[str]):
+        # Updating hparams so that the saved model can be correctly loaded
+        self.hparams.initial_vocab_tokens = new_vocab_tokens
+        self.hparams.nemo_compat_vocab = False
+
+        self.text_pipeline = self.build_text_pipeline(new_vocab_tokens, False)
+        self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))

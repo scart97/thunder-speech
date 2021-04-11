@@ -62,7 +62,6 @@ class Vocab(nn.Module):
         else:
             return len(self.itos)
 
-    @torch.jit.export
     def numericalize(self, tokens: List[str]) -> torch.Tensor:
         """Function to transform a list of tokens into the corresponding numeric representation.
 
@@ -72,6 +71,11 @@ class Vocab(nn.Module):
         Returns:
             The corresponding numeric representation
         """
+        if self.nemo_compat:
+            # When in nemo_compat mode, there's no unknown token
+            # So we filter out all of the tokens not in the vocab
+            tokens = filter(lambda x: x in self.itos, tokens)
+
         return torch.tensor(
             [self.stoi.get(it, self.unknown_idx) for it in tokens], dtype=torch.long
         )
@@ -100,4 +104,6 @@ class Vocab(nn.Module):
         Returns:
             Text with the special tokens added.
         """
+        if self.nemo_compat:
+            return tokens
         return [self.start_token] + tokens + [self.end_token]
