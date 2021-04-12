@@ -1,0 +1,265 @@
+preprocessor:
+  cls: nemo.collections.asr.modules.AudioToMelSpectrogramPreprocessor
+  params:
+    normalize: per_feature
+    window_size: 0.02
+    sample_rate: 16000
+    window_stride: 0.01
+    window: hann
+    features: 64
+    n_fft: 512
+    frame_splicing: 1
+    dither: 1.0e-05
+    stft_conv: false
+spec_augment:
+  cls: nemo.collections.asr.modules.SpectrogramAugmentation
+  params:
+    rect_freq: 50
+    rect_masks: 5
+    rect_time: 120
+encoder:
+  cls: nemo.collections.asr.modules.ConvASREncoder
+  params:
+    feat_in: 64
+    activation: relu
+    conv_mask: true
+    jasper:
+    - filters: 256
+      repeat: 1
+      kernel:
+      - 33
+      stride:
+      - 2
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: false
+      separable: true
+    - filters: 256
+      repeat: 5
+      kernel:
+      - 33
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 256
+      repeat: 5
+      kernel:
+      - 33
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 256
+      repeat: 5
+      kernel:
+      - 33
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 256
+      repeat: 5
+      kernel:
+      - 39
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 256
+      repeat: 5
+      kernel:
+      - 39
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 256
+      repeat: 5
+      kernel:
+      - 39
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 5
+      kernel:
+      - 51
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 5
+      kernel:
+      - 51
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 5
+      kernel:
+      - 51
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 5
+      kernel:
+      - 63
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 5
+      kernel:
+      - 63
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 5
+      kernel:
+      - 63
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 5
+      kernel:
+      - 75
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 5
+      kernel:
+      - 75
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 5
+      kernel:
+      - 75
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: true
+      separable: true
+    - filters: 512
+      repeat: 1
+      kernel:
+      - 87
+      stride:
+      - 1
+      dilation:
+      - 2
+      dropout: 0.0
+      residual: false
+      separable: true
+    - filters: 1024
+      repeat: 1
+      kernel:
+      - 1
+      stride:
+      - 1
+      dilation:
+      - 1
+      dropout: 0.0
+      residual: false
+decoder:
+  cls: nemo.collections.asr.modules.ConvASRDecoder
+  params:
+    feat_in: 1024
+    num_classes: 28
+    vocabulary:
+    - ' '
+    - a
+    - b
+    - c
+    - d
+    - e
+    - f
+    - g
+    - h
+    - i
+    - j
+    - k
+    - l
+    - m
+    - n
+    - o
+    - p
+    - q
+    - r
+    - s
+    - t
+    - u
+    - v
+    - w
+    - x
+    - y
+    - z
+    - ''''
+optim:
+  name: novograd
+  lr: 0.01
+  betas:
+  - 0.8
+  - 0.5
+  weight_decay: 0.001
+target: nemo.collections.asr.models.ctc_models.EncDecCTCModel

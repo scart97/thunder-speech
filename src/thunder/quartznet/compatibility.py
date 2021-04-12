@@ -79,9 +79,13 @@ def read_params_from_config(config_path: str) -> Tuple[Dict, List[str], Dict]:
         "dither": preprocess["dither"],
     }
 
+    labels = (
+        conf["labels"] if "labels" in conf else conf["decoder"]["params"]["vocabulary"]
+    )
+
     return (
         encoder_cfg,
-        OmegaConf.to_container(conf["labels"]),
+        OmegaConf.to_container(labels),
         preprocess_cfg,
     )
 
