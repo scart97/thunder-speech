@@ -24,7 +24,7 @@ def test_get_files_exist():
     path = Path("tests/nemo_config_samples")
     manifest_files = get_files(path, ".yaml")
 
-    assert len(manifest_files) == 2
+    assert len(manifest_files) == 3
     assert isinstance(manifest_files[0], Path)
     assert manifest_files[0].exists()
 
@@ -33,7 +33,7 @@ def test_get_files_work_with_string_input():
     path = "tests/nemo_config_samples"
     manifest_files = get_files(path, ".yaml")
 
-    assert len(manifest_files) == 2
+    assert len(manifest_files) == 3
     assert isinstance(manifest_files[0], Path)
     assert manifest_files[0].exists()
 
