@@ -103,6 +103,6 @@ class ManifestDatamodule(BaseDataModule):
             "test": test_manifest,
         }
 
-    def get_dataset(self, split: str):
+    def get_dataset(self, split: str) -> ManifestSpeechDataset:
         file = Path(self.manifest_mapping[split])
         return ManifestSpeechDataset(file, self.force_mono, self.sr)
