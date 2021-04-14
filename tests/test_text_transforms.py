@@ -40,7 +40,7 @@ def test_encode_text(tfm: BatchTextTransformer):
     if isinstance(tfm, torch.jit.ScriptModule):
         return
 
-    encoded, encoded_lens = tfm.encode(["Hello world", "Oi"], return_length=True)
+    encoded, encoded_lens = tfm.encode(["hello world", "oi"], return_length=True)
     assert len(encoded) == 2
     assert len(encoded_lens) == 2
     expected = torch.Tensor([29, 8, 5, 12, 12, 15, 0, 23, 15, 18, 12, 4, 30])
@@ -48,7 +48,7 @@ def test_encode_text(tfm: BatchTextTransformer):
     assert encoded_lens[0] == 13
     assert encoded_lens[1] == 4
 
-    encoded2 = tfm.encode(["Hello world", "Oi"], return_length=False)
+    encoded2 = tfm.encode(["hello world", "oi"], return_length=False)
     assert (encoded == encoded2).all()
 
 

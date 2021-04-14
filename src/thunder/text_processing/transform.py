@@ -9,10 +9,8 @@ import torch
 from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 
-from thunder.text_processing.preprocess import lower_text, normalize_text
 from thunder.text_processing.tokenizer import char_tokenizer
 from thunder.text_processing.vocab import Vocab
-from thunder.utils import chain_calls
 
 
 class BatchTextTransformer(nn.Module):
@@ -20,7 +18,6 @@ class BatchTextTransformer(nn.Module):
         self,
         vocab: Vocab,
         tokenize_func=char_tokenizer,
-        preprocessing_transforms=chain_calls(lower_text, normalize_text),
         after_tokenize=None,
         after_numericalize=None,
     ):
@@ -37,14 +34,10 @@ class BatchTextTransformer(nn.Module):
         super().__init__()
         self.vocab = vocab
         self.tokenize_func = tokenize_func
-        self.preprocessing_transforms = preprocessing_transforms
         self.after_tokenize = after_tokenize
         self.after_numericalize = after_numericalize
 
     def encode(self, items: List[str], return_length: bool = True, device=None):
-        if self.preprocessing_transforms is not None:
-            items = [self.preprocessing_transforms(x) for x in items]
-
         tokenized = [self.tokenize_func(x) for x in items]
 
         if self.after_tokenize is not None:
