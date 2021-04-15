@@ -9,8 +9,7 @@ from typing import List
 
 import pytorch_lightning as pl
 import torch
-from torch import nn
-from torch.nn.functional import log_softmax
+from torch.nn.functional import ctc_loss, log_softmax
 from torchaudio.datasets.utils import extract_archive
 
 from thunder.metrics import CER, WER
@@ -61,9 +60,7 @@ class QuartznetModule(pl.LightningModule):
             initial_vocab_tokens, nemo_compat_vocab
         )
         self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))
-        self.loss_func = nn.CTCLoss(
-            blank=self.text_pipeline.vocab.blank_idx, zero_infinity=True
-        )
+
         # Metrics
         self.val_cer = CER()
         self.val_wer = WER()
@@ -92,14 +89,23 @@ class QuartznetModule(pl.LightningModule):
         return self.text_pipeline.decode_prediction(pred.argmax(1))
 
     def calculate_loss(self, probabilities, y, audio_lens, y_lens):
-
         # Change from (batch, #vocab, time) to (time, batch, #vocab)
         probabilities = probabilities.permute(2, 0, 1)
         logprobs = log_softmax(probabilities, dim=2)
         # Calculate the logprobs correct length based on the
         # normalized original lengths
         audio_lens = (audio_lens * logprobs.shape[0]).long()
-        return self.loss_func(logprobs, y, audio_lens, y_lens)
+        blank = self.text_pipeline.vocab.blank_idx
+
+        return ctc_loss(
+            logprobs,
+            y,
+            audio_lens,
+            y_lens,
+            blank=blank,
+            reduction="mean",
+            zero_infinity=True,
+        )
 
     def training_step(self, batch, batch_idx):
         audio, audio_lens, texts = batch
