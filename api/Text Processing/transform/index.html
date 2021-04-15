@@ -696,7 +696,7 @@
 
 
 <h3 id="thunder.text_processing.transform.BatchTextTransformer.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vocab</span><span class="p">,</span> <span class="n">tokenize_func</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">char_tokenizer</span> <span class="n">at</span> <span class="mh">0x7f13b67a0a60</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">preprocessing_transforms</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">chain_calls</span><span class="o">.&lt;</span><span class="nb">locals</span><span class="o">&gt;.</span><span class="n">_inner</span> <span class="n">at</span> <span class="mh">0x7f13b673d280</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">after_tokenize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">after_numericalize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vocab</span><span class="p">,</span> <span class="n">tokenize_func</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">char_tokenizer</span> <span class="n">at</span> <span class="mh">0x7fec360f4670</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">preprocessing_transforms</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">chain_calls</span><span class="o">.&lt;</span><span class="nb">locals</span><span class="o">&gt;.</span><span class="n">_inner</span> <span class="n">at</span> <span class="mh">0x7fec360f4e50</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">after_tokenize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">after_numericalize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -730,13 +730,13 @@ stuff to encode an entire batch of text at once.</p>
         <td><code>tokenize_func</code></td>
         <td><code></code></td>
         <td><p>Function that will perform the tokenization of each individual text sample. Defaults to char_tokenizer.</p></td>
-        <td><code>&lt;function char_tokenizer at 0x7f13b67a0a60&gt;</code></td>
+        <td><code>&lt;function char_tokenizer at 0x7fec360f4670&gt;</code></td>
       </tr>
       <tr>
         <td><code>preprocessing_transforms</code></td>
         <td><code></code></td>
         <td><p>Functions that will be applied before tokenization, as the first step. Defaults to chain_calls(lower_text, normalize_text).</p></td>
-        <td><code>&lt;function chain_calls.&lt;locals&gt;._inner at 0x7f13b673d280&gt;</code></td>
+        <td><code>&lt;function chain_calls.&lt;locals&gt;._inner at 0x7fec360f4e50&gt;</code></td>
       </tr>
       <tr>
         <td><code>after_tokenize</code></td>
@@ -856,6 +856,8 @@ stuff to encode an entire batch of text at once.</p>
         <span class="c1"># Remove the blank and pad token from output</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">blank_token</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">pad_token</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">start_token</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vocab</span><span class="o">.</span><span class="n">end_token</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">out_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out_list</span>
