@@ -87,6 +87,8 @@ class BatchTextTransformer(nn.Module):
             # Remove the blank and pad token from output
             out = out.replace(self.vocab.blank_token, "")
             out = out.replace(self.vocab.pad_token, "")
+            out = out.replace(self.vocab.start_token, "")
+            out = out.replace(self.vocab.end_token, "")
             out_list.append(out)
 
         return out_list
