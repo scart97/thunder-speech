@@ -199,7 +199,7 @@ class MelScale(nn.Module):
                 f_min=0,
                 f_max=sample_rate / 2,
                 norm="slaney",
-                htk=True,
+                htk=False,
             )
             .transpose(0, 1)
             .unsqueeze(0)
