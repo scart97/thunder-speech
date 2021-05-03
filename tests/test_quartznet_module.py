@@ -15,6 +15,7 @@ from torchaudio.datasets.utils import download_url
 
 from tests.utils import mark_slow, requirescuda
 from thunder.data.datamodule import ManifestDatamodule
+from thunder.quartznet.compatibility import NemoCheckpoint
 from thunder.quartznet.module import QuartznetModule
 from thunder.utils import get_default_cache_folder
 
@@ -31,7 +32,9 @@ def test_expected_prediction_from_pretrained_model():
             resume=True,
         )
         # Preparing data and model
-        module = QuartznetModule.load_from_nemo(checkpoint_name="QuartzNet5x5LS-En")
+        module = QuartznetModule.load_from_nemo(
+            checkpoint_name=NemoCheckpoint.QuartzNet5x5LS_En
+        )
         audio, sr = torchaudio.load(folder / "f0001_us_f0001_00001.wav")
         assert sr == 16000
 

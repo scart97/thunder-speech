@@ -58,14 +58,15 @@ import pytorch_lightning as pl
 
 from thunder.data.datamodule import ManifestDatamodule
 from thunder.quartznet.module import QuartznetModule
+from thunder.quartznet.compatibility import NemoCheckpoint
 
 dm = ManifestDatamodule(
     train_manifest="/path/to/train_manifest.json",
     val_manifest="/path/to/val_manifest.json",
     test_manifest="/path/to/test_manifest.json",
 )
-
-model = QuartznetModule.load_from_nemo(checkpoint_name="QuartzNet5x5LS-En")
+# Tab completion works to discover other Nemocheckpoint.*
+model = QuartznetModule.load_from_nemo(checkpoint_name=NemoCheckpoint.QuartzNet5x5LS_En)
 
 trainer = pl.Trainer(
     gpus=-1, # Use all gpus

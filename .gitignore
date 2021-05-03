@@ -49,3 +49,9 @@ MANIFEST
 
 **/*.nemo
 .hypothesis
+
+**/*.wav
+*.pt
+*.pth
+*.zip
+lightning_logs/

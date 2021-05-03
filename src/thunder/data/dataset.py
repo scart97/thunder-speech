@@ -11,6 +11,8 @@ import torchaudio
 from torch import Tensor
 from torch.utils.data import Dataset
 
+from thunder.text_processing.preprocess import lower_text, normalize_text
+
 
 class BaseSpeechDataset(Dataset):
     def __init__(self, items: Iterable, force_mono: bool = True, sr: int = 16000):
@@ -32,9 +34,13 @@ class BaseSpeechDataset(Dataset):
 
     def __getitem__(self, index: int) -> Tuple[Tensor, str]:
         item = self.get_item(index)
+        # Dealing with input
         audio, sr = self.open_audio(item)
-        audio = self.correct_audio(audio, sr)
+        audio = self.preprocess_audio(audio, sr)
+        # Dealing with output
         text = self.open_text(item)
+        text = self.preprocess_text(text)
+
         return audio, text
 
     def get_item(self, index: int) -> Any:
@@ -59,7 +65,7 @@ class BaseSpeechDataset(Dataset):
         """
         return torchaudio.load(item)
 
-    def correct_audio(self, audio: Tensor, sr: int) -> Tensor:
+    def preprocess_audio(self, audio: Tensor, sr: int) -> Tensor:
         """Apply some base transforms to the audio, that fix silent problems.
         It transforms all the audios to mono (depending on class creation parameter)
         and resamples the audios to a common sample rate.
@@ -88,6 +94,11 @@ class BaseSpeechDataset(Dataset):
             The transcription corresponding to the item.
         """
         raise NotImplementedError()
+
+    def preprocess_text(self, text: str) -> str:
+        normalized = normalize_text(text)
+        lower = lower_text(normalized)
+        return lower
 
 
 class ManifestSpeechDataset(BaseSpeechDataset):

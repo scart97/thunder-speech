@@ -14,6 +14,7 @@ from torchaudio.datasets.utils import extract_archive
 
 from thunder.metrics import CER, WER
 from thunder.quartznet.compatibility import (
+    NemoCheckpoint,
     download_checkpoint,
     load_quartznet_weights,
     read_params_from_config,
@@ -141,10 +142,12 @@ class QuartznetModule(pl.LightningModule):
         )
 
     @classmethod
-    def load_from_nemo(cls, *, nemo_filepath: str = None, checkpoint_name: str = None):
+    def load_from_nemo(
+        cls, *, nemo_filepath: str = None, checkpoint_name: NemoCheckpoint = None
+    ):
         if checkpoint_name is not None:
             nemo_filepath = download_checkpoint(checkpoint_name)
-        if nemo_filepath is None:
+        if nemo_filepath is None and checkpoint_name is None:
             raise ValueError("Either nemo_filepath or checkpoint_name must be passed")
 
         with TemporaryDirectory() as extract_path:

@@ -12,6 +12,7 @@ from torchaudio.datasets.utils import extract_archive
 
 from tests.utils import mark_slow
 from thunder.quartznet.compatibility import (
+    NemoCheckpoint,
     download_checkpoint,
     load_quartznet_weights,
     read_params_from_config,
@@ -29,7 +30,8 @@ from thunder.quartznet.preprocess import FilterbankFeatures
 def test_can_load_weights():
     # Quartznet 5x5 is small (25mb), so it can be downloaded while testing.
     try:
-        cfg = download_checkpoint("QuartzNet5x5LS-En")
+
+        cfg = download_checkpoint(NemoCheckpoint.QuartzNet5x5LS_En)
         with TemporaryDirectory() as extract_path:
             extract_path = Path(extract_path)
             extract_archive(str(cfg), extract_path)
