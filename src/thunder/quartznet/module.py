@@ -172,10 +172,10 @@ class QuartznetModule(pl.LightningModule):
         module.eval()
         return module
 
-    def change_vocab(self, new_vocab_tokens: List[str]):
+    def change_vocab(self, new_vocab_tokens: List[str], nemo_compat=False):
         # Updating hparams so that the saved model can be correctly loaded
         self.hparams.initial_vocab_tokens = new_vocab_tokens
-        self.hparams.nemo_compat_vocab = False
+        self.hparams.nemo_compat_vocab = nemo_compat
 
-        self.text_pipeline = self.build_text_pipeline(new_vocab_tokens, False)
+        self.text_pipeline = self.build_text_pipeline(new_vocab_tokens, nemo_compat)
         self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))
