@@ -87,10 +87,7 @@ def Quartznet_decoder(num_classes: int, input_channels: int = 1024) -> nn.Module
 
     # decoder.apply(partial(init_weights, mode=InitMode.kaiming_uniform))
 
-    # decoder.bias.data = _get_final_layer_bias(num_classes)
-    # if num_classes > 30:
-    #     decoder.weight.data = torch.load("nemo_dec_weight.pt")
-    #     decoder.bias.data = torch.load("nemo_dec_bias.pt")
+    decoder.bias.data = _get_final_layer_bias(num_classes)
 
     return decoder
 
