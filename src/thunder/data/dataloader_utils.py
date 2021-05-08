@@ -25,17 +25,15 @@ def asr_collate(samples: List[Tuple[Tensor, str]]) -> Tuple[Tensor, Tensor, List
     """
     samples = sorted(samples, key=lambda sample: sample[0].size(-1), reverse=True)
     padded_audios = pad_sequence([s[0].squeeze() for s in samples], batch_first=True)
-
     audio_lengths = Tensor([s[0].size(-1) for s in samples])
     audio_lengths = audio_lengths / audio_lengths.max()  # Normalize by max length
-
     texts = [s[1] for s in samples]
 
     return (padded_audios, audio_lengths, texts)
 
 
 class BucketingSampler(Sampler):
-    def __init__(self, data_source: Iterable, batch_size: int = 1):
+    def __init__(self, data_source: Iterable, batch_size: int = 16):
         """Samples batches assuming they are in order of size to batch
         similarly sized samples together
 

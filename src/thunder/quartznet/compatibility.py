@@ -57,7 +57,10 @@ def read_params_from_config(config_path: str) -> Tuple[Dict, List[str], Dict]:
         A tuple containing, in this order, the encoder hyperparameters, the vocabulary, and the preprocessing hyperparameters
     """
     conf = OmegaConf.load(config_path)
-    encoder_params = conf["encoder"]["params"]
+
+    encoder_params = (
+        conf["model"]["encoder"]["params"] if "model" in conf else conf["encoder"]["params"]
+    )
     quartznet_conf = OmegaConf.to_container(encoder_params["jasper"])
 
     body_config = quartznet_conf[1:-2]
@@ -68,7 +71,11 @@ def read_params_from_config(config_path: str) -> Tuple[Dict, List[str], Dict]:
         "filters": filters,
         "kernel_sizes": kernel_sizes,
     }
-    preprocess = conf["preprocessor"]["params"]
+    preprocess = (
+        conf["model"]["preprocessor"]["params"]
+        if "model" in conf
+        else conf["preprocessor"]["params"]
+    )
 
     preprocess_cfg = {
         "sample_rate": preprocess["sample_rate"],
@@ -79,9 +86,7 @@ def read_params_from_config(config_path: str) -> Tuple[Dict, List[str], Dict]:
         "dither": preprocess["dither"],
     }
 
-    labels = (
-        conf["labels"] if "labels" in conf else conf["decoder"]["params"]["vocabulary"]
-    )
+    labels = conf["labels"] if "labels" in conf else conf["decoder"]["params"]["vocabulary"]
 
     return (
         encoder_cfg,
@@ -99,19 +104,20 @@ def load_quartznet_weights(encoder: nn.Module, decoder: nn.Module, weights_path:
         weights_path : Path to the pytorch weights checkpoint
     """
     weights = torch.load(weights_path)
-
     # We remove the 'encoder.' and 'decoder.' prefix from the weights to enable
     # compatibility to load with plain nn.Modules created by reading the config
-    encoder_weights = {
-        k.replace("encoder.", "").replace(".conv", "").replace(".res.0", ".res"): v
-        for k, v in weights.items()
-        if "encoder" in k
-    }
+
+    encoder_weights = {}
+    for k, v in weights.items():
+        if "encoder" not in k:
+            continue
+        k = k.replace("encoder.encoder.0", "stem").replace(".res.0", ".res")
+        for i in range(1, 40):
+            k = k.replace(f"encoder.encoder.{i}.", f"body.{i-1}.")
+        encoder_weights[k] = v
     encoder.load_state_dict(encoder_weights, strict=True)
 
     decoder_weights = {
-        k.replace("decoder.decoder_layers.0.", ""): v
-        for k, v in weights.items()
-        if "decoder" in k
+        k.replace("decoder.decoder_layers.0.", ""): v for k, v in weights.items() if "decoder" in k
     }
     decoder.load_state_dict(decoder_weights, strict=True)

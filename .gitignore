@@ -22,6 +22,7 @@ __pycache__/*
 .idea
 .vscode
 tags
+train
 
 # Package files
 *.egg
@@ -49,3 +50,6 @@ MANIFEST
 
 **/*.nemo
 .hypothesis
+Pipfile
+lightning_logs
+wandb

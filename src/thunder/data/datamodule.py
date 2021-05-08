@@ -15,8 +15,8 @@ from .dataset import BaseSpeechDataset, ManifestSpeechDataset
 class BaseDataModule(LightningDataModule):
     def __init__(
         self,
-        bs: int = 10,
-        num_workers: int = 8,
+        bs: int = 16,
+        num_workers: int = 0,
         force_mono: bool = True,
         sr: int = 16000,
     ):
@@ -47,7 +47,8 @@ class BaseDataModule(LightningDataModule):
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
             self.train_dataset,
-            batch_sampler=self.sampler,
+            batch_size=16,
+            shuffle=True,
             collate_fn=asr_collate,
             num_workers=self.num_workers,
         )
@@ -86,8 +87,8 @@ class ManifestDatamodule(BaseDataModule):
         train_manifest: str,
         val_manifest: str,
         test_manifest: str,
-        bs: int = 10,
-        num_workers: int = 8,
+        bs: int = 16,
+        num_workers: int = 0,
         force_mono: bool = True,
         sr: int = 16000,
     ):

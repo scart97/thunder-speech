@@ -101,12 +101,12 @@ class ManifestSpeechDataset(BaseSpeechDataset):
         """
         # Reading from the manifest file
         items = [json.loads(line) for line in file.read_text().strip().splitlines()]
-        # Sort items for efficient batching later.
-        sorted_items = list(sorted(items, key=lambda x: x["duration"]))
-        super().__init__(sorted_items, force_mono=force_mono, sr=sr)
+        super().__init__(items, force_mono=force_mono, sr=sr)
 
     def open_audio(self, item: dict) -> Tuple[Tensor, int]:
-        return torchaudio.load(item["audio_filepath"])
+        audio_filepath = item["audio_filepath"]
+        audio = torchaudio.load(audio_filepath)
+        return audio
 
     def open_text(self, item: dict) -> str:
         return item["text"]
