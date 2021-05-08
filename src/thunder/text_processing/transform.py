@@ -9,7 +9,6 @@ import torch
 from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 
-from thunder.text_processing.preprocess import lower_text, normalize_text
 from thunder.text_processing.tokenizer import char_tokenizer
 from thunder.text_processing.vocab import Vocab
 from thunder.utils import chain_calls
@@ -20,7 +19,7 @@ class BatchTextTransformer(nn.Module):
         self,
         vocab: Vocab,
         tokenize_func=char_tokenizer,
-        preprocessing_transforms=chain_calls(lower_text, normalize_text),
+        preprocessing_transforms=chain_calls(),  # lower_text #, normalize_text),
         after_tokenize=None,
         after_numericalize=None,
     ):
@@ -44,21 +43,20 @@ class BatchTextTransformer(nn.Module):
     def encode(self, items: List[str], return_length: bool = True, device=None):
         if self.preprocessing_transforms is not None:
             items = [self.preprocessing_transforms(x) for x in items]
-
         tokenized = [self.tokenize_func(x) for x in items]
 
         if self.after_tokenize is not None:
             tokenized = [self.after_tokenize(x) for x in tokenized]
 
         expanded_tokenized = [self.vocab.add_special_tokens(x) for x in tokenized]
-        encoded = [
-            self.vocab.numericalize(x).to(device=device) for x in expanded_tokenized
-        ]
+        encoded = [self.vocab.numericalize(x).to(device=device) for x in expanded_tokenized]
         if self.after_numericalize is not None:
             encoded = [self.after_numericalize(x) for x in encoded]
 
         encoded_batched = pad_sequence(
-            encoded, batch_first=True, padding_value=self.vocab.pad_idx
+            encoded,
+            batch_first=True,
+            padding_value=0,
         )
         if return_length:
             lengths = torch.LongTensor([len(it) for it in encoded]).to(device=device)
@@ -67,7 +65,7 @@ class BatchTextTransformer(nn.Module):
             return encoded_batched
 
     @torch.jit.export
-    def decode_prediction(self, predictions: torch.Tensor) -> List[str]:
+    def decode_prediction(self, predictions: torch.Tensor, debug: bool = False) -> List[str]:
         """
         Args:
             predictions : Tensor of shape (batch, time)
@@ -84,6 +82,7 @@ class BatchTextTransformer(nn.Module):
             out = self.vocab.decode_into_text(element)
             # Join prediction into one string
             out = "".join(out)
+
             # Remove the blank and pad token from output
             out = out.replace(self.vocab.blank_token, "")
             out = out.replace(self.vocab.pad_token, "")

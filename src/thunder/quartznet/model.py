@@ -6,34 +6,40 @@
 
 # Copyright (c) 2021 scart97
 
-
+import torch
 from typing import List
-
 from torch import nn
 
-from thunder.quartznet.blocks import body, init_weights, stem
+from thunder.quartznet.blocks import body, stem, InitMode
 
 
-def Quartznet5(
-    feat_in: int,
-    filters: List[int] = [256, 256, 512, 512, 512],
-    kernel_sizes: List[int] = [33, 39, 51, 63, 75],
-    repeat_blocks: int = 1,
-) -> nn.Module:
-    """Basic Quartznet encoder setup.
-    Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (repeat_blocks=3)
+class Quartznet5(nn.Module):
+    def __init__(
+        self,
+        feat_in: int,
+        filters: List[int] = [256, 256, 512, 512, 512],
+        kernel_sizes: List[int] = [33, 39, 51, 63, 75],
+        repeat_blocks: int = 1,
+    ) -> nn.Module:
+        """Basic Quartznet encoder setup.
+        Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (repeat_blocks=3)
 
-    Args:
-        feat_in : Number of input features to the model.
-        repeat_blocks : Number of repetitions of each block.
+        Args:
+            feat_in : Number of input features to the model
+            repeat_blocks : Number of repetitions of each block.
 
-    Returns:
-        Pytorch model corresponding to the encoder.
-    """
-    return nn.Sequential(
-        stem(feat_in),
-        *body(filters, kernel_sizes, repeat_blocks),
-    )
+        Returns:
+            Pytorch model corresponding to the encoder.
+        """
+        super(Quartznet5, self).__init__()
+        self.stem = stem(feat_in)
+        self.body = nn.ModuleList(body(filters, kernel_sizes, repeat_blocks))
+
+    def forward(self, x: torch.Tensor, seq_lens: torch.Tensor):
+        out, seq_lens = self.stem(x, seq_lens)
+        for i, block in enumerate(self.body):
+            out, seq_lens = block(out, seq_lens)
+        return out, seq_lens
 
 
 def Quartznet5x5_encoder(feat_in: int = 64) -> nn.Module:
@@ -69,11 +75,27 @@ def Quartznet_decoder(num_classes: int, input_channels: int = 1024) -> nn.Module
     Returns:
         Pytorch model of the decoder
     """
-    decoder = nn.Conv1d(
-        input_channels,
-        num_classes,
-        kernel_size=1,
-        bias=True,
-    )
-    decoder.apply(init_weights)
+
+    decoder = torch.nn.Sequential(
+        nn.Conv1d(
+            input_channels,
+            num_classes,
+            kernel_size=1,
+            bias=True,
+        )
+    )[0]
+
+    # decoder.apply(partial(init_weights, mode=InitMode.kaiming_uniform))
+
+    # decoder.bias.data = _get_final_layer_bias(num_classes)
+    # if num_classes > 30:
+    #     decoder.weight.data = torch.load("nemo_dec_weight.pt")
+    #     decoder.bias.data = torch.load("nemo_dec_bias.pt")
+
     return decoder
+
+
+def _get_final_layer_bias(num_classes):
+    t = torch.ones(num_classes) * -5
+    t[-1] = -0.1
+    return t

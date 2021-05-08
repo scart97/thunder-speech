@@ -57,16 +57,52 @@ class FeatureBatchNormalizer(nn.Module):
         super().__init__()
         self.div_guard = 1e-5
 
+    def forward(self, x: torch.Tensor, seq_lens: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x : Tensor of shape (batch, features, time)
+        """
+
+        seq_lens = seq_lens.to(dtype=torch.long)
+
+        x_mean = torch.zeros((seq_lens.shape[0], x.shape[1]), dtype=x.dtype, device=x.device)
+        x_std = torch.zeros((seq_lens.shape[0], x.shape[1]), dtype=x.dtype, device=x.device)
+
+        for i in range(x.shape[0]):
+            x_mean[i, :] = x[i, :, : seq_lens[i]].mean(dim=1)
+            x_std[i, :] = x[i, :, : seq_lens[i]].std(dim=1)
+        # make sure x_std is not zero
+        x_std += self.div_guard
+        out = (x - x_mean.unsqueeze(2)) / x_std.unsqueeze(2)
+
+        for i in range(x.shape[0]):
+            out[i, :, seq_lens[i] :] = 0
+        return out
+
+
+class FinalPad(nn.Module):
+    def __init__(self, pad_to: int = 16, pad_value: int = 0):
+        """Pad spectrogram with `pad_value` to nearest multiple of `pad_to`
+
+        Args:
+            pad_to: input will be padded to a multiple of pad_to
+            pad_value: value to pad with, default 0
+        """
+        super().__init__()
+        self.pad_to = pad_to
+        self.pad_value = pad_value
+
+    @torch.no_grad()
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
             x : Tensor of shape (batch, features, time)
         """
-        x_mean = x.mean(dim=2, keepdim=True).detach()
-        x_std = x.std(dim=2, keepdim=True).detach()
-        # make sure x_std is not zero
-        x_std += self.div_guard
-        return (x - x_mean) / x_std
+        # Todo: Refactor to be more clear, I just dont want to risk introducing a bug at this point
+        pad_amt = x.size(-1) % self.pad_to
+        if pad_amt != 0:
+            x = nn.functional.pad(x, (0, self.pad_to - pad_amt), value=self.pad_value)
+        return x
 
 
 class DitherAudio(nn.Module):
@@ -89,8 +125,10 @@ class DitherAudio(nn.Module):
         Args:
             x : Tensor of shape (batch, time)
         """
+        torch.set_printoptions(threshold=10_000)
         if self.training:
-            return x + self.dither * torch.randn_like(x)
+            out = x + self.dither * torch.randn_like(x)
+            return out
         else:
             return x
 
@@ -116,9 +154,8 @@ class PreEmphasisFilter(nn.Module):
         Args:
             x : Tensor of shape (batch, time)
         """
-        return torch.cat(
-            (x[:, 0].unsqueeze(1), x[:, 1:] - self.preemph * x[:, :-1]), dim=1
-        )
+        out = torch.cat((x[:, 0].unsqueeze(1), x[:, 1:] - self.preemph * x[:, :-1]), dim=1)
+        return out
 
 
 class PowerSpectrum(nn.Module):
@@ -158,15 +195,17 @@ class PowerSpectrum(nn.Module):
         Args:
             x : Tensor of shape (batch, time)
         """
-        x = torch.stft(
-            x,
-            n_fft=self.n_fft,
-            hop_length=self.hop_length,
-            win_length=self.win_length,
-            center=True,
-            window=self.window.to(dtype=torch.float),
-            return_complex=False,
-        )
+
+        with torch.cuda.amp.autocast(enabled=False):
+            x = torch.stft(
+                x,
+                n_fft=self.n_fft,
+                hop_length=self.hop_length,
+                win_length=self.win_length,
+                center=True,
+                window=self.window.to(dtype=torch.float),
+                return_complex=False,
+            )
 
         # torch returns real, imag; so convert to magnitude
         x = torch.sqrt(x.pow(2).sum(-1))
@@ -176,9 +215,7 @@ class PowerSpectrum(nn.Module):
 
 
 class MelScale(nn.Module):
-    def __init__(
-        self, sample_rate: int, n_fft: int, nfilt: int, log_scale: bool = True
-    ):
+    def __init__(self, sample_rate: int, n_fft: int, nfilt: int, log_scale: bool = True):
         """Convert a spectrogram to Mel scale, following the default
         formula of librosa instead of the one used by torchaudio.
         Also converts to log scale.
@@ -190,7 +227,6 @@ class MelScale(nn.Module):
             log_scale : Controls if the output should also be applied a log scale.
         """
         super().__init__()
-
         filterbanks = (
             create_fb_matrix(
                 int(1 + n_fft // 2),
@@ -199,7 +235,7 @@ class MelScale(nn.Module):
                 f_min=0,
                 f_max=sample_rate / 2,
                 norm="slaney",
-                htk=True,
+                htk=False,
             )
             .transpose(0, 1)
             .unsqueeze(0)
@@ -222,16 +258,7 @@ class MelScale(nn.Module):
         return x
 
 
-def FilterbankFeatures(
-    sample_rate: int = 16000,
-    n_window_size: int = 320,
-    n_window_stride: int = 160,
-    n_fft: int = 512,
-    preemph: float = 0.97,
-    nfilt: int = 64,
-    dither: float = 1e-5,
-    **kwargs,
-) -> nn.Module:
+class FilterbankFeatures(nn.Module):
     """Creates the Filterbank features used in the Quartznet model.
 
     Args:
@@ -246,14 +273,37 @@ def FilterbankFeatures(
     Returns:
         Module that computes the features based on raw audio tensor.
     """
-    return nn.Sequential(
-        DitherAudio(dither=dither),
-        PreEmphasisFilter(preemph=preemph),
-        PowerSpectrum(
+
+    def __init__(
+        self,
+        sample_rate: int = 16000,
+        n_window_size: int = 320,
+        n_window_stride: int = 160,
+        n_fft: int = 512,
+        preemph: float = 0.97,
+        nfilt: int = 64,
+        dither: float = 1e-5,
+        **kwargs,
+    ):
+        super().__init__()
+        self.apply_dither = DitherAudio(dither=dither)
+        self.apply_preemph = PreEmphasisFilter(preemph=preemph)
+        self.apply_power_spec = PowerSpectrum(
             n_window_size=n_window_size,
             n_window_stride=n_window_stride,
             n_fft=n_fft,
-        ),
-        MelScale(sample_rate=sample_rate, n_fft=n_fft, nfilt=nfilt),
-        FeatureBatchNormalizer(),
-    )
+        )
+        self.apply_mel = MelScale(sample_rate=sample_rate, n_fft=n_fft, nfilt=nfilt)
+        self.normalize = FeatureBatchNormalizer()
+
+        self.final_pad = FinalPad()
+
+    @torch.no_grad()
+    def forward(self, x: torch.Tensor, seq_lens: torch.Tensor) -> torch.Tensor:
+        x = self.apply_dither(x)
+        x = self.apply_preemph(x)
+        x = self.apply_power_spec(x)
+        x = self.apply_mel(x)
+        x = self.normalize(x, seq_lens)
+        x = self.final_pad(x)
+        return x

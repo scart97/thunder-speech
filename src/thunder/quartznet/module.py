@@ -9,9 +9,9 @@ from typing import List
 
 import pytorch_lightning as pl
 import torch
-from torch.nn.functional import ctc_loss, log_softmax
+from torch.nn.functional import log_softmax, ctc_loss
+from torch.nn import CTCLoss
 from torchaudio.datasets.utils import extract_archive
-
 from thunder.metrics import CER, WER
 from thunder.quartznet.compatibility import (
     download_checkpoint,
@@ -22,6 +22,7 @@ from thunder.quartznet.model import Quartznet5, Quartznet_decoder
 from thunder.quartznet.preprocess import FilterbankFeatures
 from thunder.text_processing.transform import BatchTextTransformer
 from thunder.text_processing.vocab import Vocab
+import wandb
 
 
 class QuartznetModule(pl.LightningModule):
@@ -53,19 +54,16 @@ class QuartznetModule(pl.LightningModule):
             nfilt=nfilt,
             dither=dither,
         )
-
+        self.n_window_stride = n_window_stride
         self.encoder = Quartznet5(nfilt, filters, kernel_sizes, repeat_blocks)
-
-        self.text_pipeline = self.build_text_pipeline(
-            initial_vocab_tokens, nemo_compat_vocab
-        )
+        self.converged = False
+        self.text_pipeline = self.build_text_pipeline(initial_vocab_tokens, nemo_compat_vocab)
         self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))
-
         # Metrics
         self.val_cer = CER()
         self.val_wer = WER()
-        # Example input is one second of fake audio
-        self.example_input_array = torch.randn((10, sample_rate))
+        # self.example_input_array = torch.randn((16, sample_rate))
+        self.example_input_array = None
 
     def build_text_pipeline(
         self, initial_vocab_tokens: List[str], nemo_compat_vocab: bool
@@ -74,47 +72,54 @@ class QuartznetModule(pl.LightningModule):
         return BatchTextTransformer(vocab=vocab)
 
     def build_decoder(self, decoder_input_channels: int, vocab_size: int):
-        return Quartznet_decoder(
-            num_classes=vocab_size, input_channels=decoder_input_channels
-        )
+        return Quartznet_decoder(num_classes=vocab_size, input_channels=decoder_input_channels)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        features = self.features(x)
-        encoded = self.encoder(features)
-        return self.decoder(encoded)
+    def forward(
+        self, x: torch.Tensor, audio_lens: torch.Tensor = None, batch_idx: int = 0
+    ) -> torch.Tensor:
+        max_samples = x.shape[-1]
+        seq_lens = torch.floor((audio_lens * max_samples) / self.n_window_stride) + 1
+        features = self.features(x, seq_lens)
+        torch.set_printoptions(threshold=10_000)
+
+        encoded, encoded_lens = self.encoder(features, seq_lens)
+        encoded_lens = encoded_lens.long()
+        decoded = self.decoder(encoded)
+
+        return decoded, encoded_lens
 
     @torch.jit.export
     def predict(self, x: torch.Tensor) -> List[str]:
         pred = self(x)
         return self.text_pipeline.decode_prediction(pred.argmax(1))
 
-    def calculate_loss(self, probabilities, y, audio_lens, y_lens):
+    def calculate_loss(self, probabilities, y, encoded_lens, y_lens):
         # Change from (batch, #vocab, time) to (time, batch, #vocab)
         probabilities = probabilities.permute(2, 0, 1)
         logprobs = log_softmax(probabilities, dim=2)
-        # Calculate the logprobs correct length based on the
-        # normalized original lengths
-        audio_lens = (audio_lens * logprobs.shape[0]).long()
+        torch.set_printoptions(threshold=10_000)
         blank = self.text_pipeline.vocab.blank_idx
-
-        return ctc_loss(
+        loss = ctc_loss(
             logprobs,
             y,
-            audio_lens,
+            encoded_lens,
             y_lens,
             blank=blank,
             reduction="mean",
-            zero_infinity=True,
+            zero_infinity=False,
         )
+        return loss
 
     def training_step(self, batch, batch_idx):
         audio, audio_lens, texts = batch
-        y, y_lens = self.text_pipeline.encode(texts, device=self.device)
 
-        probabilities = self(audio)
-        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
+        y, y_lens = self.text_pipeline.encode(texts, device=self.device)
+        probabilities, encoded_lens = self(audio, audio_lens, batch_idx)
+        loss = self.calculate_loss(probabilities, y, encoded_lens, y_lens)
 
         self.log("loss/train_loss", loss)
+        metrics = {"loss": loss}
+        wandb.log(metrics)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -124,8 +129,8 @@ class QuartznetModule(pl.LightningModule):
         probabilities = self(audio)
         loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
 
-        decoded_preds = self.text_pipeline.decode_prediction(probabilities.argmax(1))
-        decoded_targets = self.text_pipeline.decode_prediction(y)
+        decoded_preds = self.text_pipeline.decode_prediction(probabilities.argmax(1), debug=False)
+        decoded_targets = self.text_pipeline.decode_prediction(y, debug=False)
         self.val_cer(decoded_preds, decoded_targets)
         self.val_wer(decoded_preds, decoded_targets)
 
@@ -135,13 +140,20 @@ class QuartznetModule(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        return torch.optim.Adam(
-            filter(lambda p: p.requires_grad, self.parameters()),
+        opt = torch.optim.AdamW(
+            self.parameters(),
             lr=self.hparams.learning_rate,
+            betas=[0.8, 0.5],
         )
+        return opt
 
     @classmethod
-    def load_from_nemo(cls, *, nemo_filepath: str = None, checkpoint_name: str = None):
+    def load_from_nemo(
+        cls,
+        *,
+        nemo_filepath: str = None,
+        checkpoint_name: str = None,
+    ):
         if checkpoint_name is not None:
             nemo_filepath = download_checkpoint(checkpoint_name)
         if nemo_filepath is None:
@@ -151,9 +163,7 @@ class QuartznetModule(pl.LightningModule):
             extract_path = Path(extract_path)
             extract_archive(str(nemo_filepath), extract_path)
             config_path = extract_path / "model_config.yaml"
-            encoder_params, initial_vocab, preprocess_params = read_params_from_config(
-                config_path
-            )
+            encoder_params, initial_vocab, preprocess_params = read_params_from_config(config_path)
             module = cls(
                 initial_vocab_tokens=initial_vocab,
                 **encoder_params,
@@ -172,7 +182,7 @@ class QuartznetModule(pl.LightningModule):
     def change_vocab(self, new_vocab_tokens: List[str]):
         # Updating hparams so that the saved model can be correctly loaded
         self.hparams.initial_vocab_tokens = new_vocab_tokens
-        self.hparams.nemo_compat_vocab = False
-
-        self.text_pipeline = self.build_text_pipeline(new_vocab_tokens, False)
+        self.hparams.nemo_compat_vocab = True
+        # Changed the last arg to True, it is "nemo_compat_vocab"
+        self.text_pipeline = self.build_text_pipeline(new_vocab_tokens, True)
         self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))
