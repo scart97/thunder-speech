@@ -48,10 +48,9 @@ class BaseDataModule(LightningDataModule):
         return DataLoader(
             self.train_dataset,
             batch_size=16,
-            shuffle=False,
+            shuffle=True,
             collate_fn=asr_collate,
             num_workers=self.num_workers,
-            pin_memory=True,
         )
 
     def val_dataloader(self) -> DataLoader:
