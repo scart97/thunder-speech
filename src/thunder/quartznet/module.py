@@ -126,8 +126,8 @@ class QuartznetModule(pl.LightningModule):
         audio, audio_lens, texts = batch
         y, y_lens = self.text_pipeline.encode(texts, device=self.device)
 
-        probabilities = self(audio)
-        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
+        probabilities, encoded_lens = self(audio, audio_lens, batch_idx)
+        loss = self.calculate_loss(probabilities, y, encoded_lens, y_lens)
 
         decoded_preds = self.text_pipeline.decode_prediction(probabilities.argmax(1), debug=False)
         decoded_targets = self.text_pipeline.decode_prediction(y, debug=False)
