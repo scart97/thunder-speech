@@ -65,7 +65,7 @@ class BatchTextTransformer(nn.Module):
             return encoded_batched
 
     @torch.jit.export
-    def decode_prediction(self, predictions: torch.Tensor, debug: bool = False) -> List[str]:
+    def decode_prediction(self, predictions: torch.Tensor) -> List[str]:
         """
         Args:
             predictions : Tensor of shape (batch, time)
