@@ -22,7 +22,7 @@ __pycache__/*
 .idea
 .vscode
 tags
-train
+train/sweeps
 
 # Package files
 *.egg
