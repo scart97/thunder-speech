@@ -141,7 +141,7 @@ class QuartznetModule(pl.LightningModule):
 
     def configure_optimizers(self):
         opt = torch.optim.AdamW(
-            self.parameters(),
+            filter(lambda p: p.requires_grad, self.parameters()),
             lr=self.hparams.learning_rate,
             betas=self.hparams.betas,
         )
