@@ -9,6 +9,7 @@ class FinetuneEncoderDecoder(BaseFinetuning):
     # First epoch is 0, the default unfreezes at the second one
     def __init__(
         self,
+        decoder_lr,
         unfreeze_encoder_at_epoch: int = 1,
         encoder_initial_lr_div: float = 10,
         train_bn: bool = True,
@@ -17,7 +18,7 @@ class FinetuneEncoderDecoder(BaseFinetuning):
         Finetune a encoder model based on a learning rate.
 
         Args:
-
+            decoder_lr: lr to set for the decoder after unfreezing
             unfreeze_encoder_at_epoch: Epoch at which the encoder will be unfreezed.
 
             encoder_initial_lr_div:
@@ -26,6 +27,7 @@ class FinetuneEncoderDecoder(BaseFinetuning):
             train_bn: Wheter to make Batch Normalization trainable.
         """
         super().__init__()
+        self.decoder_lr = decoder_lr
         self.unfreeze_encoder_at_epoch = unfreeze_encoder_at_epoch
         self.encoder_initial_lr_div = encoder_initial_lr_div
         self.train_bn = train_bn
@@ -50,13 +52,15 @@ class FinetuneEncoderDecoder(BaseFinetuning):
         optimizer: Optimizer,
         opt_idx: int,
     ):
+
         if epoch == self.unfreeze_encoder_at_epoch:
-            print("num param groups:", len(optimizer.param_groups))
-            optimizer.param_groups[-1]["lr"] = 1e-5
-            print("Unfreezing and setting lr to...")
+            print("Unfreezing")
+            optimizer.param_groups[-1]["lr"] = self.decoder_lr
             self.unfreeze_and_add_param_group(
                 pl_module.encoder,
                 optimizer,
                 initial_denom_lr=self.encoder_initial_lr_div,
                 train_bn=not self.train_bn,
             )
+            for i, pg in enumerate(optimizer.param_groups):
+                print(f"LR for param group {i}, {pg['lr']}")
