@@ -24,9 +24,7 @@ class LogResultsCallback(Callback):
         batch = next(iter(trainer.val_dataloaders[0]))
         audio, audio_lens, texts = batch
         y, y_lens = pl_module.text_pipeline.encode(texts, device=pl_module.device)
-
         probabilities, encoded_lens = pl_module(audio.cuda(), audio_lens.cuda(), batch_idx=0)
-
         decoded_preds = pl_module.text_pipeline.decode_prediction(probabilities.argmax(1))
         decoded_targets = pl_module.text_pipeline.decode_prediction(y)
         self._log_results(audio, decoded_targets, decoded_preds)
