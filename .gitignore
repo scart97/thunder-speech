@@ -56,3 +56,4 @@ lightning_logs
 wandb
 .ipynb_checkpoints/
 00_train.ipynb
+train/train_en.py
