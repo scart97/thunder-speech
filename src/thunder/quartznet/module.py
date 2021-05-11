@@ -74,12 +74,11 @@ class QuartznetModule(pl.LightningModule):
     def build_decoder(self, decoder_input_channels: int, vocab_size: int):
         return Quartznet_decoder(num_classes=vocab_size, input_channels=decoder_input_channels)
 
-    def forward(
-        self, x: torch.Tensor, audio_lens: torch.Tensor = None, batch_idx: int = 0
-    ) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, audio_lens: torch.Tensor = None) -> torch.Tensor:
         max_samples = x.shape[-1]
         seq_lens = torch.floor((audio_lens * max_samples) / self.n_window_stride) + 1
         features = self.features(x, seq_lens)
+
         torch.set_printoptions(threshold=10_000)
 
         encoded, encoded_lens = self.encoder(features, seq_lens)
@@ -99,14 +98,16 @@ class QuartznetModule(pl.LightningModule):
         logprobs = log_softmax(probabilities, dim=2)
         torch.set_printoptions(threshold=10_000)
         blank = self.text_pipeline.vocab.blank_idx
-        loss = ctc_loss(
-            logprobs,
-            y,
-            encoded_lens,
-            y_lens,
-            blank=blank,
-            reduction="mean",
-            zero_infinity=False,
+        loss = torch.mean(
+            ctc_loss(
+                logprobs,
+                y,
+                encoded_lens,
+                y_lens,
+                blank=blank,
+                reduction="none",
+                zero_infinity=False,
+            )
         )
         return loss
 
@@ -114,19 +115,18 @@ class QuartznetModule(pl.LightningModule):
         audio, audio_lens, texts = batch
 
         y, y_lens = self.text_pipeline.encode(texts, device=self.device)
-        probabilities, encoded_lens = self(audio, audio_lens, batch_idx)
+        probabilities, encoded_lens = self(audio, audio_lens)
         loss = self.calculate_loss(probabilities, y, encoded_lens, y_lens)
 
         self.log("loss/train_loss", loss)
         metrics = {"loss": loss}
-        wandb.log(metrics)
         return loss
 
     def validation_step(self, batch, batch_idx):
         audio, audio_lens, texts = batch
         y, y_lens = self.text_pipeline.encode(texts, device=self.device)
 
-        probabilities, encoded_lens = self(audio, audio_lens, batch_idx)
+        probabilities, encoded_lens = self(audio, audio_lens)
         loss = self.calculate_loss(probabilities, y, encoded_lens, y_lens)
 
         decoded_preds = self.text_pipeline.decode_prediction(probabilities.argmax(1), debug=False)
@@ -143,7 +143,7 @@ class QuartznetModule(pl.LightningModule):
         opt = torch.optim.AdamW(
             self.parameters(),
             lr=self.hparams.learning_rate,
-            betas=[0.8, 0.5],
+            betas=self.hparams.betas,
         )
         return opt
 
