@@ -23,6 +23,7 @@ __pycache__/*
 .vscode
 tags
 train/sweeps
+train/data
 
 # Package files
 *.egg
@@ -53,3 +54,5 @@ MANIFEST
 Pipfile
 lightning_logs
 wandb
+.ipynb_checkpoints/
+00_train.ipynb
