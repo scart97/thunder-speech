@@ -144,6 +144,7 @@ class QuartznetModule(pl.LightningModule):
         return torch.optim.Adam(
             filter(lambda p: p.requires_grad, self.parameters()),
             lr=self.hparams.learning_rate,
+            betas=[0.8, 0.5],
         )
 
     @classmethod
