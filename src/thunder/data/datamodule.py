@@ -14,16 +14,16 @@ from .dataset import BaseSpeechDataset, ManifestSpeechDataset
 class BaseDataModule(LightningDataModule):
     def __init__(
         self,
-        bs: int = 10,
+        batch_size: int = 10,
         num_workers: int = 8,
         force_mono: bool = True,
-        sr: int = 16000,
+        sample_rate: int = 16000,
     ):
         super().__init__()
-        self.bs = bs
+        self.batch_size = batch_size
         self.num_workers = num_workers
         self.force_mono = force_mono
-        self.sr = sr
+        self.sample_rate = sample_rate
 
     def get_dataset(self, split: str) -> BaseSpeechDataset:
         """Function to get the corresponding dataset to the specified split.
@@ -45,7 +45,7 @@ class BaseDataModule(LightningDataModule):
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
             self.train_dataset,
-            batch_size=self.bs,
+            batch_size=self.batch_size,
             collate_fn=asr_collate,
             num_workers=self.num_workers,
             shuffle=True,
@@ -55,7 +55,7 @@ class BaseDataModule(LightningDataModule):
     def val_dataloader(self) -> DataLoader:
         return DataLoader(
             self.val_dataset,
-            batch_size=self.bs,
+            batch_size=self.batch_size,
             shuffle=False,
             collate_fn=asr_collate,
             num_workers=self.num_workers,
@@ -65,7 +65,7 @@ class BaseDataModule(LightningDataModule):
     def test_dataloader(self) -> DataLoader:
         return DataLoader(
             self.test_dataset,
-            batch_size=self.bs,
+            batch_size=self.batch_size,
             shuffle=False,
             collate_fn=asr_collate,
             num_workers=self.num_workers,
@@ -79,7 +79,7 @@ class BaseDataModule(LightningDataModule):
         Returns:
             Number of steps
         """
-        return len(self.train_dataset) // self.bs
+        return len(self.train_dataset) // self.batch_size
 
 
 class ManifestDatamodule(BaseDataModule):
@@ -88,16 +88,16 @@ class ManifestDatamodule(BaseDataModule):
         train_manifest: str,
         val_manifest: str,
         test_manifest: str,
-        bs: int = 10,
+        batch_size: int = 10,
         num_workers: int = 8,
         force_mono: bool = True,
-        sr: int = 16000,
+        sample_rate: int = 16000,
     ):
         super().__init__(
-            bs=bs,
+            batch_size=batch_size,
             num_workers=num_workers,
             force_mono=force_mono,
-            sr=sr,
+            sample_rate=sample_rate,
         )
         self.manifest_mapping = {
             "train": train_manifest,
@@ -107,5 +107,5 @@ class ManifestDatamodule(BaseDataModule):
 
     def get_dataset(self, split: str) -> ManifestSpeechDataset:
         return ManifestSpeechDataset(
-            self.manifest_mapping[split], self.force_mono, self.sr
+            self.manifest_mapping[split], self.force_mono, self.sample_rate
         )
