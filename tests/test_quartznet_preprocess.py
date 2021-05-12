@@ -47,12 +47,6 @@ def test_normalize_has_correct_mean_std():
         assert torch.allclose(xb[:, :].std(), torch.ones(1), atol=0.1)
 
 
-def test_normalize_batch_independence():
-    norm = FeatureBatchNormalizer()
-    x = torch.randn(10, 40, 1337)
-    _test_batch_independence(norm, x)
-
-
 @requirescuda
 def test_normalize_device_move():
     norm = FeatureBatchNormalizer()

@@ -57,6 +57,7 @@ class FeatureBatchNormalizer(nn.Module):
         super().__init__()
         self.div_guard = 1e-5
 
+    @torch.no_grad()
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
