@@ -11,7 +11,7 @@ from typing import List
 
 from torch import nn
 
-from thunder.quartznet.blocks import body, init_weights, stem
+from thunder.quartznet.blocks import MultiSequential, body, init_weights, stem
 
 
 def Quartznet5(
@@ -30,7 +30,7 @@ def Quartznet5(
     Returns:
         Pytorch model corresponding to the encoder.
     """
-    return nn.Sequential(
+    return MultiSequential(
         stem(feat_in),
         *body(filters, kernel_sizes, repeat_blocks),
     )

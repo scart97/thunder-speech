@@ -5,7 +5,7 @@
 
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List
+from typing import List, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -66,7 +66,10 @@ class QuartznetModule(pl.LightningModule):
         self.val_cer = CER()
         self.val_wer = WER()
         # Example input is one second of fake audio
-        self.example_input_array = torch.randn((10, sample_rate))
+        self.example_input_array = (
+            torch.randn((10, sample_rate)),
+            torch.randint(10, sample_rate, (10,)),
+        )
 
     def build_text_pipeline(
         self, initial_vocab_tokens: List[str], nemo_compat_vocab: bool
@@ -79,29 +82,31 @@ class QuartznetModule(pl.LightningModule):
             num_classes=vocab_size, input_channels=decoder_input_channels
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        features = self.features(x)
-        encoded = self.encoder(features)
-        return self.decoder(encoded)
+    def forward(
+        self, x: torch.Tensor, lens: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        features = self.features(x)  # TODO: maybe mask features
+        lens = (features.shape[-1] * lens).long()
+        encoded, lens = self.encoder(features, lens)
+        return self.decoder(encoded), lens
 
     @torch.jit.export
     def predict(self, x: torch.Tensor) -> List[str]:
-        pred = self(x)
+        lens = torch.tensor([x.shape[-1]], device=x.device)
+        pred, _ = self(x, lens)
         return self.text_pipeline.decode_prediction(pred.argmax(1))
 
-    def calculate_loss(self, probabilities, y, audio_lens, y_lens):
+    def calculate_loss(self, probabilities, y, prob_lens, y_lens):
         # Change from (batch, #vocab, time) to (time, batch, #vocab)
         probabilities = probabilities.permute(2, 0, 1)
         logprobs = log_softmax(probabilities, dim=2)
-        # Calculate the logprobs correct length based on the
-        # normalized original lengths
-        audio_lens = (audio_lens * logprobs.shape[0]).long()
+
         blank = self.text_pipeline.vocab.blank_idx
 
         return ctc_loss(
             logprobs,
             y,
-            audio_lens,
+            prob_lens.long(),
             y_lens,
             blank=blank,
             reduction="mean",
@@ -112,8 +117,8 @@ class QuartznetModule(pl.LightningModule):
         audio, audio_lens, texts = batch
         y, y_lens = self.text_pipeline.encode(texts, device=self.device)
 
-        probabilities = self(audio)
-        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
+        probabilities, out_lens = self(audio, audio_lens)
+        loss = self.calculate_loss(probabilities, y, out_lens, y_lens)
 
         self.log("loss/train_loss", loss)
         return loss
@@ -122,8 +127,8 @@ class QuartznetModule(pl.LightningModule):
         audio, audio_lens, texts = batch
         y, y_lens = self.text_pipeline.encode(texts, device=self.device)
 
-        probabilities = self(audio)
-        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
+        probabilities, out_lens = self(audio, audio_lens)
+        loss = self.calculate_loss(probabilities, y, out_lens, y_lens)
 
         decoded_preds = self.text_pipeline.decode_prediction(probabilities.argmax(1))
         decoded_targets = self.text_pipeline.decode_prediction(y)

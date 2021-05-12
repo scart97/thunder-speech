@@ -23,7 +23,7 @@
 # Original file: https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/parts/quartznet.py
 
 from enum import Enum
-from typing import List
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
@@ -53,6 +53,8 @@ def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
     Raises:
         ValueError: Raised when the initial mode is not one of the possible options.
     """
+    if isinstance(m, MaskedConv1d):
+        init_weights(m.conv, mode)
     if isinstance(m, (nn.Conv1d, nn.Linear)):
         if mode == InitMode.xavier_uniform:
             nn.init.xavier_uniform_(m.weight, gain=1.0)
@@ -98,6 +100,114 @@ def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
     if dilation > 1:
         return (dilation * (kernel_size - 1) + 1) // 2
     return kernel_size // 2
+
+
+class MaskedConv1d(nn.Module):
+    __constants__ = ["use_mask", "padding", "dilation", "kernel_size", "stride"]
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        stride: int = 1,
+        padding: int = 0,
+        dilation: int = 1,
+        groups: int = 1,
+        bias: bool = False,
+        use_mask: bool = True,
+    ):
+        """Masked Convolution.
+        This module correspond to a 1d convolution with input masking. Arguments to create are the
+        same as nn.Conv1d, but with the addition of use_mask for special behaviour.
+        Args:
+            in_channels : Same as nn.Conv1d
+            out_channels : Same as nn.Conv1d
+            kernel_size : Same as nn.Conv1d
+            stride : Same as nn.Conv1d
+            padding : Same as nn.Conv1d
+            dilation : Same as nn.Conv1d
+            groups : Same as nn.Conv1d
+            bias : Same as nn.Conv1d
+            use_mask : Controls the masking of input before the convolution during the forward.
+        """
+        super(MaskedConv1d, self).__init__()
+
+        self.use_mask = use_mask
+
+        self.conv = nn.Conv1d(
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias,
+        )
+
+        self.padding = self.conv.padding[0]
+        self.dilation = self.conv.dilation[0]
+        self.kernel_size = self.conv.kernel_size[0]
+        self.stride = self.conv.stride[0]
+
+    def get_seq_len(self, lens: torch.Tensor) -> torch.Tensor:
+        """Get the lengths of the inputs after the convolution operation is applied.
+        Args:
+            lens : Original lengths of the inputs
+        Returns:
+            Resulting lengths after the convolution
+        """
+        return (
+            lens + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1
+        ) // self.stride + 1
+
+    def mask_fill(self, x: torch.Tensor, lens: torch.Tensor) -> torch.Tensor:
+        """Mask the input based on it's respective lengths.
+        Args:
+            x : Signal to be processed, of shape (batch, features, time)
+            lens : Lenghts of each element in the batch of x, with shape (batch)
+        Returns:
+            The masked signal
+        """
+        lens = lens.to(dtype=torch.long)
+        max_len = x.size(2)
+        mask = torch.arange(max_len, device=lens.device).expand(
+            lens.shape[0], max_len
+        ) >= lens.unsqueeze(1)
+        x = x.masked_fill(mask.unsqueeze(1).to(device=x.device), 0)
+        return x
+
+    def forward(
+        self, x: torch.Tensor, lens: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Forward method
+        Args:
+            x : Signal to be processed, of shape (batch, features, time)
+            lens : Lenghts of each element in the batch of x, with shape (batch)
+        Returns:
+            Both the signal processed by the convolution and the resulting lengths
+        """
+        if self.use_mask:
+            x = self.mask_fill(x, lens)
+        out = self.conv(x)
+        return out, self.get_seq_len(lens)
+
+
+class MultiSequential(nn.Sequential):
+    def forward(self, x1, x2):
+        for module in self.children():
+            x1, x2 = module(x1, x2)
+        return x1, x2
+
+
+class Masked(nn.Module):
+    def __init__(self, *layers):
+        super().__init__()
+        self.layer = nn.Sequential(*layers)
+
+    def forward(self, x: torch.Tensor, lens: torch.Tensor):
+        return self.layer(x), lens
 
 
 class QuartznetBlock(nn.Module):
@@ -167,12 +277,12 @@ class QuartznetBlock(nn.Module):
             )
         )
 
-        self.mconv = nn.Sequential(*conv)
+        self.mconv = MultiSequential(*conv)
 
         if residual:
             stride_residual = stride if stride[0] == 1 else stride[0] ** repeat
 
-            self.res = nn.Sequential(
+            self.res = MultiSequential(
                 *self._get_conv_bn_layer(
                     inplanes,
                     planes,
@@ -184,7 +294,7 @@ class QuartznetBlock(nn.Module):
         else:
             self.res = None
 
-        self.mout = nn.Sequential(*self._get_act_dropout_layer(drop_prob=dropout))
+        self.mout = MultiSequential(*self._get_act_dropout_layer(drop_prob=dropout))
 
     def _get_conv_bn_layer(
         self,
@@ -197,14 +307,14 @@ class QuartznetBlock(nn.Module):
 
         if separable:
             layers = [
-                nn.Conv1d(
+                MaskedConv1d(
                     in_channels,
                     in_channels,
                     kernel_size,
                     groups=in_channels,
                     **conv_kwargs,
                 ),
-                nn.Conv1d(
+                MaskedConv1d(
                     in_channels,
                     out_channels,
                     kernel_size=1,
@@ -216,7 +326,7 @@ class QuartznetBlock(nn.Module):
             ]
         else:
             layers = [
-                nn.Conv1d(
+                MaskedConv1d(
                     in_channels,
                     out_channels,
                     kernel_size,
@@ -224,14 +334,16 @@ class QuartznetBlock(nn.Module):
                 )
             ]
 
-        layers.append(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1))
+        layers.append(Masked(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1)))
 
         return layers
 
     def _get_act_dropout_layer(self, drop_prob=0.2):
-        return [nn.ReLU(True), nn.Dropout(p=drop_prob)]
+        return [Masked(nn.ReLU(True)), Masked(nn.Dropout(p=drop_prob))]
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, lens: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
             x : Tensor of shape (batch, features, time) where #features == inplanes
@@ -241,16 +353,16 @@ class QuartznetBlock(nn.Module):
         """
 
         # compute forward convolutions
-        out = self.mconv(x)
+        out, lens_out = self.mconv(x, lens)
 
         # compute the residuals
         if self.res is not None:
-            res_out = self.res(x)
+            res_out, _ = self.res(x, lens)
             out = out + res_out
 
         # compute the output
-        out = self.mout(out)
-        return out
+        out, lens_out = self.mout(out, lens_out)
+        return out, lens_out
 
 
 def stem(feat_in: int) -> QuartznetBlock:

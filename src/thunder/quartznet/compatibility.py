@@ -131,12 +131,19 @@ def load_quartznet_weights(encoder: nn.Module, decoder: nn.Module, weights_path:
     """
     weights = torch.load(weights_path)
 
+    def fix_encoder_name(x: str) -> str:
+        x = x.replace("encoder.", "").replace(".res.0", ".res")
+        # Add another abstraction layer if it's not a masked conv
+        # This is caused by the new Masked wrapper
+        if ".conv" not in x:
+            parts = x.split(".")
+            x = ".".join(parts[:3] + ["layer", "0"] + parts[3:])
+        return x
+
     # We remove the 'encoder.' and 'decoder.' prefix from the weights to enable
     # compatibility to load with plain nn.Modules created by reading the config
     encoder_weights = {
-        k.replace("encoder.", "").replace(".conv", "").replace(".res.0", ".res"): v
-        for k, v in weights.items()
-        if "encoder" in k
+        fix_encoder_name(k): v for k, v in weights.items() if "encoder" in k
     }
     encoder.load_state_dict(encoder_weights, strict=True)
 
