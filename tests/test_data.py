@@ -88,10 +88,5 @@ def test_load_single_process(single_process_loader):
     _can_load_data(single_process_loader)
 
 
-@pytest.mark.xfail
 def test_load_multi_process(multi_process_loader):
-    # I don't know why but this test fails if run
-    # at the same time as other dataloader tests,
-    # but pass if you run it alone.
-    # It's also behaving correctly inside training.
     _can_load_data(multi_process_loader)

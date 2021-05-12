@@ -8,7 +8,7 @@ from pathlib import Path
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-from .dataloader_utils import BucketingSampler, asr_collate
+from .dataloader_utils import asr_collate
 from .dataset import BaseSpeechDataset, ManifestSpeechDataset
 
 
@@ -40,16 +40,17 @@ class BaseDataModule(LightningDataModule):
 
     def setup(self, stage):
         self.train_dataset = self.get_dataset(split="train")
-        self.sampler = BucketingSampler(self.train_dataset, batch_size=self.bs)
         self.val_dataset = self.get_dataset(split="valid")
         self.test_dataset = self.get_dataset(split="test")
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
             self.train_dataset,
-            batch_sampler=self.sampler,
+            batch_size=self.bs,
             collate_fn=asr_collate,
             num_workers=self.num_workers,
+            shuffle=True,
+            pin_memory=True,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -59,6 +60,7 @@ class BaseDataModule(LightningDataModule):
             shuffle=False,
             collate_fn=asr_collate,
             num_workers=self.num_workers,
+            pin_memory=True,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -68,6 +70,7 @@ class BaseDataModule(LightningDataModule):
             shuffle=False,
             collate_fn=asr_collate,
             num_workers=self.num_workers,
+            pin_memory=True,
         )
 
     @property
@@ -77,7 +80,7 @@ class BaseDataModule(LightningDataModule):
         Returns:
             Number of steps
         """
-        return len(self.sampler)
+        return len(self.train_dataset) // self.bs
 
 
 class ManifestDatamodule(BaseDataModule):
