@@ -5,7 +5,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Iterable, Tuple
+from typing import Any, Iterable, Tuple, Union
 
 import torchaudio
 from torch import Tensor
@@ -102,7 +102,7 @@ class BaseSpeechDataset(Dataset):
 
 
 class ManifestSpeechDataset(BaseSpeechDataset):
-    def __init__(self, file: Path, force_mono: bool, sr: int):
+    def __init__(self, file: Union[str, Path], force_mono: bool, sr: int):
         """Dataset that loads from nemo manifest files.
 
         Args:
@@ -110,6 +110,7 @@ class ManifestSpeechDataset(BaseSpeechDataset):
             force_mono : If true, convert all the loaded samples to mono.
             sr : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
         """
+        file = Path(file)
         # Reading from the manifest file
         items = [json.loads(line) for line in file.read_text().strip().splitlines()]
         super().__init__(items, force_mono=force_mono, sr=sr)

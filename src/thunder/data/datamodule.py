@@ -3,7 +3,6 @@
 
 # Copyright (c) 2021 scart97
 
-from pathlib import Path
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
@@ -107,5 +106,6 @@ class ManifestDatamodule(BaseDataModule):
         }
 
     def get_dataset(self, split: str) -> ManifestSpeechDataset:
-        file = Path(self.manifest_mapping[split])
-        return ManifestSpeechDataset(file, self.force_mono, self.sr)
+        return ManifestSpeechDataset(
+            self.manifest_mapping[split], self.force_mono, self.sr
+        )
