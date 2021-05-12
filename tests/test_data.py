@@ -19,7 +19,7 @@ def single_process_loader(sample_manifest):
         val_manifest=sample_manifest,
         test_manifest=sample_manifest,
         num_workers=0,
-        bs=10,
+        batch_size=10,
     )
     dm.prepare_data()
     dm.setup(None)
@@ -33,7 +33,7 @@ def multi_process_loader(sample_manifest):
         val_manifest=sample_manifest,
         test_manifest=sample_manifest,
         num_workers=12,
-        bs=10,
+        batch_size=10,
     )
     dm.prepare_data()
     dm.setup(None)

@@ -166,8 +166,8 @@ def test_maskconv_onnx():
 
 
 quartznet_parameters = given(
-    inplanes=integers(16, 32),
-    planes=integers(16, 32),
+    in_channels=integers(16, 32),
+    out_channels=integers(16, 32),
     repeat=integers(1, 4),
     kernel_size=lists(
         integers(11, 33).filter(lambda x: x % 2 == 1), min_size=1, max_size=1
@@ -185,13 +185,13 @@ def test_QuartznetBlock_combinations(**kwargs):
         block = QuartznetBlock(**kwargs)
     except ValueError:
         return
-    x = torch.randn(10, kwargs["inplanes"], 1337)
+    x = torch.randn(10, kwargs["in_channels"], 1337)
     lens = torch.randint(10, 1337, (10,))
 
     out, _ = block(x, lens)
 
     assert out.shape[0] == x.shape[0]
-    assert out.shape[1] == kwargs["planes"]
+    assert out.shape[1] == kwargs["out_channels"]
 
 
 @mark_slow
@@ -201,7 +201,7 @@ def test_QuartznetBlock_update(**kwargs):
         block = QuartznetBlock(**kwargs)
     except ValueError:
         return
-    x = torch.randn(10, kwargs["inplanes"], 1337)
+    x = torch.randn(10, kwargs["in_channels"], 1337)
     lens = torch.randint(10, 1337, (10,))
     _test_parameters_update(block, (x, lens))
 
@@ -214,7 +214,7 @@ def test_QuartznetBlock_independence(**kwargs):
         block = QuartznetBlock(**kwargs)
     except ValueError:
         return
-    x = torch.randn(10, kwargs["inplanes"], 1337)
+    x = torch.randn(10, kwargs["in_channels"], 1337)
     lens = torch.randint(10, 1337, (10,))
     _test_batch_independence(block, (x, lens))
 
@@ -228,7 +228,7 @@ def test_QuartznetBlock_device_move(**kwargs):
         block = QuartznetBlock(**kwargs)
     except ValueError:
         return
-    x = torch.randn(10, kwargs["inplanes"], 1337)
+    x = torch.randn(10, kwargs["in_channels"], 1337)
     lens = torch.randint(10, 1337, (10,))
     _test_device_move(block, (x, lens))
 
@@ -243,7 +243,7 @@ def test_QuartznetBlock_trace(**kwargs):
     except ValueError:
         return
 
-    x = torch.randn(10, kwargs["inplanes"], 1337)
+    x = torch.randn(10, kwargs["in_channels"], 1337)
     lens = torch.randint(10, 1337, (10,))
     block_trace = torch.jit.trace(block, (x, lens))
 
@@ -263,7 +263,7 @@ def test_QuartznetBlock_script(**kwargs):
     except ValueError:
         return
 
-    x = torch.randn(10, kwargs["inplanes"], 1337)
+    x = torch.randn(10, kwargs["in_channels"], 1337)
     lens = torch.randint(10, 1337, (10,))
     block_script = torch.jit.script(block)
 
@@ -281,7 +281,7 @@ def test_QuartznetBlock_onnx(**kwargs):
         block = QuartznetBlock(**kwargs)
     except ValueError:
         return
-    x = torch.randn(10, kwargs["inplanes"], 1337)
+    x = torch.randn(10, kwargs["in_channels"], 1337)
     lens = torch.randint(10, 1337, (10,))
     with TemporaryDirectory() as export_path:
         torch.onnx.export(

@@ -213,8 +213,8 @@ class Masked(nn.Module):
 class QuartznetBlock(nn.Module):
     def __init__(
         self,
-        inplanes: int,
-        planes: int,
+        in_channels: int,
+        out_channels: int,
         repeat: int = 5,
         kernel_size: List[int] = [11],
         stride: List[int] = [1],
@@ -228,8 +228,8 @@ class QuartznetBlock(nn.Module):
         dense residual used on Jasper is not supported here, and masked convolutions were also removed.
 
         Args:
-            inplanes : Number of input planes
-            planes : Number of output planes
+            in_channels : Number of input channels
+            out_channels : Number of output channels
             repeat : Repetitions inside block.
             kernel_size : Kernel size.
             stride : Stride of each repetition.
@@ -242,7 +242,7 @@ class QuartznetBlock(nn.Module):
 
         padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
 
-        inplanes_loop = inplanes
+        inplanes_loop = in_channels
         conv = []
 
         for _ in range(repeat - 1):
@@ -250,7 +250,7 @@ class QuartznetBlock(nn.Module):
             conv.extend(
                 self._get_conv_bn_layer(
                     inplanes_loop,
-                    planes,
+                    out_channels,
                     kernel_size=kernel_size,
                     stride=stride,
                     dilation=dilation,
@@ -262,12 +262,12 @@ class QuartznetBlock(nn.Module):
 
             conv.extend(self._get_act_dropout_layer(drop_prob=dropout))
 
-            inplanes_loop = planes
+            inplanes_loop = out_channels
 
         conv.extend(
             self._get_conv_bn_layer(
                 inplanes_loop,
-                planes,
+                out_channels,
                 kernel_size=kernel_size,
                 stride=stride,
                 dilation=dilation,
@@ -284,8 +284,8 @@ class QuartznetBlock(nn.Module):
 
             self.res = MultiSequential(
                 *self._get_conv_bn_layer(
-                    inplanes,
-                    planes,
+                    in_channels,
+                    out_channels,
                     kernel_size=1,
                     stride=stride_residual,
                     bias=False,
