@@ -17,13 +17,6 @@ from torch import nn
 
 from thunder.utils import get_default_cache_folder
 
-checkpoint_archives = {
-    "QuartzNet15x5Base-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-En.nemo",
-    "QuartzNet15x5Base-Zh": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-Zh.nemo",
-    "QuartzNet5x5LS-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet5x5LS-En.nemo",
-    "QuartzNet15x5NR-En": "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5NR-En.nemo",
-}
-
 
 # fmt:off
 class NemoCheckpoint(str, Enum):
@@ -52,6 +45,12 @@ class NemoCheckpoint(str, Enum):
     stt_en_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_en_quartznet15x5/versions/1.0.0rc1/files/stt_en_quartznet15x5.nemo",
     stt_zh_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_zh_quartznet15x5/versions/1.0.0rc1/files/stt_zh_quartznet15x5.nemo",
 
+    @staticmethod
+    def from_string(name):
+        try:
+            return NemoCheckpoint[name]
+        except KeyError:
+            raise ValueError()
 # fmt:on
 
 
