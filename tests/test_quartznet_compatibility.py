@@ -23,7 +23,7 @@ from thunder.quartznet.model import (
     Quartznet15x5_encoder,
     Quartznet_decoder,
 )
-from thunder.quartznet.preprocess import FilterbankFeatures
+from thunder.quartznet.transform import FilterbankFeatures
 
 
 @mark_slow

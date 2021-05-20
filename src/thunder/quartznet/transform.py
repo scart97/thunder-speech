@@ -1,4 +1,4 @@
-"""Functionality to preprocess the audio input in the same way
+"""Functionality to transform the audio input in the same way
 that the Quartznet model expects it.
 """
 

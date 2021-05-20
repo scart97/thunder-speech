@@ -20,7 +20,7 @@ from thunder.quartznet.compatibility import (
     read_params_from_config,
 )
 from thunder.quartznet.model import Quartznet5, Quartznet_decoder
-from thunder.quartznet.preprocess import FilterbankFeatures
+from thunder.quartznet.transform import FilterbankFeatures
 from thunder.text_processing.transform import BatchTextTransformer
 from thunder.text_processing.vocab import Vocab
 

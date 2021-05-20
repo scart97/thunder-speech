@@ -17,7 +17,7 @@ from tests.utils import (
     mark_slow,
     requirescuda,
 )
-from thunder.quartznet.preprocess import (
+from thunder.quartznet.transform import (
     DitherAudio,
     FeatureBatchNormalizer,
     FilterbankFeatures,
