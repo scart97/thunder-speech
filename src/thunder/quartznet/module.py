@@ -214,7 +214,7 @@ class QuartznetModule(pl.LightningModule):
         self.log("metrics/wer", self.val_wer, on_epoch=True)
         return loss
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> torch.optim.Optimizer:
         """Configuring optimizers. Check the original lightning docs for more info.
 
         Returns:
@@ -229,7 +229,7 @@ class QuartznetModule(pl.LightningModule):
     @classmethod
     def load_from_nemo(
         cls, *, nemo_filepath: str = None, checkpoint_name: NemoCheckpoint = None
-    ):
+    ) -> "QuartznetModule":
         """Load from the original nemo checkpoint.
 
         Args:
