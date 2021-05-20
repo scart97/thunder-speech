@@ -19,7 +19,7 @@ from thunder.quartznet.compatibility import (
     load_quartznet_weights,
     read_params_from_config,
 )
-from thunder.quartznet.model import Quartznet5, Quartznet_decoder
+from thunder.quartznet.model import Quartznet_decoder, Quartznet_encoder
 from thunder.quartznet.transform import FilterbankFeatures
 from thunder.text_processing.transform import BatchTextTransformer
 from thunder.text_processing.vocab import Vocab
@@ -55,7 +55,7 @@ class QuartznetModule(pl.LightningModule):
             dither=dither,
         )
 
-        self.encoder = Quartznet5(nfilt, filters, kernel_sizes, repeat_blocks)
+        self.encoder = Quartznet_encoder(nfilt, filters, kernel_sizes, repeat_blocks)
 
         self.text_pipeline = self.build_text_pipeline(
             initial_vocab_tokens, nemo_compat_vocab

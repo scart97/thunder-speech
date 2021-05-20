@@ -14,7 +14,7 @@ from torch import nn
 from thunder.quartznet.blocks import MultiSequential, body, init_weights, stem
 
 
-def Quartznet5(
+def Quartznet_encoder(
     feat_in: int,
     filters: List[int] = [256, 256, 512, 512, 512],
     kernel_sizes: List[int] = [33, 39, 51, 63, 75],
@@ -25,6 +25,8 @@ def Quartznet5(
 
     Args:
         feat_in : Number of input features to the model.
+        filters: List of filter sizes used to create the encoder blocks
+        kernel_sizes: List of kernel sizes corresponding to each filter size
         repeat_blocks : Number of repetitions of each block.
 
     Returns:
@@ -34,30 +36,6 @@ def Quartznet5(
         stem(feat_in),
         *body(filters, kernel_sizes, repeat_blocks),
     )
-
-
-def Quartznet5x5_encoder(feat_in: int = 64) -> nn.Module:
-    """Build encoder corresponding to the Quartznet5x5 model.
-
-    Args:
-        feat_in : Number of input features to the model.
-
-    Returns:
-        Pytorch model of the encoder
-    """
-    return Quartznet5(feat_in)
-
-
-def Quartznet15x5_encoder(feat_in: int = 64) -> nn.Module:
-    """Build encoder corresponding to the Quartznet15x5 model.
-
-    Args:
-        feat_in : Number of input features to the model.
-
-    Returns:
-        Pytorch model of the encoder
-    """
-    return Quartznet5(feat_in, repeat_blocks=3)
 
 
 def Quartznet_decoder(num_classes: int, input_channels: int = 1024) -> nn.Module:
