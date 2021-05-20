@@ -27,7 +27,6 @@ class BatchTextTransformer(nn.Module):
         Args:
             vocab : Vocabulary to be used
             tokenize_func : Function that will perform the tokenization of each individual text sample. Defaults to char_tokenizer.
-            preprocessing_transforms : Functions that will be applied before tokenization, as the first step. Defaults to chain_calls(lower_text, normalize_text).
             after_tokenize : Functions to be applied after the tokenization but before numericalization. Defaults to None.
             after_numericalize : Functions to be applied at the end of the pipeline. Defaults to torch.LongTensor.
         """
