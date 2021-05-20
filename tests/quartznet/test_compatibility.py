@@ -11,13 +11,13 @@ import torch
 from torchaudio.datasets.utils import extract_archive
 
 from tests.utils import mark_slow
+from thunder.quartznet.blocks import Quartznet_decoder, Quartznet_encoder
 from thunder.quartznet.compatibility import (
     NemoCheckpoint,
     download_checkpoint,
     load_quartznet_weights,
     read_params_from_config,
 )
-from thunder.quartznet.model import Quartznet_decoder, Quartznet_encoder
 from thunder.quartznet.transform import FilterbankFeatures
 
 

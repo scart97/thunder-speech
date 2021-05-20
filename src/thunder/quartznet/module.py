@@ -14,13 +14,13 @@ from torch.nn.functional import ctc_loss, log_softmax
 from torchaudio.datasets.utils import extract_archive
 
 from thunder.metrics import CER, WER
+from thunder.quartznet.blocks import Quartznet_decoder, Quartznet_encoder
 from thunder.quartznet.compatibility import (
     NemoCheckpoint,
     download_checkpoint,
     load_quartznet_weights,
     read_params_from_config,
 )
-from thunder.quartznet.model import Quartznet_decoder, Quartznet_encoder
 from thunder.quartznet.transform import FilterbankFeatures
 from thunder.text_processing.transform import BatchTextTransformer
 from thunder.text_processing.vocab import Vocab
@@ -55,9 +55,9 @@ class QuartznetModule(pl.LightningModule):
             preemph : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             nfilt : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             dither : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            filters : Check [`Quartznet_encoder`][thunder.quartznet.model.Quartznet_encoder]
-            kernel_sizes : Check [`Quartznet_encoder`][thunder.quartznet.model.Quartznet_encoder]
-            repeat_blocks : Check [`Quartznet_encoder`][thunder.quartznet.model.Quartznet_encoder]
+            filters : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
+            kernel_sizes : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
+            repeat_blocks : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
             learning_rate : Learning rate used by the optimizer
             nemo_compat_vocab : Controls if the used vocabulary will be compatible with the original nemo implementation.
         """

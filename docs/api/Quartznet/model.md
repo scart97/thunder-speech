@@ -1,1 +1,0 @@
-::: thunder.quartznet.model
