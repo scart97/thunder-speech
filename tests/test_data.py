@@ -62,10 +62,11 @@ def test_dataset_shape_and_type(single_process_loader, subset):
 def test_audio_scale(single_process_loader, subset):
     dataset = getattr(single_process_loader, subset)
     audio = dataset[0][0]
-    assert audio.min() >= -1.0
-    assert audio.max() <= 1.0
-    # assert (audio > 0.0).any()
-    # assert (audio < 0.0).any()
+    for audio, _ in dataset:
+        assert audio.min() >= -1.0
+        assert audio.max() <= 1.0
+        assert (audio > 0.0).any()
+        assert (audio < 0.0).any()
 
 
 @pytest.mark.parametrize("subset", ["val_dataset", "test_dataset"])

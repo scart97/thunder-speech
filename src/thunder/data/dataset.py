@@ -69,8 +69,9 @@ class BaseSpeechDataset(Dataset):
 
     def preprocess_audio(self, audio: Tensor, sample_rate: int) -> Tensor:
         """Apply some base transforms to the audio, that fix silent problems.
-        It transforms all the audios to mono (depending on class creation parameter)
-        and resamples the audios to a common sample rate.
+        It transforms all the audios to mono (depending on class creation parameter),
+        remove the possible DC bias present and then resamples the audios to a common
+        sample rate.
 
         Args:
             audio : Audio tensor
@@ -81,6 +82,14 @@ class BaseSpeechDataset(Dataset):
         """
         if self.force_mono and (audio.shape[0] > 1):
             audio = audio.mean(0, keepdim=True)
+
+        # Removing the dc component from the audio
+        # It happens when a faulty capture device introduce
+        # an offset into the recorded waveform, and this can
+        # cause problems with later transforms.
+        # https://en.wikipedia.org/wiki/DC_bias
+        audio = audio - audio.mean(1)
+
         if self.sample_rate != sample_rate:
             tfm = torchaudio.transforms.Resample(
                 orig_freq=sample_rate, new_freq=self.sample_rate
