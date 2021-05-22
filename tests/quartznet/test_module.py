@@ -81,5 +81,5 @@ def test_change_vocab():
     assert module.hparams.initial_vocab_tokens == ["a", "b", "c"]
     # comparing to 10 to account for the 3 initial tokens plus
     # the few special tokens automatically added.
-    assert len(module.text_pipeline.vocab) < 10
+    assert len(module.text_transform.vocab) < 10
     assert module.decoder.out_channels < 10

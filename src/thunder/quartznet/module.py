@@ -64,7 +64,7 @@ class QuartznetModule(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.features = FilterbankFeatures(
+        self.audio_transform = FilterbankFeatures(
             sample_rate=sample_rate,
             n_window_size=n_window_size,
             n_window_stride=n_window_stride,
@@ -76,10 +76,10 @@ class QuartznetModule(pl.LightningModule):
 
         self.encoder = Quartznet_encoder(nfilt, filters, kernel_sizes, repeat_blocks)
 
-        self.text_pipeline = self.build_text_pipeline(
+        self.text_transform = self.build_text_transform(
             initial_vocab_tokens, nemo_compat_vocab
         )
-        self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))
+        self.decoder = self.build_decoder(1024, len(self.text_transform.vocab))
 
         # Metrics
         self.val_cer = CER()
@@ -90,7 +90,7 @@ class QuartznetModule(pl.LightningModule):
             torch.randint(10, sample_rate, (10,)),
         )
 
-    def build_text_pipeline(
+    def build_text_transform(
         self, initial_vocab_tokens: List[str], nemo_compat_vocab: bool
     ) -> BatchTextTransformer:
         """Overwrite this function if you want to change how the text processing happens inside the model.
@@ -129,7 +129,7 @@ class QuartznetModule(pl.LightningModule):
         Returns:
             Tuple with the predictions and output lengths. Notice that the ouput lengths are not normalized, they are a long tensor.
         """
-        features = self.features(x)  # TODO: maybe mask features
+        features = self.audio_transform(x)  # TODO: maybe mask features
         feature_lens = (features.shape[-1] * lens).long()
         encoded, output_lens = self.encoder(features, feature_lens)
         return self.decoder(encoded), output_lens.long()
@@ -146,14 +146,14 @@ class QuartznetModule(pl.LightningModule):
         """
         lens = torch.tensor([x.shape[-1]], device=x.device)
         pred, _ = self(x, lens)
-        return self.text_pipeline.decode_prediction(pred.argmax(1))
+        return self.text_transform.decode_prediction(pred.argmax(1))
 
     def calculate_loss(self, probabilities, y, prob_lens, y_lens):
         # Change from (batch, #vocab, time) to (time, batch, #vocab)
         probabilities = probabilities.permute(2, 0, 1)
         logprobs = log_softmax(probabilities, dim=2)
 
-        blank = self.text_pipeline.vocab.blank_idx
+        blank = self.text_transform.vocab.blank_idx
 
         return ctc_loss(
             logprobs,
@@ -178,7 +178,7 @@ class QuartznetModule(pl.LightningModule):
             Training loss for that batch
         """
         audio, audio_lens, texts = batch
-        y, y_lens = self.text_pipeline.encode(texts, device=self.device)
+        y, y_lens = self.text_transform.encode(texts, device=self.device)
 
         probabilities, out_lens = self(audio, audio_lens)
         loss = self.calculate_loss(probabilities, y, out_lens, y_lens)
@@ -199,13 +199,13 @@ class QuartznetModule(pl.LightningModule):
             Validation loss for that batch
         """
         audio, audio_lens, texts = batch
-        y, y_lens = self.text_pipeline.encode(texts, device=self.device)
+        y, y_lens = self.text_transform.encode(texts, device=self.device)
 
         probabilities, out_lens = self(audio, audio_lens)
         loss = self.calculate_loss(probabilities, y, out_lens, y_lens)
 
-        decoded_preds = self.text_pipeline.decode_prediction(probabilities.argmax(1))
-        decoded_targets = self.text_pipeline.decode_prediction(y)
+        decoded_preds = self.text_transform.decode_prediction(probabilities.argmax(1))
+        decoded_targets = self.text_transform.decode_prediction(y)
         self.val_cer(decoded_preds, decoded_targets)
         self.val_wer(decoded_preds, decoded_targets)
 
@@ -280,5 +280,5 @@ class QuartznetModule(pl.LightningModule):
         self.hparams.initial_vocab_tokens = new_vocab_tokens
         self.hparams.nemo_compat_vocab = nemo_compat
 
-        self.text_pipeline = self.build_text_pipeline(new_vocab_tokens, nemo_compat)
-        self.decoder = self.build_decoder(1024, len(self.text_pipeline.vocab))
+        self.text_transform = self.build_text_transform(new_vocab_tokens, nemo_compat)
+        self.decoder = self.build_decoder(1024, len(self.text_transform.vocab))
