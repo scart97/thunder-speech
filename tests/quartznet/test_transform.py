@@ -17,7 +17,7 @@ from tests.utils import (
     mark_slow,
     requirescuda,
 )
-from thunder.quartznet.preprocess import (
+from thunder.quartznet.transform import (
     DitherAudio,
     FeatureBatchNormalizer,
     FilterbankFeatures,
@@ -45,12 +45,6 @@ def test_normalize_has_correct_mean_std():
     for xb in out:
         assert torch.allclose(xb[:, :].mean(), torch.zeros(1), atol=0.1)
         assert torch.allclose(xb[:, :].std(), torch.ones(1), atol=0.1)
-
-
-def test_normalize_batch_independence():
-    norm = FeatureBatchNormalizer()
-    x = torch.randn(10, 40, 1337)
-    _test_batch_independence(norm, x)
 
 
 @requirescuda

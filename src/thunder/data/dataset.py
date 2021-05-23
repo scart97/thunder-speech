@@ -5,26 +5,30 @@
 
 import json
 from pathlib import Path
-from typing import Any, Iterable, Tuple
+from typing import Any, Iterable, Tuple, Union
 
 import torchaudio
 from torch import Tensor
 from torch.utils.data import Dataset
 
+from thunder.text_processing.preprocess import lower_text, normalize_text
+
 
 class BaseSpeechDataset(Dataset):
-    def __init__(self, items: Iterable, force_mono: bool = True, sr: int = 16000):
+    def __init__(
+        self, items: Iterable, force_mono: bool = True, sample_rate: int = 16000
+    ):
         """This is the base class that implements the minimal functionality to have a compatible
         speech dataset, in a way that can be easily customized by subclassing.
 
         Args:
             items : Source of items in the dataset, sorted by audio duration. This can be a list of files, a pandas dataframe or any other iterable structure where you record your data.
             force_mono : If true, convert all the loaded samples to mono.
-            sr : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
+            sample_rate : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
         """
         super().__init__()
         self.items = items
-        self.sr = sr
+        self.sample_rate = sample_rate
         self.force_mono = force_mono
 
     def __len__(self):
@@ -32,9 +36,13 @@ class BaseSpeechDataset(Dataset):
 
     def __getitem__(self, index: int) -> Tuple[Tensor, str]:
         item = self.get_item(index)
+        # Dealing with input
         audio, sr = self.open_audio(item)
-        audio = self.correct_audio(audio, sr)
+        audio = self.preprocess_audio(audio, sr)
+        # Dealing with output
         text = self.open_text(item)
+        text = self.preprocess_text(text)
+
         return audio, text
 
     def get_item(self, index: int) -> Any:
@@ -59,22 +67,33 @@ class BaseSpeechDataset(Dataset):
         """
         return torchaudio.load(item)
 
-    def correct_audio(self, audio: Tensor, sr: int) -> Tensor:
+    def preprocess_audio(self, audio: Tensor, sample_rate: int) -> Tensor:
         """Apply some base transforms to the audio, that fix silent problems.
-        It transforms all the audios to mono (depending on class creation parameter)
-        and resamples the audios to a common sample rate.
+        It transforms all the audios to mono (depending on class creation parameter),
+        remove the possible DC bias present and then resamples the audios to a common
+        sample rate.
 
         Args:
             audio : Audio tensor
-            sr : Sample rate
+            sample_rate : Sample rate
 
         Returns:
             Audio tensor after the transforms.
         """
         if self.force_mono and (audio.shape[0] > 1):
             audio = audio.mean(0, keepdim=True)
-        if self.sr != sr:
-            tfm = torchaudio.transforms.Resample(orig_freq=sr, new_freq=self.sr)
+
+        # Removing the dc component from the audio
+        # It happens when a faulty capture device introduce
+        # an offset into the recorded waveform, and this can
+        # cause problems with later transforms.
+        # https://en.wikipedia.org/wiki/DC_bias
+        audio = audio - audio.mean(1)
+
+        if self.sample_rate != sample_rate:
+            tfm = torchaudio.transforms.Resample(
+                orig_freq=sample_rate, new_freq=self.sample_rate
+            )
             audio = tfm(audio)
         return audio
 
@@ -89,21 +108,25 @@ class BaseSpeechDataset(Dataset):
         """
         raise NotImplementedError()
 
+    def preprocess_text(self, text: str) -> str:
+        normalized = normalize_text(text)
+        lower = lower_text(normalized)
+        return lower
+
 
 class ManifestSpeechDataset(BaseSpeechDataset):
-    def __init__(self, file: Path, force_mono: bool, sr: int):
+    def __init__(self, file: Union[str, Path], force_mono: bool, sample_rate: int):
         """Dataset that loads from nemo manifest files.
 
         Args:
             file : Nemo manifest file.
             force_mono : If true, convert all the loaded samples to mono.
-            sr : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
+            sample_rate : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
         """
+        file = Path(file)
         # Reading from the manifest file
         items = [json.loads(line) for line in file.read_text().strip().splitlines()]
-        # Sort items for efficient batching later.
-        sorted_items = list(sorted(items, key=lambda x: x["duration"]))
-        super().__init__(sorted_items, force_mono=force_mono, sr=sr)
+        super().__init__(items, force_mono=force_mono, sample_rate=sample_rate)
 
     def open_audio(self, item: dict) -> Tuple[Tensor, int]:
         return torchaudio.load(item["audio_filepath"])

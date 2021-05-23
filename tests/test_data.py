@@ -19,7 +19,7 @@ def single_process_loader(sample_manifest):
         val_manifest=sample_manifest,
         test_manifest=sample_manifest,
         num_workers=0,
-        bs=10,
+        batch_size=10,
     )
     dm.prepare_data()
     dm.setup(None)
@@ -33,7 +33,7 @@ def multi_process_loader(sample_manifest):
         val_manifest=sample_manifest,
         test_manifest=sample_manifest,
         num_workers=12,
-        bs=10,
+        batch_size=10,
     )
     dm.prepare_data()
     dm.setup(None)
@@ -62,10 +62,11 @@ def test_dataset_shape_and_type(single_process_loader, subset):
 def test_audio_scale(single_process_loader, subset):
     dataset = getattr(single_process_loader, subset)
     audio = dataset[0][0]
-    assert audio.min() >= -1.0
-    assert audio.max() <= 1.0
-    assert (audio > 0.0).any()
-    assert (audio < 0.0).any()
+    for audio, _ in dataset:
+        assert audio.min() >= -1.0
+        assert audio.max() <= 1.0
+        assert (audio > 0.0).any()
+        assert (audio < 0.0).any()
 
 
 @pytest.mark.parametrize("subset", ["val_dataset", "test_dataset"])
@@ -88,10 +89,5 @@ def test_load_single_process(single_process_loader):
     _can_load_data(single_process_loader)
 
 
-@pytest.mark.xfail
 def test_load_multi_process(multi_process_loader):
-    # I don't know why but this test fails if run
-    # at the same time as other dataloader tests,
-    # but pass if you run it alone.
-    # It's also behaving correctly inside training.
     _can_load_data(multi_process_loader)

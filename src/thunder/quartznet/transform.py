@@ -1,4 +1,4 @@
-"""Functionality to preprocess the audio input in the same way
+"""Functionality to transform the audio input in the same way
 that the Quartznet model expects it.
 """
 
@@ -57,6 +57,7 @@ class FeatureBatchNormalizer(nn.Module):
         super().__init__()
         self.div_guard = 1e-5
 
+    @torch.no_grad()
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
@@ -199,7 +200,7 @@ class MelScale(nn.Module):
                 f_min=0,
                 f_max=sample_rate / 2,
                 norm="slaney",
-                htk=True,
+                htk=False,
             )
             .transpose(0, 1)
             .unsqueeze(0)

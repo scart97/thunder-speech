@@ -4,7 +4,6 @@
 # Copyright (c) 2021 scart97
 
 import os
-from typing import List
 
 import pytest
 
@@ -27,13 +26,20 @@ mark_slow = pytest.mark.skipif(not os.getenv("RUN_SLOW"), reason="Skip slow test
 # ##############################################
 
 
-def _test_parameters_update(model: nn.Module, x: List[torch.Tensor]):
+def call_model(model, x, device="cpu"):
+    if isinstance(x, tuple):
+        x = tuple(i.to(device) for i in x)
+        out, _ = model(*x)
+    else:
+        out = model(x.to(device))
+    return out
+
+
+def _test_parameters_update(model: nn.Module, x):
     model.train()
     optim = torch.optim.SGD(model.parameters(), lr=0.1)
+    outputs = call_model(model, x)
 
-    outputs = model(x)
-    if isinstance(outputs, list):
-        outputs = outputs[-1]
     loss = outputs.mean()
     loss.backward()
     optim.step()
@@ -47,26 +53,30 @@ def _test_parameters_update(model: nn.Module, x: List[torch.Tensor]):
 def _test_device_move(model: nn.Module, x: torch.Tensor, atol: float = 1e-4):
     model.eval()
     seed_everything(42)
-    outputs_cpu = model(x)
+    outputs_cpu = call_model(model, x)
 
     seed_everything(42)
     model = model.cuda()
-    outputs_gpu = model(x.cuda())
+    outputs_gpu = call_model(model, x, "cuda")
 
     seed_everything(42)
     model = model.cpu()
-    outputs_back_on_cpu = model(x.cpu())
+    outputs_back_on_cpu = call_model(model, x)
     model.train()
     assert torch.allclose(outputs_cpu, outputs_gpu.cpu(), atol=atol)
     assert torch.allclose(outputs_cpu, outputs_back_on_cpu)
 
 
-def _test_batch_independence(model: nn.Module, x: torch.Tensor):
+def _test_batch_independence(model: nn.Module, inp: torch.Tensor):
+    if isinstance(inp, tuple):
+        x = inp[0]
+    else:
+        x = inp
     x.requires_grad_(True)
 
     # Compute forward pass in eval mode to deactivate batch norm
     model.eval()
-    outputs = model(x)
+    outputs = call_model(model, inp)
     model.train()
 
     # Mask loss for certain samples in batch
@@ -79,7 +89,6 @@ def _test_batch_independence(model: nn.Module, x: torch.Tensor):
     # Compute backward pass
     loss = outputs.mean()
     loss.backward()
-
     # Check if gradient exists and is zero for masked samples
     for i, grad in enumerate(x.grad):
         if i == mask_idx:
