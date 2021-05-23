@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.5">
     
     
       
@@ -18,7 +18,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.9299cb39.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.bde7dde4.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ef6f36e2.min.css">
@@ -392,6 +392,7 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+      
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Compatibility
           <span class="md-nav__icon md-icon"></span>
@@ -406,6 +407,7 @@
   
   
   
+  
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
@@ -415,6 +417,13 @@
         <li class="md-nav__item">
   <a href="#thunder.quartznet.compatibility" class="md-nav__link">
     thunder.quartznet.compatibility
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.compatibility.NemoCheckpoint" class="md-nav__link">
+    NemoCheckpoint
   </a>
   
 </li>
@@ -453,18 +462,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../model/" class="md-nav__link">
-        Model
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../module/" class="md-nav__link">
         Module
       </a>
@@ -477,8 +474,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../preprocess/" class="md-nav__link">
-        Preprocess
+      <a href="../transform/" class="md-nav__link">
+        Transform
       </a>
     </li>
   
@@ -587,6 +584,7 @@
   
   
   
+  
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
@@ -596,6 +594,13 @@
         <li class="md-nav__item">
   <a href="#thunder.quartznet.compatibility" class="md-nav__link">
     thunder.quartznet.compatibility
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.compatibility.NemoCheckpoint" class="md-nav__link">
+    NemoCheckpoint
   </a>
   
 </li>
@@ -653,6 +658,65 @@
 
 
 
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="thunder.quartznet.compatibility.NemoCheckpoint" class="doc doc-heading">
+        <code>NemoCheckpoint</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Trained model weight checkpoints.
+Used by <a href="#thunder.quartznet.compatibility.download_checkpoint"><code>download_checkpoint</code></a> and
+<a href="../module/#thunder.quartznet.module.QuartznetModule.load_from_nemo"><code>QuartznetModule.load_from_nemo</code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Possible values are <code>QuartzNet15x5Base_En</code>,<code>QuartzNet15x5Base_Zh</code>,<code>QuartzNet5x5LS_En</code>, <code>QuartzNet15x5NR_En</code>,
+<code>stt_ca_quartznet15x5</code>,<code>stt_it_quartznet15x5</code>,<code>stt_fr_quartznet15x5</code>,<code>stt_es_quartznet15x5</code>,
+<code>stt_de_quartznet15x5</code>,<code>stt_pl_quartznet15x5</code>,<code>stt_ru_quartznet15x5</code>,<code>stt_en_quartznet15x5</code>,
+<code>stt_zh_quartznet15x5</code></p>
+</div>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
 
 
   <div class="doc doc-object doc-function">
@@ -682,7 +746,7 @@
   <tbody>
       <tr>
         <td><code>name</code></td>
-        <td><code>str</code></td>
+        <td><code>NemoCheckpoint</code></td>
         <td><p>Model identifier. Check checkpoint_archives.keys()</p></td>
         <td><em>required</em></td>
       </tr>
@@ -711,7 +775,7 @@
 </table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/compatibility.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">download_checkpoint</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">checkpoint_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">download_checkpoint</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">NemoCheckpoint</span><span class="p">,</span> <span class="n">checkpoint_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Download quartznet checkpoint by identifier.</span>
 
 <span class="sd">    Args:</span>
@@ -724,7 +788,7 @@
     <span class="k">if</span> <span class="n">checkpoint_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">checkpoint_folder</span> <span class="o">=</span> <span class="n">get_default_cache_folder</span><span class="p">()</span>
 
-    <span class="n">url</span> <span class="o">=</span> <span class="n">checkpoint_archives</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">value</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">checkpoint_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">checkpoint_folder</span><span class="p">)</span> <span class="o">/</span> <span class="n">filename</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">checkpoint_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
@@ -796,12 +860,19 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">weights_path</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">fix_encoder_name</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;encoder.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.res.0&quot;</span><span class="p">,</span> <span class="s2">&quot;.res&quot;</span><span class="p">)</span>
+        <span class="c1"># Add another abstraction layer if it&#39;s not a masked conv</span>
+        <span class="c1"># This is caused by the new Masked wrapper</span>
+        <span class="k">if</span> <span class="s2">&quot;.conv&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;layer&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">parts</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
+        <span class="k">return</span> <span class="n">x</span>
+
     <span class="c1"># We remove the &#39;encoder.&#39; and &#39;decoder.&#39; prefix from the weights to enable</span>
     <span class="c1"># compatibility to load with plain nn.Modules created by reading the config</span>
     <span class="n">encoder_weights</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;encoder.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.conv&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.res.0&quot;</span><span class="p">,</span> <span class="s2">&quot;.res&quot;</span><span class="p">):</span> <span class="n">v</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">weights</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="k">if</span> <span class="s2">&quot;encoder&quot;</span> <span class="ow">in</span> <span class="n">k</span>
+        <span class="n">fix_encoder_name</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">weights</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;encoder&quot;</span> <span class="ow">in</span> <span class="n">k</span>
     <span class="p">}</span>
     <span class="n">encoder</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">encoder_weights</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -961,13 +1032,13 @@ checkpoint.</p>
         </a>
       
       
-        <a href="../model/" class="md-footer__link md-footer__link--next" rel="next">
+        <a href="../module/" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Model
+              Module
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -996,10 +1067,10 @@ checkpoint.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../../assets/javascripts/workers/search.d351de03.min.js", "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.7353b375.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.a1609d9a.min.js"></script>
       
     
   </body>

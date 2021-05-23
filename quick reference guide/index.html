@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.5">
     
     
       
@@ -18,7 +18,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.9299cb39.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.bde7dde4.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ef6f36e2.min.css">
@@ -219,6 +219,7 @@
       
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
+      
         
       
       
@@ -233,6 +234,7 @@
       
         
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
   
   
     
@@ -453,18 +455,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/Quartznet/model/" class="md-nav__link">
-        Model
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../api/Quartznet/module/" class="md-nav__link">
         Module
       </a>
@@ -477,8 +467,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/Quartznet/preprocess/" class="md-nav__link">
-        Preprocess
+      <a href="../api/Quartznet/transform/" class="md-nav__link">
+        Transform
       </a>
     </li>
   
@@ -586,6 +576,7 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
     
   
   
@@ -671,21 +662,22 @@ can be removed and only the base pytorch will be necessary to run inferece!</p>
 <span class="n">audio</span><span class="p">,</span> <span class="n">sr</span> <span class="o">=</span> <span class="n">torchaudio</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">audio_name</span><span class="p">)</span>
 <span class="hll"><span class="n">probs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
 </span><span class="c1"># If you also want the transcriptions:</span>
-<span class="n">transcriptions</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">text_pipeline</span><span class="o">.</span><span class="n">decode_prediction</span><span class="p">(</span><span class="n">probs</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">transcriptions</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">text_transform</span><span class="o">.</span><span class="n">decode_prediction</span><span class="p">(</span><span class="n">probs</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 </code></pre></div>
 <h2 id="how-to-finetune-a-model-if-i-already-have-the-nemo-manifests-prepared">How to finetune a model if I already have the nemo manifests prepared?</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">pytorch_lightning</span> <span class="k">as</span> <span class="nn">pl</span>
 
 <span class="kn">from</span> <span class="nn">thunder.data.datamodule</span> <span class="kn">import</span> <span class="n">ManifestDatamodule</span>
 <span class="kn">from</span> <span class="nn">thunder.quartznet.module</span> <span class="kn">import</span> <span class="n">QuartznetModule</span>
+<span class="kn">from</span> <span class="nn">thunder.quartznet.compatibility</span> <span class="kn">import</span> <span class="n">NemoCheckpoint</span>
 
 <span class="n">dm</span> <span class="o">=</span> <span class="n">ManifestDatamodule</span><span class="p">(</span>
     <span class="n">train_manifest</span><span class="o">=</span><span class="s2">&quot;/path/to/train_manifest.json&quot;</span><span class="p">,</span>
     <span class="n">val_manifest</span><span class="o">=</span><span class="s2">&quot;/path/to/val_manifest.json&quot;</span><span class="p">,</span>
     <span class="n">test_manifest</span><span class="o">=</span><span class="s2">&quot;/path/to/test_manifest.json&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">QuartznetModule</span><span class="o">.</span><span class="n">load_from_nemo</span><span class="p">(</span><span class="n">checkpoint_name</span><span class="o">=</span><span class="s2">&quot;QuartzNet5x5LS-En&quot;</span><span class="p">)</span>
+<span class="c1"># Tab completion works to discover other Nemocheckpoint.*</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">QuartznetModule</span><span class="o">.</span><span class="n">load_from_nemo</span><span class="p">(</span><span class="n">checkpoint_name</span><span class="o">=</span><span class="n">NemoCheckpoint</span><span class="o">.</span><span class="n">QuartzNet5x5LS_En</span><span class="p">)</span>
 
 <span class="n">trainer</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
     <span class="n">gpus</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Use all gpus</span>
@@ -768,10 +760,10 @@ better defaults)</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.d351de03.min.js", "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.7353b375.min.js"></script>
+      <script src="../assets/javascripts/bundle.a1609d9a.min.js"></script>
       
     
   </body>
