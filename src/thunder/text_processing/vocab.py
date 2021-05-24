@@ -3,6 +3,8 @@
 
 # Copyright (c) 2021 scart97
 
+__all__ = ["Vocab"]
+
 from typing import List
 
 import torch

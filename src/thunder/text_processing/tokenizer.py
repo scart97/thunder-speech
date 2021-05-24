@@ -3,6 +3,8 @@
 
 # Copyright (c) 2021 scart97
 
+__all__ = ["word_tokenizer", "char_tokenizer"]
+
 from typing import List
 
 

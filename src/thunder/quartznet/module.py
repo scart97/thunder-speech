@@ -3,6 +3,8 @@
 
 # Copyright (c) 2021 scart97
 
+__all__ = ["QuartznetModule", "NemoCheckpoint"]
+
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import List, Tuple

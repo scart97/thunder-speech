@@ -3,6 +3,8 @@
 
 # Copyright (c) 2021 scart97
 
+__all__ = ["BaseSpeechDataset", "ManifestSpeechDataset"]
+
 import json
 from pathlib import Path
 from typing import Any, Iterable, Tuple, Union

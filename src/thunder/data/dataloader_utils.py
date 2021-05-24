@@ -6,6 +6,8 @@
 
 # Copyright (c) 2021 scart97
 
+__all__ = ["asr_collate"]
+
 from typing import List, Tuple
 
 from torch import Tensor
