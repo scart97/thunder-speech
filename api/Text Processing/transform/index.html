@@ -214,6 +214,21 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../Ultimate%20guide/" class="md-nav__link">
+        The ultimate guide to speech recognition (WIP)
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../quick%20reference%20guide/" class="md-nav__link">
         Quick reference guide
       </a>
@@ -234,14 +249,14 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
       
-      <label class="md-nav__link" for="__nav_3">
+      <label class="md-nav__link" for="__nav_4">
         Api
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Api" data-md-level="1">
-        <label class="md-nav__title" for="__nav_3">
+        <label class="md-nav__title" for="__nav_4">
           <span class="md-nav__icon md-icon"></span>
           Api
         </label>
@@ -291,14 +306,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_4" type="checkbox" id="__nav_4_4" >
       
-      <label class="md-nav__link" for="__nav_3_4">
+      <label class="md-nav__link" for="__nav_4_4">
         Data
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Data" data-md-level="2">
-        <label class="md-nav__title" for="__nav_3_4">
+        <label class="md-nav__title" for="__nav_4_4">
           <span class="md-nav__icon md-icon"></span>
           Data
         </label>
@@ -354,14 +369,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_5" type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
       
-      <label class="md-nav__link" for="__nav_3_5">
+      <label class="md-nav__link" for="__nav_4_5">
         Quartznet
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Quartznet" data-md-level="2">
-        <label class="md-nav__title" for="__nav_3_5">
+        <label class="md-nav__title" for="__nav_4_5">
           <span class="md-nav__icon md-icon"></span>
           Quartznet
         </label>
@@ -431,14 +446,14 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_6" type="checkbox" id="__nav_3_6" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_6" type="checkbox" id="__nav_4_6" checked>
       
-      <label class="md-nav__link" for="__nav_3_6">
+      <label class="md-nav__link" for="__nav_4_6">
         Text Processing
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Text Processing" data-md-level="2">
-        <label class="md-nav__title" for="__nav_3_6">
+        <label class="md-nav__title" for="__nav_4_6">
           <span class="md-nav__icon md-icon"></span>
           Text Processing
         </label>
@@ -655,6 +670,7 @@
 
 
 
+
   <div class="doc doc-object doc-class">
 
 
@@ -687,7 +703,7 @@
 
 
 <h3 id="thunder.text_processing.transform.BatchTextTransformer.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vocab</span><span class="p">,</span> <span class="n">tokenize_func</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">char_tokenizer</span> <span class="n">at</span> <span class="mh">0x7f416cab1f70</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">after_tokenize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">after_numericalize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vocab</span><span class="p">,</span> <span class="n">tokenize_func</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">char_tokenizer</span> <span class="n">at</span> <span class="mh">0x7fc6ad3831f0</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">after_tokenize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">after_numericalize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -721,7 +737,7 @@ stuff to encode an entire batch of text at once.</p>
         <td><code>tokenize_func</code></td>
         <td><code></code></td>
         <td><p>Function that will perform the tokenization of each individual text sample. Defaults to char_tokenizer.</p></td>
-        <td><code>&lt;function char_tokenizer at 0x7f416cab1f70&gt;</code></td>
+        <td><code>&lt;function char_tokenizer at 0x7fc6ad3831f0&gt;</code></td>
       </tr>
       <tr>
         <td><code>after_tokenize</code></td>
