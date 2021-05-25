@@ -3,6 +3,7 @@
 
 # Copyright (c) 2021 scart97
 
+__all__ = ["BaseDataModule", "ManifestDatamodule"]
 
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader

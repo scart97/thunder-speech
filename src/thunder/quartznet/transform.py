@@ -42,6 +42,15 @@ that the Quartznet model expects it.
 
 # Copyright (c) 2021 scart97
 
+__all__ = [
+    "FeatureBatchNormalizer",
+    "DitherAudio",
+    "PreEmphasisFilter",
+    "PowerSpectrum",
+    "MelScale",
+    "FilterbankFeatures",
+]
+
 import math
 from typing import Optional
 

@@ -3,6 +3,8 @@
 
 # Copyright (c) 2021 scart97
 
+__all__ = ["audio_len", "get_default_cache_folder", "get_files", "chain_calls"]
+
 import functools
 import os
 from pathlib import Path

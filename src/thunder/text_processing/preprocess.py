@@ -3,6 +3,8 @@
 
 # Copyright (c) 2021 scart97
 
+__all__ = ["lower_text", "normalize_text", "expand_numbers"]
+
 import re
 import unicodedata
 

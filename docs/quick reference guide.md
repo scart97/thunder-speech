@@ -57,8 +57,7 @@ transcriptions = model.text_transform.decode_prediction(probs.argmax(1))
 import pytorch_lightning as pl
 
 from thunder.data.datamodule import ManifestDatamodule
-from thunder.quartznet.module import QuartznetModule
-from thunder.quartznet.compatibility import NemoCheckpoint
+from thunder.quartznet.module import QuartznetModule,  NemoCheckpoint
 
 dm = ManifestDatamodule(
     train_manifest="/path/to/train_manifest.json",
