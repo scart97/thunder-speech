@@ -45,6 +45,14 @@ def test_fixture(sample_manifest: Path):
     assert len(sample_manifest.read_text()) > 0
 
 
+def test_all_outputs(single_process_loader):
+    dataset = single_process_loader.train_dataset
+    outputs = dataset.all_outputs()
+    assert len(outputs) == len(dataset)
+    assert isinstance(outputs, list)
+    assert outputs[0] == dataset[0][1]
+
+
 @pytest.mark.parametrize("subset", ["train_dataset", "val_dataset", "test_dataset"])
 def test_dataset_shape_and_type(single_process_loader, subset):
     dataset = getattr(single_process_loader, subset)
