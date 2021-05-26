@@ -401,6 +401,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#thunder.data.dataset.BaseSpeechDataset.all_outputs" class="md-nav__link">
+    all_outputs()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#thunder.data.dataset.BaseSpeechDataset.get_item" class="md-nav__link">
     get_item()
   </a>
@@ -734,6 +741,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#thunder.data.dataset.BaseSpeechDataset.all_outputs" class="md-nav__link">
+    all_outputs()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#thunder.data.dataset.BaseSpeechDataset.get_item" class="md-nav__link">
     get_item()
   </a>
@@ -932,6 +946,62 @@ speech dataset, in a way that can be easily customized by subclassing.</p>
 
   </div>
 
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="thunder.data.dataset.BaseSpeechDataset.all_outputs" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">all_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Return a list with just the outputs for the whole dataset.
+Useful when creating the initial vocab tokens, or to train a
+language model.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>List[str]</code></td>
+      <td><p>All of the outputs of the dataset, with the corresponding preprocessing applied.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>thunder/data/dataset.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">all_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Return a list with just the outputs for the whole dataset.</span>
+<span class="sd">    Useful when creating the initial vocab tokens, or to train a</span>
+<span class="sd">    language model.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        All of the outputs of the dataset, with the corresponding preprocessing applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_text</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocess_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outputs</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
 
 
 

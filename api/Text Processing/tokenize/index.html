@@ -519,6 +519,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#thunder.text_processing.tokenizer.get_most_frequent_tokens" class="md-nav__link">
+    get_most_frequent_tokens()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#thunder.text_processing.tokenizer.word_tokenizer" class="md-nav__link">
     word_tokenizer()
   </a>
@@ -658,6 +665,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#thunder.text_processing.tokenizer.get_most_frequent_tokens" class="md-nav__link">
+    get_most_frequent_tokens()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#thunder.text_processing.tokenizer.word_tokenizer" class="md-nav__link">
     word_tokenizer()
   </a>
@@ -757,6 +771,107 @@
 <span class="sd">        Tokenized text</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="thunder.text_processing.tokenizer.get_most_frequent_tokens" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_most_frequent_tokens</span><span class="p">(</span><span class="n">corpus</span><span class="p">,</span> <span class="n">tokenize_function</span><span class="p">,</span> <span class="n">minimum_frequency</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_number_of_tokens</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Helper function to get the most frequent tokens from a text corpus.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>corpus</code></td>
+        <td><code>str</code></td>
+        <td><p>Text corpus to be used, this is a long string containing all of your text</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>tokenize_function</code></td>
+        <td><code>Callable</code></td>
+        <td><p>Same tokenizer function that will be used during training</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>minimum_frequency</code></td>
+        <td><code>int</code></td>
+        <td><p>Remove any token with frequency less than that. Defaults to 1.</p></td>
+        <td><code>1</code></td>
+      </tr>
+      <tr>
+        <td><code>max_number_of_tokens</code></td>
+        <td><code>Optional[int]</code></td>
+        <td><p>Optionally limit to the K most frequent tokens. Defaults to None.</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>List[str]</code></td>
+      <td><p>All of the unique, most frequent tokens, ordered by frequency.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>thunder/text_processing/tokenizer.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_most_frequent_tokens</span><span class="p">(</span>
+    <span class="n">corpus</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">tokenize_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">minimum_frequency</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_number_of_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Helper function to get the most frequent tokens from a text corpus.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        corpus : Text corpus to be used, this is a long string containing all of your text</span>
+<span class="sd">        tokenize_function : Same tokenizer function that will be used during training</span>
+<span class="sd">        minimum_frequency : Remove any token with frequency less than that. Defaults to 1.</span>
+<span class="sd">        max_number_of_tokens : Optionally limit to the K most frequent tokens. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        All of the unique, most frequent tokens, ordered by frequency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tokenized</span> <span class="o">=</span> <span class="n">tokenize_function</span><span class="p">(</span><span class="n">corpus</span><span class="p">)</span>
+    <span class="n">token_counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">tokenized</span><span class="p">)</span>
+    <span class="n">output_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">token</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">token_counter</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="n">max_number_of_tokens</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="n">minimum_frequency</span><span class="p">:</span>
+            <span class="n">output_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output_tokens</span>
 </code></pre></div>
         </details>
     </div>

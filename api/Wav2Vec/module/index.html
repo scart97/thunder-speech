@@ -864,7 +864,7 @@
       <tr>
         <td><code>initial_vocab_tokens</code></td>
         <td><code>List[str]</code></td>
-        <td><p>List of tokens to be used in the vocab, special tokens should not be included here.</p></td>
+        <td><p>List of tokens to be used in the vocab, special tokens should not be included here. Check <a href="https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset"><code>docs</code></a></p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
@@ -913,7 +913,7 @@
     <span class="sd">&quot;&quot;&quot;Wav2Vec model for fine-tuning.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here.</span>
+<span class="sd">        initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)</span>
 <span class="sd">        model_name : Name of the original huggingface checkpoint to load from.</span>
 <span class="sd">        gradient_checkpointing : Use gradient checkpointing to save memory at the expense of slower backward pass.</span>
 <span class="sd">        decoder_dropout : Dropout before the final decoding layer</span>

@@ -289,6 +289,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#how-to-get-the-initial_vocab_tokens-from-my-dataset" class="md-nav__link">
+    How to get the initial_vocab_tokens from my dataset?
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -680,6 +687,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#how-to-get-the-initial_vocab_tokens-from-my-dataset" class="md-nav__link">
+    How to get the initial_vocab_tokens from my dataset?
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -757,6 +771,16 @@ can be removed and only the base pytorch will be necessary to run inferece!</p>
 properly fine tuning (freeze encoder at the start, learning rate scheduling,
 better defaults)</p>
 </div>
+<h2 id="how-to-get-the-initial_vocab_tokens-from-my-dataset">How to get the initial_vocab_tokens from my dataset?</h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">thunder.text_processing.tokenizer</span> <span class="kn">import</span> <span class="n">char_tokenizer</span><span class="p">,</span> <span class="n">get_most_frequent_tokens</span>
+
+<span class="n">my_datamodule</span> <span class="o">=</span> <span class="n">CustomDatamodule</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">my_datamodule</span><span class="o">.</span><span class="n">prepare_data</span><span class="p">()</span>
+<span class="n">my_datamodule</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="n">train_corpus</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">my_datamodule</span><span class="o">.</span><span class="n">train_dataset</span><span class="o">.</span><span class="n">all_outputs</span><span class="p">())</span>
+<span class="n">initial_vocab_tokens</span> <span class="o">=</span> <span class="n">get_most_frequent_tokens</span><span class="p">(</span><span class="n">train_corpus</span><span class="p">,</span> <span class="n">char_tokenizer</span><span class="p">)</span>
+</code></pre></div>
                 
               
               
