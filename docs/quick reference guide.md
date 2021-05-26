@@ -79,3 +79,17 @@ trainer.fit(model=model, datamodule=dm)
     This will probably have a subpar result right now, as I'm still working on
     properly fine tuning (freeze encoder at the start, learning rate scheduling,
     better defaults)
+
+
+## How to get the initial_vocab_tokens from my dataset?
+
+```python
+from thunder.text_processing.tokenizer import char_tokenizer, get_most_frequent_tokens
+
+my_datamodule = CustomDatamodule(...)
+my_datamodule.prepare_data()
+my_datamodule.setup(None)
+
+train_corpus = " ".join(my_datamodule.train_dataset.all_outputs())
+initial_vocab_tokens = get_most_frequent_tokens(train_corpus, char_tokenizer)
+```

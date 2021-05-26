@@ -5,7 +5,8 @@
 
 __all__ = ["word_tokenizer", "char_tokenizer"]
 
-from typing import List
+from collections import Counter
+from typing import Callable, List, Optional
 
 
 def word_tokenizer(text: str) -> List[str]:
@@ -30,3 +31,30 @@ def char_tokenizer(text: str) -> List[str]:
         Tokenized text
     """
     return list(text)
+
+
+def get_most_frequent_tokens(
+    corpus: str,
+    tokenize_function: Callable,
+    minimum_frequency: int = 1,
+    max_number_of_tokens: Optional[int] = None,
+) -> List[str]:
+    """Helper function to get the most frequent tokens from a text corpus.
+
+    Args:
+        corpus : Text corpus to be used, this is a long string containing all of your text
+        tokenize_function : Same tokenizer function that will be used during training
+        minimum_frequency : Remove any token with frequency less than that. Defaults to 1.
+        max_number_of_tokens : Optionally limit to the K most frequent tokens. Defaults to None.
+
+    Returns:
+        All of the unique, most frequent tokens, ordered by frequency.
+    """
+
+    tokenized = tokenize_function(corpus)
+    token_counter = Counter(tokenized)
+    output_tokens = []
+    for token, count in token_counter.most_common(max_number_of_tokens):
+        if count >= minimum_frequency:
+            output_tokens.append(token)
+    return output_tokens

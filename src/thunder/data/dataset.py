@@ -7,7 +7,7 @@ __all__ = ["BaseSpeechDataset", "ManifestSpeechDataset"]
 
 import json
 from pathlib import Path
-from typing import Any, Iterable, Tuple, Union
+from typing import Any, Iterable, List, Tuple, Union
 
 import torchaudio
 from torch import Tensor
@@ -46,6 +46,22 @@ class BaseSpeechDataset(Dataset):
         text = self.preprocess_text(text)
 
         return audio, text
+
+    def all_outputs(self) -> List[str]:
+        """Return a list with just the outputs for the whole dataset.
+        Useful when creating the initial vocab tokens, or to train a
+        language model.
+
+        Returns:
+            All of the outputs of the dataset, with the corresponding preprocessing applied.
+        """
+        outputs = []
+        for index in range(len(self)):
+            item = self.get_item(index)
+            text = self.open_text(item)
+            text = self.preprocess_text(text)
+            outputs.append(text)
+        return outputs
 
     def get_item(self, index: int) -> Any:
         """Get the item source specified by the index.

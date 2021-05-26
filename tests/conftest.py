@@ -9,13 +9,20 @@
 """
 
 import json
+import os
 
 import pytest
 
+from hypothesis import settings
 from torchaudio.datasets.utils import download_url, extract_archive
 
 from thunder.text_processing.preprocess import normalize_text
 from thunder.utils import audio_len, get_default_cache_folder, get_files
+
+# Increase deadline on CI, where the machine might be slower
+# 3 seconds
+settings.register_profile("ci", deadline=3000)
+settings.load_profile(os.getenv(u"HYPOTHESIS_PROFILE", "default"))
 
 
 @pytest.fixture(scope="session")

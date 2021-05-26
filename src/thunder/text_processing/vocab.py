@@ -26,7 +26,7 @@ class Vocab(nn.Module):
         reverse mapping of numbers back to tokens.
 
         Args:
-            initial_vocab_tokens : Basic list of tokens that will be part of the vocabulary. DO NOT INCLUDE SPECIAL TOKENS THERE. Even the blank is automatically added by the class.
+            initial_vocab_tokens : Basic list of tokens that will be part of the vocabulary. DO NOT INCLUDE SPECIAL TOKENS THERE. Even the blank is automatically added by the class. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
             pad_token : Token that will represent padding.
             unknown_token : Token that will represent unknown elements. Notice that this is different than the blank used by ctc.
             start_token : Token that will represent the beginning of the sequence.

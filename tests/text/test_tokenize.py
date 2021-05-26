@@ -3,7 +3,11 @@
 
 # Copyright (c) 2021 scart97
 
-from thunder.text_processing.tokenizer import char_tokenizer, word_tokenizer
+from thunder.text_processing.tokenizer import (
+    char_tokenizer,
+    get_most_frequent_tokens,
+    word_tokenizer,
+)
 
 
 def test_word_tokenizer():
@@ -26,3 +30,21 @@ def test_char_tokenizer():
 def test_char_tokenizer_empty_input():
     assert char_tokenizer("") == []
     assert char_tokenizer("     ") == [" ", " ", " ", " ", " "]
+
+
+def test_get_most_frequent_tokens():
+    corpus = "abc abcd abcde abcdef abcdefg abcdefgh"
+
+    output = get_most_frequent_tokens(corpus, char_tokenizer, minimum_frequency=1)
+    assert output == ["a", "b", "c", " ", "d", "e", "f", "g", "h"]
+
+    output = get_most_frequent_tokens(corpus, char_tokenizer, minimum_frequency=3)
+    assert output == ["a", "b", "c", " ", "d", "e", "f"]
+
+    output = get_most_frequent_tokens(corpus, char_tokenizer, max_number_of_tokens=4)
+    assert output == ["a", "b", "c", " "]
+
+    output = get_most_frequent_tokens(
+        corpus, char_tokenizer, minimum_frequency=6, max_number_of_tokens=4
+    )
+    assert output == ["a", "b", "c"]
