@@ -31,7 +31,7 @@ class Wav2Vec2Module(pl.LightningModule):
         """Wav2Vec model for fine-tuning.
 
         Args:
-            initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here.
+            initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
             model_name : Name of the original huggingface checkpoint to load from.
             gradient_checkpointing : Use gradient checkpointing to save memory at the expense of slower backward pass.
             decoder_dropout : Dropout before the final decoding layer

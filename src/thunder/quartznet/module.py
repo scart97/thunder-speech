@@ -49,7 +49,7 @@ class QuartznetModule(pl.LightningModule):
         feature creation and text processing.
 
         Args:
-            initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here.
+            initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
             sample_rate : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             n_window_size : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             n_window_stride : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
