@@ -3,10 +3,26 @@
 
 # Copyright (c) 2021 scart97
 
-__all__ = ["word_tokenizer", "char_tokenizer"]
+__all__ = [
+    "BPETokenizer",
+    "word_tokenizer",
+    "char_tokenizer",
+    "get_most_frequent_tokens",
+]
 
 from collections import Counter
 from typing import Callable, List, Optional
+
+import sentencepiece
+
+
+class BPETokenizer:
+    def __init__(self, model_path: str):
+        self.tokenizer = sentencepiece.SentencePieceProcessor()
+        self.tokenizer.Load(model_path)
+
+    def __call__(self, text: str) -> List[str]:
+        return self.tokenizer.encode_as_pieces(text)
 
 
 def word_tokenizer(text: str) -> List[str]:

@@ -3,11 +3,53 @@
 
 # Copyright (c) 2021 scart97
 
+from string import ascii_letters
+
+import pytest
+
+from hypothesis import given
+from hypothesis.strategies import text
+
 from thunder.text_processing.tokenizer import (
+    BPETokenizer,
     char_tokenizer,
     get_most_frequent_tokens,
     word_tokenizer,
 )
+
+
+def test_bpe_tokenizer_load():
+    tokenizer = BPETokenizer("tests/nemo_config_samples/example_tokenizer.model")
+    assert tokenizer is not None
+
+    with pytest.raises(OSError, match="Not found"):
+        BPETokenizer("incorrect_name.model")
+    with pytest.raises(OSError, match="Not found"):
+        BPETokenizer("")
+
+
+def test_bpe_tokenizer():
+    tokenizer = BPETokenizer("tests/nemo_config_samples/example_tokenizer.model")
+
+    out = tokenizer("Hello world")
+    assert out == ["▁", "H", "el", "lo", "▁world"]
+
+    out = tokenizer("hello world")
+    assert out == ["▁he", "ll", "o", "▁world"]
+
+
+def test_bpe_tokenizer_empty_input():
+    tokenizer = BPETokenizer("tests/nemo_config_samples/example_tokenizer.model")
+    assert tokenizer("") == []
+
+
+@given(text(list(ascii_letters) + ["$", "@", " ", "#", "!"]))
+def test_bpe_tokenizer_reversible(text):
+    tokenizer = BPETokenizer("tests/nemo_config_samples/example_tokenizer.model")
+    out = tokenizer(text)
+    back_to_original = "".join(out).replace("▁", " ")
+
+    assert back_to_original.strip() == text.strip()
 
 
 def test_word_tokenizer():
