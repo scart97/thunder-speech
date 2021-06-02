@@ -48,8 +48,8 @@ def test_bpe_tokenizer_reversible(text):
     tokenizer = BPETokenizer("tests/nemo_config_samples/example_tokenizer.model")
     out = tokenizer(text)
     back_to_original = "".join(out).replace("▁", " ")
-
-    assert back_to_original.strip() == text.strip()
+    # Sentencepiece ignores multiple spaces in sequence
+    assert back_to_original.strip() == " ".join(text.split())
 
 
 def test_word_tokenizer():
