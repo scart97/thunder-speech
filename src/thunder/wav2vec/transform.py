@@ -4,7 +4,7 @@
 # Copyright (c) 2021 scart97
 
 import torch
-from torch import nn as nn
+from torch import nn
 
 
 class Wav2Vec2Preprocess(nn.Module):

@@ -40,7 +40,7 @@ from enum import Enum
 from typing import List, Tuple
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 class InitMode(str, Enum):
