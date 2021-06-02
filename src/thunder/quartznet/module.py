@@ -25,7 +25,7 @@ from thunder.quartznet.compatibility import (
 )
 from thunder.quartznet.transform import FilterbankFeatures
 from thunder.text_processing.transform import BatchTextTransformer
-from thunder.text_processing.vocab import Vocab
+from thunder.text_processing.vocab import SimpleVocab, Vocab
 
 
 class QuartznetModule(pl.LightningModule):
@@ -104,7 +104,11 @@ class QuartznetModule(pl.LightningModule):
         Returns:
             The transform that will both `encode` the text and `decode_prediction`.
         """
-        vocab = Vocab(initial_vocab_tokens, nemo_compat=nemo_compat_vocab)
+        vocab = (
+            SimpleVocab(initial_vocab_tokens)
+            if nemo_compat_vocab
+            else Vocab(initial_vocab_tokens)
+        )
         return BatchTextTransformer(vocab=vocab)
 
     def build_decoder(self, decoder_input_channels: int, vocab_size: int) -> nn.Module:

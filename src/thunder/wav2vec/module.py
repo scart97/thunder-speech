@@ -73,7 +73,7 @@ class Wav2Vec2Module(pl.LightningModule):
         Returns:
             The transform that will both `encode` the text and `decode_prediction`.
         """
-        vocab = Vocab(initial_vocab_tokens, nemo_compat=False)
+        vocab = Vocab(initial_vocab_tokens)
         return BatchTextTransformer(vocab=vocab)
 
     def build_decoder(
