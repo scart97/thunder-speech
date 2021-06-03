@@ -293,7 +293,7 @@ class CitrinetModule(pl.LightningModule):
     def change_vocab(
         self,
         new_vocab_tokens: List[str],
-        sentencepice_model: str,
+        sentencepiece_model: Optional[str] = None,
         nemo_compat: bool = False,
     ):
         """Changes the vocabulary of the model. useful when finetuning to another language.
@@ -305,9 +305,9 @@ class CitrinetModule(pl.LightningModule):
         # Updating hparams so that the saved model can be correctly loaded
         self.hparams.initial_vocab_tokens = new_vocab_tokens
         self.hparams.nemo_compat_vocab = nemo_compat
-        self.hparams.sentencepiece_model = sentencepice_model
+        self.hparams.sentencepiece_model = sentencepiece_model
 
         self.text_transform = self.build_text_transform(
-            new_vocab_tokens, nemo_compat, sentencepice_model
+            new_vocab_tokens, nemo_compat, sentencepiece_model
         )
         self.decoder = self.build_decoder(640, len(self.text_transform.vocab))
