@@ -31,7 +31,7 @@ __all__ = [
     "Citrinet_encoder",
 ]
 
-from typing import List
+from typing import List, Tuple
 
 import torch
 from torch import nn
@@ -39,7 +39,8 @@ from torch import nn
 from thunder.quartznet.blocks import (
     Masked,
     MultiSequential,
-    QuartznetBlock,
+    _get_act_dropout_layer,
+    _get_conv_bn_layer,
     get_same_padding,
 )
 
@@ -82,7 +83,7 @@ class SqueezeExcite(nn.Module):
         return x * y
 
 
-class CitrinetBlock(QuartznetBlock):
+class CitrinetBlock(nn.Module):
     def __init__(
         self,
         in_channels: int,
@@ -95,7 +96,7 @@ class CitrinetBlock(QuartznetBlock):
         residual: bool = True,
         separable: bool = False,
     ):
-        super().__init__(in_channels, out_channels)
+        super().__init__()
 
         padding_val = get_same_padding(kernel_size[0], 1, dilation[0])
 
@@ -105,7 +106,7 @@ class CitrinetBlock(QuartznetBlock):
         for _ in range(repeat - 1):
 
             conv.extend(
-                self._get_conv_bn_layer(
+                _get_conv_bn_layer(
                     inplanes_loop,
                     out_channels,
                     kernel_size=kernel_size,
@@ -117,13 +118,13 @@ class CitrinetBlock(QuartznetBlock):
                 )
             )
 
-            conv.extend(self._get_act_dropout_layer(drop_prob=dropout))
+            conv.extend(_get_act_dropout_layer(drop_prob=dropout))
 
             inplanes_loop = out_channels
 
         padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
         conv.extend(
-            self._get_conv_bn_layer(
+            _get_conv_bn_layer(
                 inplanes_loop,
                 out_channels,
                 kernel_size=kernel_size,
@@ -143,7 +144,7 @@ class CitrinetBlock(QuartznetBlock):
             stride_residual = stride if stride[0] == 1 else stride[0]
 
             self.res = MultiSequential(
-                *self._get_conv_bn_layer(
+                *_get_conv_bn_layer(
                     in_channels,
                     out_channels,
                     kernel_size=1,
@@ -154,7 +155,30 @@ class CitrinetBlock(QuartznetBlock):
         else:
             self.res = None
 
-        self.mout = MultiSequential(*self._get_act_dropout_layer(drop_prob=dropout))
+        self.mout = MultiSequential(*_get_act_dropout_layer(drop_prob=dropout))
+
+    def forward(
+        self, x: torch.Tensor, lens: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Args:
+            x : Tensor of shape (batch, features, time) where #features == inplanes
+
+        Returns:
+            Result of applying the block on the input
+        """
+
+        # compute forward convolutions
+        out, lens_out = self.mconv(x, lens)
+
+        # compute the residuals
+        if self.res is not None:
+            res_out, _ = self.res(x, lens)
+            out = out + res_out
+
+        # compute the output
+        out, lens_out = self.mout(out, lens_out)
+        return out, lens_out
 
 
 def stem(feat_in: int) -> CitrinetBlock:

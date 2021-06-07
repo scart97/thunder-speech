@@ -224,6 +224,52 @@ class Masked(nn.Module):
         return self.layer(x), lens
 
 
+def _get_conv_bn_layer(
+    in_channels,
+    out_channels,
+    kernel_size=11,
+    separable=False,
+    **conv_kwargs,
+):
+
+    if separable:
+        layers = [
+            MaskedConv1d(
+                in_channels,
+                in_channels,
+                kernel_size,
+                groups=in_channels,
+                **conv_kwargs,
+            ),
+            MaskedConv1d(
+                in_channels,
+                out_channels,
+                kernel_size=1,
+                stride=1,
+                dilation=1,
+                padding=0,
+                bias=conv_kwargs.get("bias", False),
+            ),
+        ]
+    else:
+        layers = [
+            MaskedConv1d(
+                in_channels,
+                out_channels,
+                kernel_size,
+                **conv_kwargs,
+            )
+        ]
+
+    layers.append(Masked(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1)))
+
+    return layers
+
+
+def _get_act_dropout_layer(drop_prob=0.2):
+    return [Masked(nn.ReLU(True)), Masked(nn.Dropout(p=drop_prob))]
+
+
 class QuartznetBlock(nn.Module):
     def __init__(
         self,
@@ -262,7 +308,7 @@ class QuartznetBlock(nn.Module):
         for _ in range(repeat - 1):
 
             conv.extend(
-                self._get_conv_bn_layer(
+                _get_conv_bn_layer(
                     inplanes_loop,
                     out_channels,
                     kernel_size=kernel_size,
@@ -274,12 +320,12 @@ class QuartznetBlock(nn.Module):
                 )
             )
 
-            conv.extend(self._get_act_dropout_layer(drop_prob=dropout))
+            conv.extend(_get_act_dropout_layer(drop_prob=dropout))
 
             inplanes_loop = out_channels
 
         conv.extend(
-            self._get_conv_bn_layer(
+            _get_conv_bn_layer(
                 inplanes_loop,
                 out_channels,
                 kernel_size=kernel_size,
@@ -297,7 +343,7 @@ class QuartznetBlock(nn.Module):
             stride_residual = stride if stride[0] == 1 else stride[0] ** repeat
 
             self.res = MultiSequential(
-                *self._get_conv_bn_layer(
+                *_get_conv_bn_layer(
                     in_channels,
                     out_channels,
                     kernel_size=1,
@@ -308,52 +354,7 @@ class QuartznetBlock(nn.Module):
         else:
             self.res = None
 
-        self.mout = MultiSequential(*self._get_act_dropout_layer(drop_prob=dropout))
-
-    def _get_conv_bn_layer(
-        self,
-        in_channels,
-        out_channels,
-        kernel_size=11,
-        separable=False,
-        **conv_kwargs,
-    ):
-
-        if separable:
-            layers = [
-                MaskedConv1d(
-                    in_channels,
-                    in_channels,
-                    kernel_size,
-                    groups=in_channels,
-                    **conv_kwargs,
-                ),
-                MaskedConv1d(
-                    in_channels,
-                    out_channels,
-                    kernel_size=1,
-                    stride=1,
-                    dilation=1,
-                    padding=0,
-                    bias=conv_kwargs.get("bias", False),
-                ),
-            ]
-        else:
-            layers = [
-                MaskedConv1d(
-                    in_channels,
-                    out_channels,
-                    kernel_size,
-                    **conv_kwargs,
-                )
-            ]
-
-        layers.append(Masked(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1)))
-
-        return layers
-
-    def _get_act_dropout_layer(self, drop_prob=0.2):
-        return [Masked(nn.ReLU(True)), Masked(nn.Dropout(p=drop_prob))]
+        self.mout = MultiSequential(*_get_act_dropout_layer(drop_prob=dropout))
 
     def forward(
         self, x: torch.Tensor, lens: torch.Tensor
