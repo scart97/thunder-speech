@@ -4,6 +4,7 @@
 # Copyright (c) 2021 scart97
 
 from string import ascii_letters
+from tempfile import TemporaryDirectory
 
 import pytest
 
@@ -12,8 +13,10 @@ from hypothesis.strategies import text
 
 from thunder.text_processing.tokenizer import (
     BPETokenizer,
+    SentencepieceModelFile,
     char_tokenizer,
     get_most_frequent_tokens,
+    train_sentencepiece_model,
     word_tokenizer,
 )
 
@@ -50,6 +53,41 @@ def test_bpe_tokenizer_reversible(text):
     back_to_original = "".join(out).replace("▁", " ")
     # Sentencepiece ignores multiple spaces in sequence
     assert back_to_original.strip() == " ".join(text.split())
+
+
+def test_train_sentencepiece():
+    file_with_text = "tests/nemo_config_samples/QuartzNet5x5LS-En.yaml"
+    with TemporaryDirectory() as output_dir:
+        trained = train_sentencepiece_model(
+            file_with_text,
+            vocab_size=50,
+            output_dir=str(output_dir),
+            do_lower_case=True,
+            sample_size=150,
+        )
+        assert isinstance(trained, SentencepieceModelFile)
+        assert trained.model_path.exists()
+        assert len(trained.vocabulary_tokens) <= 50
+
+        with pytest.warns(UserWarning):
+            # Trained model already exists, emit warning
+            train_skipped = train_sentencepiece_model(
+                file_with_text, vocab_size=50, output_dir=str(output_dir)
+            )
+            assert train_skipped.model_path == trained.model_path
+            assert train_skipped.vocabulary_tokens == trained.vocabulary_tokens
+
+
+def test_train_sentencepiece_exception():
+    with TemporaryDirectory() as output_dir:
+        with pytest.raises(ValueError):
+            train_sentencepiece_model(
+                f"{output_dir}/this_doesnt_exist.txt",
+                vocab_size=50,
+                output_dir=str(output_dir),
+                do_lower_case=True,
+                sample_size=150,
+            )
 
 
 def test_word_tokenizer():
