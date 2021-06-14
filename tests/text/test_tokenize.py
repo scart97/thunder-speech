@@ -3,6 +3,7 @@
 
 # Copyright (c) 2021 scart97
 
+from pathlib import Path
 from string import ascii_letters
 from tempfile import TemporaryDirectory
 
@@ -66,7 +67,7 @@ def test_train_sentencepiece():
             sample_size=150,
         )
         assert isinstance(trained, SentencepieceModelFile)
-        assert trained.model_path.exists()
+        assert Path(trained.model_path).exists()
         assert len(trained.vocabulary_tokens) <= 50
 
         with pytest.warns(UserWarning):
