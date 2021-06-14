@@ -34,6 +34,9 @@ class CitrinetModule(pl.LightningModule):
     def __init__(
         self,
         initial_vocab_tokens: List[str],
+        filters: List[int],
+        kernel_sizes: List[int],
+        strides: List[int],
         sentencepiece_model: Optional[str] = None,
         sample_rate: int = 16000,
         n_window_size: int = 320,
@@ -42,9 +45,6 @@ class CitrinetModule(pl.LightningModule):
         preemph: float = 0.97,
         nfilt: int = 64,
         dither: float = 1e-5,
-        filters: List[int] = [256, 256, 512, 512, 512],
-        kernel_sizes: List[int] = [33, 39, 51, 63, 75],
-        strides: List[int] = [33, 39, 51, 63, 75],
         learning_rate: float = 3e-4,
         nemo_compat_vocab: bool = False,
     ):
@@ -53,6 +53,9 @@ class CitrinetModule(pl.LightningModule):
 
         Args:
             initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
+            filters : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
+            kernel_sizes : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
+            strides : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
             sample_rate : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             n_window_size : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             n_window_stride : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
@@ -60,8 +63,6 @@ class CitrinetModule(pl.LightningModule):
             preemph : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             nfilt : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             dither : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            filters : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
-            kernel_sizes : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
             learning_rate : Learning rate used by the optimizer
             nemo_compat_vocab : Controls if the used vocabulary will be compatible with the original nemo implementation.
         """
