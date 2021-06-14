@@ -30,10 +30,21 @@ class CitrinetCheckpoint(str, Enum):
 
     @staticmethod
     def from_string(name):
+        """Creates enum value from string. Helper to use with argparse/hydra
+
+        Args:
+            name : Name of the checkpoint
+
+        Raises:
+            ValueError: Name provided is not a valid checkpoint
+
+        Returns:
+            Enum value corresponding to the name
+        """
         try:
             return CitrinetCheckpoint[name]
         except KeyError as option_does_not_exist:
-            raise ValueError() from option_does_not_exist
+            raise ValueError("Name provided is not a valid checkpoint") from option_does_not_exist
 # fmt:on
 
 
@@ -82,6 +93,15 @@ def read_params_from_config_citrinet(config_path: str) -> Tuple[Dict, List[str],
 
 
 def fix_vocab(vocab_tokens: List[str]) -> List[str]:
+    """Transform the nemo vocab tokens back to the sentencepiece sytle
+    with the _ prefix
+
+    Args:
+        vocab_tokens : List of tokens in the vocabulary
+
+    Returns:
+        New list of tokens with the new prefix
+    """
     out_tokens = []
     for token in vocab_tokens:
         if token.startswith("##"):
