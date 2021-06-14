@@ -32,11 +32,24 @@ class BPETokenizer:
 
 @dataclass
 class SentencepieceModelFile:
-    model_path: Path
+    """Dataclass that represents the data from the trained sentencepiece model,
+    processed so that it can be integrated with the models.
+    """
+
+    model_path: str
     vocabulary_tokens: List[str]
 
     @classmethod
-    def from_folder(cls, output_dir: str):
+    def from_folder(cls, output_dir: str) -> "SentencepieceModelFile":
+        """Load the data from a folder that contains the `tokenizer.vocab`
+        and `tokenizer.model` outputs from sentencepiece.
+
+        Args:
+            output_dir : Output directory of the sentencepiece training, that contains the required files.
+
+        Returns:
+            Instance of `SentencepieceModelFile` with the corresponding data loaded.
+        """
         special_tokens = ["<s>", "</s>", "<pad>", "<unk>"]
         vocab = []
 
@@ -49,7 +62,7 @@ class SentencepieceModelFile:
                     continue
                 vocab.append(piece)
 
-        return cls(Path(f"{output_dir}/tokenizer.model"), vocab)
+        return cls(f"{output_dir}/tokenizer.model", vocab)
 
 
 def train_sentencepiece_model(
@@ -68,10 +81,10 @@ def train_sentencepiece_model(
     This is a direct port of `create_spt_model` present on the NEMO
     toolkit (nemo/collections/common/tokenizers/sentencepiece_tokenizer.py)
     Args:
-        data_file: data file
-        vocab_size: vocabulary size
-        output_dir: folder to save created tokenizer model.
-        sample_size: maximum size of sentences the trainer loads
+        data_file: text file containing the sentences that will be used to train the model
+        vocab_size: maximum vocabulary size
+        output_dir: folder to save created tokenizer model and vocab
+        sample_size: maximum number of sentences the trainer loads. -1 means to use all the data.
         do_lower_case: if text should be lower cased before tokenizer model is created
         character_coverage: float value between 0 and 1 (as a percentage). For languages with a vast charset,
             can be < 1.0, but for all other languages, it should be set as 1.0

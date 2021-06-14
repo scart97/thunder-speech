@@ -18,7 +18,7 @@ from omegaconf import OmegaConf
 class CitrinetCheckpoint(str, Enum):
     """Trained model weight checkpoints.
     Used by [`download_checkpoint`][thunder.quartznet.compatibility.download_checkpoint] and
-    [`CitrinetModule.load_from_nemo`][thunder.quartznet.module.CitrinetModule.load_from_nemo].
+    [`CitrinetModule.load_from_nemo`][thunder.citrinet.module.CitrinetModule.load_from_nemo].
 
     Note:
         Possible values are `stt_en_citrinet_256`,`stt_en_citrinet_512`,`stt_en_citrinet_1024`, `stt_es_citrinet_512`
@@ -32,8 +32,8 @@ class CitrinetCheckpoint(str, Enum):
     def from_string(name):
         try:
             return CitrinetCheckpoint[name]
-        except KeyError:
-            raise ValueError()
+        except KeyError as option_does_not_exist:
+            raise ValueError() from option_does_not_exist
 # fmt:on
 
 
