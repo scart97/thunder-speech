@@ -7,7 +7,7 @@ from torch import Tensor, tensor
 from torchmetrics import Metric
 
 
-def _edit_update(predicted: str, reference: str):
+def _edit_update(predicted: List[str], reference: List[str]):
     distance = editdistance.eval(predicted, reference)
     total = len(reference)
     assert total > 0, "The reference is empty, this will cause a incorrect metric value"
