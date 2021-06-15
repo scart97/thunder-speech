@@ -96,6 +96,21 @@ class CitrinetBlock(nn.Module):
         residual: bool = True,
         separable: bool = False,
     ):
+        """Citrinet block. This is a refactoring of the Jasperblock present on the NeMo toolkit,
+        but simplified to only support the new citrinet model. Biggest change is that
+        dense residual used on Jasper is not supported here.
+
+        Args:
+            in_channels : Number of input channels
+            out_channels : Number of output channels
+            repeat : Repetitions inside block.
+            kernel_size : Kernel size.
+            stride : Stride of each repetition.
+            dilation : Dilation of each repetition.
+            dropout : Dropout used before each activation.
+            residual : Controls the use of residual connection.
+            separable : Controls the use of separable convolutions.
+        """
         super().__init__()
 
         padding_val = get_same_padding(kernel_size[0], 1, dilation[0])
@@ -163,9 +178,11 @@ class CitrinetBlock(nn.Module):
         """
         Args:
             x : Tensor of shape (batch, features, time) where #features == inplanes
+            lens : Tensor containing the lengths of each input in the batch, to be used by the
+                masked convolution that happens internally
 
         Returns:
-            Result of applying the block on the input
+            Result of applying the block on the input, and corresponding output lengths
         """
 
         # compute forward convolutions
