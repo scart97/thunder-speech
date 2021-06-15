@@ -1,13 +1,17 @@
+"""Citrinet LightningModule that combines all of the individual parts
+to enable easy finetuning and inference.
+"""
+
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
 # Copyright (c) 2021 scart97
 
-__all__ = ["QuartznetModule", "NemoCheckpoint"]
+__all__ = ["CitrinetModule", "CitrinetCheckpoint"]
 
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -15,23 +19,29 @@ from torch import Tensor, nn
 from torch.nn.functional import ctc_loss, log_softmax
 from torchaudio.datasets.utils import extract_archive
 
-from thunder.metrics import CER, WER
-from thunder.quartznet.blocks import Quartznet_decoder, Quartznet_encoder
-from thunder.quartznet.compatibility import (
-    NemoCheckpoint,
-    download_checkpoint,
-    load_quartznet_weights,
-    read_params_from_config,
+from thunder.citrinet.blocks import Citrinet_encoder
+from thunder.citrinet.compatibility import (
+    CitrinetCheckpoint,
+    fix_vocab,
+    read_params_from_config_citrinet,
 )
+from thunder.metrics import CER, WER
+from thunder.quartznet.blocks import Quartznet_decoder
+from thunder.quartznet.compatibility import download_checkpoint, load_quartznet_weights
 from thunder.quartznet.transform import FilterbankFeatures
+from thunder.text_processing.tokenizer import BPETokenizer, char_tokenizer
 from thunder.text_processing.transform import BatchTextTransformer
 from thunder.text_processing.vocab import SimpleVocab, Vocab
 
 
-class QuartznetModule(pl.LightningModule):
+class CitrinetModule(pl.LightningModule):
     def __init__(
         self,
         initial_vocab_tokens: List[str],
+        filters: List[int],
+        kernel_sizes: List[int],
+        strides: List[int],
+        sentencepiece_model: Optional[str] = None,
         sample_rate: int = 16000,
         n_window_size: int = 320,
         n_window_stride: int = 160,
@@ -39,9 +49,6 @@ class QuartznetModule(pl.LightningModule):
         preemph: float = 0.97,
         nfilt: int = 64,
         dither: float = 1e-5,
-        filters: List[int] = [256, 256, 512, 512, 512],
-        kernel_sizes: List[int] = [33, 39, 51, 63, 75],
-        repeat_blocks: int = 1,
         learning_rate: float = 3e-4,
         nemo_compat_vocab: bool = False,
     ):
@@ -50,6 +57,9 @@ class QuartznetModule(pl.LightningModule):
 
         Args:
             initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
+            filters : Check [`Citrinet_encoder`][thunder.citrinet.blocks.Citrinet_encoder]
+            kernel_sizes : Check [`Citrinet_encoder`][thunder.citrinet.blocks.Citrinet_encoder]
+            strides : Check [`Citrinet_encoder`][thunder.citrinet.blocks.Citrinet_encoder]
             sample_rate : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             n_window_size : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             n_window_stride : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
@@ -57,9 +67,6 @@ class QuartznetModule(pl.LightningModule):
             preemph : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             nfilt : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             dither : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            filters : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
-            kernel_sizes : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
-            repeat_blocks : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
             learning_rate : Learning rate used by the optimizer
             nemo_compat_vocab : Controls if the used vocabulary will be compatible with the original nemo implementation.
         """
@@ -76,12 +83,12 @@ class QuartznetModule(pl.LightningModule):
             dither=dither,
         )
 
-        self.encoder = Quartznet_encoder(nfilt, filters, kernel_sizes, repeat_blocks)
+        self.encoder = Citrinet_encoder(nfilt, filters, kernel_sizes, strides)
 
         self.text_transform = self.build_text_transform(
-            initial_vocab_tokens, nemo_compat_vocab
+            initial_vocab_tokens, nemo_compat_vocab, sentencepiece_model
         )
-        self.decoder = self.build_decoder(1024, len(self.text_transform.vocab))
+        self.decoder = self.build_decoder(640, len(self.text_transform.vocab))
 
         # Metrics
         self.val_cer = CER()
@@ -91,25 +98,6 @@ class QuartznetModule(pl.LightningModule):
             torch.randn((10, sample_rate)),
             torch.randint(10, sample_rate, (10,)) / sample_rate,
         )
-
-    def build_text_transform(
-        self, initial_vocab_tokens: List[str], nemo_compat_vocab: bool
-    ) -> BatchTextTransformer:
-        """Overwrite this function if you want to change how the text processing happens inside the model.
-
-        Args:
-            initial_vocab_tokens : List of tokens to create the vocabulary, special tokens should not be included here.
-            nemo_compat_vocab : Controls if the used vocabulary will be compatible with the original nemo implementation.
-
-        Returns:
-            The transform that will both `encode` the text and `decode_prediction`.
-        """
-        vocab = (
-            SimpleVocab(initial_vocab_tokens)
-            if nemo_compat_vocab
-            else Vocab(initial_vocab_tokens)
-        )
-        return BatchTextTransformer(vocab=vocab)
 
     def build_decoder(self, decoder_input_channels: int, vocab_size: int) -> nn.Module:
         """Overwrite this function if you want to change the model decoder.
@@ -124,6 +112,32 @@ class QuartznetModule(pl.LightningModule):
         return Quartznet_decoder(
             num_classes=vocab_size, input_channels=decoder_input_channels
         )
+
+    def build_text_transform(
+        self,
+        initial_vocab_tokens: List[str],
+        nemo_compat_vocab: bool,
+        sentencepiece_model: Optional[str] = None,
+    ) -> BatchTextTransformer:
+        """Overwrite this function if you want to change how the text processing happens inside the model.
+
+        Args:
+            initial_vocab_tokens : List of tokens to create the vocabulary, special tokens should not be included here.
+            sentencepiece_model: Path to sentencepiece .model file, if applicable
+            nemo_compat_vocab : Controls if the used vocabulary will be compatible with the original nemo implementation.
+
+        Returns:
+            The transform that will both `encode` the text and `decode_prediction`.
+        """
+        vocab = (
+            SimpleVocab(initial_vocab_tokens)
+            if nemo_compat_vocab
+            else Vocab(initial_vocab_tokens)
+        )
+        tokenizer = (
+            BPETokenizer(sentencepiece_model) if sentencepiece_model else char_tokenizer
+        )
+        return BatchTextTransformer(vocab=vocab, tokenizer=tokenizer)
 
     def forward(self, x: Tensor, lens: Tensor) -> Tuple[Tensor, Tensor]:
         """Process the audio tensor to create the predictions.
@@ -234,8 +248,8 @@ class QuartznetModule(pl.LightningModule):
 
     @classmethod
     def load_from_nemo(
-        cls, *, nemo_filepath: str = None, checkpoint_name: NemoCheckpoint = None
-    ) -> "QuartznetModule":
+        cls, *, nemo_filepath: str = None, checkpoint_name: CitrinetCheckpoint = None
+    ) -> "CitrinetModule":
         """Load from the original nemo checkpoint.
 
         Args:
@@ -257,11 +271,17 @@ class QuartznetModule(pl.LightningModule):
             extract_path = Path(extract_path)
             extract_archive(str(nemo_filepath), extract_path)
             config_path = extract_path / "model_config.yaml"
-            encoder_params, initial_vocab, preprocess_params = read_params_from_config(
-                config_path
-            )
+            (
+                encoder_params,
+                initial_vocab,
+                preprocess_params,
+            ) = read_params_from_config_citrinet(config_path)
+
+            sentencepiece_path = str(extract_path / "tokenizer.model")
+
             module = cls(
-                initial_vocab_tokens=initial_vocab,
+                initial_vocab_tokens=fix_vocab(initial_vocab),
+                sentencepiece_model=sentencepiece_path,
                 **encoder_params,
                 **preprocess_params,
                 nemo_compat_vocab=True,
@@ -275,7 +295,12 @@ class QuartznetModule(pl.LightningModule):
         module.eval()
         return module
 
-    def change_vocab(self, new_vocab_tokens: List[str], nemo_compat=False):
+    def change_vocab(
+        self,
+        new_vocab_tokens: List[str],
+        sentencepiece_model: Optional[str] = None,
+        nemo_compat: bool = False,
+    ):
         """Changes the vocabulary of the model. useful when finetuning to another language.
 
         Args:
@@ -285,6 +310,9 @@ class QuartznetModule(pl.LightningModule):
         # Updating hparams so that the saved model can be correctly loaded
         self.hparams.initial_vocab_tokens = new_vocab_tokens
         self.hparams.nemo_compat_vocab = nemo_compat
+        self.hparams.sentencepiece_model = sentencepiece_model
 
-        self.text_transform = self.build_text_transform(new_vocab_tokens, nemo_compat)
-        self.decoder = self.build_decoder(1024, len(self.text_transform.vocab))
+        self.text_transform = self.build_text_transform(
+            new_vocab_tokens, nemo_compat, sentencepiece_model
+        )
+        self.decoder = self.build_decoder(640, len(self.text_transform.vocab))
