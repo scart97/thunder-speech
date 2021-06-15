@@ -1,3 +1,7 @@
+"""Citrinet LightningModule that combines all of the individual parts
+to enable easy finetuning and inference.
+"""
+
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
@@ -53,9 +57,9 @@ class CitrinetModule(pl.LightningModule):
 
         Args:
             initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
-            filters : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
-            kernel_sizes : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
-            strides : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
+            filters : Check [`Citrinet_encoder`][thunder.citrinet.blocks.Citrinet_encoder]
+            kernel_sizes : Check [`Citrinet_encoder`][thunder.citrinet.blocks.Citrinet_encoder]
+            strides : Check [`Citrinet_encoder`][thunder.citrinet.blocks.Citrinet_encoder]
             sample_rate : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             n_window_size : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
             n_window_stride : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
