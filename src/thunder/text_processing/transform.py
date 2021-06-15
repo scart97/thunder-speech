@@ -49,7 +49,9 @@ class BatchTextTransformer(nn.Module):
             return encoded_batched
 
     @torch.jit.export
-    def decode_prediction(self, predictions: torch.Tensor) -> List[str]:
+    def decode_prediction(
+        self, predictions: torch.Tensor, remove_repeated: bool = True
+    ) -> List[str]:
         """
         Args:
             predictions : Tensor of shape (batch, time)
@@ -61,7 +63,8 @@ class BatchTextTransformer(nn.Module):
 
         for element in predictions:
             # Remove consecutive repeated elements
-            element = torch.unique_consecutive(element)
+            if remove_repeated:
+                element = torch.unique_consecutive(element)
             # Map back to string
             out = self.vocab.decode_into_text(element)
             # Join prediction into one string
