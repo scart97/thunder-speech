@@ -9,7 +9,7 @@
 What to expect from this project:
 
 - End-to-end speech recognition models
-- Simple fine tuning to new languages
+- Simple fine-tuning to new languages
 - Inference support as a first-class feature
 - Developer oriented api
 
@@ -54,7 +54,7 @@ If you want to know how to export the models using torchscript, access the raw p
 
 ## Contributing
 
-The first step to contribute is to do a editable install of the library:
+The first step to contribute is to do an editable installation of the library:
 
 ```
 git clone https://github.com/scart97/thunder-speech.git
@@ -69,7 +69,7 @@ Then, make sure that everything is working. You can run the test suit, that is b
 RUN_SLOW=1 pytest
 ```
 
-Here the `RUN_SLOW` flag is used to run all of the tests, including the ones that might download checkpoints or do small training runs and are marked as slow. If you don't have a CUDA capable gpu, some of the tests will be unconditionally skipped.
+Here the `RUN_SLOW` flag is used to run all the tests, including the ones that might download checkpoints or do small training runs and are marked as slow. If you don't have a CUDA capable gpu, some tests will be unconditionally skipped.
 
 
 ## Influences
@@ -80,11 +80,11 @@ From there also came the inspiration for the fine-tuning and prediction api's.
 
 The data loading and processing is loosely based on my experience using fast.ai.
 It tries to decouple transforms that happen at the item level from the ones that are efficiently implemented for the whole batch at the GPU.
-Also the idea that default parameters should be great.
+Also, the idea that default parameters should be great.
 
-The overall organization of code and decoupling follows the pytorch-lightning ideals, with self contained modules that try to reduce the boilerplate necessary.
+The overall organization of code and decoupling follows the pytorch-lightning ideals, with self-contained modules that try to reduce the boilerplate necessary.
 
-Finally the transformers library inspired the simple model implementations, with a clear separation in folders containing the specific code that you need to understand each architecture and preprocessing. Also their strong test suit.
+Finally, the transformers library inspired the simple model implementations, with a clear separation in folders containing the specific code that you need to understand each architecture and preprocessing, and their strong test suit.
 
 
 ## Note
