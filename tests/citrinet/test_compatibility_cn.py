@@ -16,7 +16,8 @@ from thunder.citrinet.compatibility import (
     read_params_from_config_citrinet,
 )
 from thunder.quartznet.blocks import Quartznet_decoder
-from thunder.quartznet.compatibility import download_checkpoint, load_quartznet_weights
+from thunder.quartznet.compatibility import load_quartznet_weights
+from thunder.utils import download_checkpoint
 
 
 @mark_slow
