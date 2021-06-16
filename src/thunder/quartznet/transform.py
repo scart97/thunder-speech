@@ -56,8 +56,7 @@ from typing import Optional
 
 import torch
 from torch import nn
-
-from thunder.librosa_compat import create_fb_matrix
+from torchaudio.functional import create_fb_matrix
 
 
 class FeatureBatchNormalizer(nn.Module):
@@ -209,7 +208,7 @@ class MelScale(nn.Module):
                 f_min=0,
                 f_max=sample_rate / 2,
                 norm="slaney",
-                htk=False,
+                mel_scale="slaney",
             )
             .transpose(0, 1)
             .unsqueeze(0)
