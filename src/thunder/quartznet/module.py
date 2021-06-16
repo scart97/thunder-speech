@@ -19,13 +19,13 @@ from thunder.metrics import CER, WER
 from thunder.quartznet.blocks import Quartznet_decoder, Quartznet_encoder
 from thunder.quartznet.compatibility import (
     NemoCheckpoint,
-    download_checkpoint,
     load_quartznet_weights,
     read_params_from_config,
 )
 from thunder.quartznet.transform import FilterbankFeatures
 from thunder.text_processing.transform import BatchTextTransformer
 from thunder.text_processing.vocab import SimpleVocab, Vocab
+from thunder.utils import download_checkpoint
 
 
 class QuartznetModule(pl.LightningModule):
@@ -229,7 +229,7 @@ class QuartznetModule(pl.LightningModule):
         return torch.optim.Adam(
             filter(lambda p: p.requires_grad, self.parameters()),
             lr=self.hparams.learning_rate,
-            betas=[0.8, 0.5],
+            betas=(0.8, 0.5),
         )
 
     @classmethod
@@ -254,8 +254,8 @@ class QuartznetModule(pl.LightningModule):
             raise ValueError("Either nemo_filepath or checkpoint_name must be passed")
 
         with TemporaryDirectory() as extract_path:
-            extract_path = Path(extract_path)
             extract_archive(str(nemo_filepath), extract_path)
+            extract_path = Path(extract_path)
             config_path = extract_path / "model_config.yaml"
             encoder_params, initial_vocab, preprocess_params = read_params_from_config(
                 config_path
@@ -267,7 +267,7 @@ class QuartznetModule(pl.LightningModule):
                 nemo_compat_vocab=True,
             )
             weights_path = extract_path / "model_weights.ckpt"
-            load_quartznet_weights(module.encoder, module.decoder, weights_path)
+            load_quartznet_weights(module.encoder, module.decoder, str(weights_path))
         # Here we set it in eval mode, so it correctly works during inference
         # Supposing that the majority of applications will be either (1) load a checkpoint
         # and directly run inference, or (2) fine-tuning. Either way this will prevent a silent
