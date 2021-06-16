@@ -26,7 +26,7 @@ class BatchTextTransformer(nn.Module):
 
         Args:
             vocab : Vocabulary to be used
-            tokenize_func : Function that will perform the tokenization of each individual text sample. Defaults to char_tokenizer.
+            tokenizer : Function that will perform the tokenization of each individual text sample. Defaults to char_tokenizer.
         """
         super().__init__()
         self.vocab = vocab
@@ -55,6 +55,7 @@ class BatchTextTransformer(nn.Module):
         """
         Args:
             predictions : Tensor of shape (batch, time)
+            remove_repeated: controls if repeated elements without a blank between them will be removed while decoding
 
         Returns:
             A list of decoded strings, one for each element in the batch.

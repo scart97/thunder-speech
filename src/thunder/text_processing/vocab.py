@@ -3,7 +3,7 @@
 
 # Copyright (c) 2021 scart97
 
-__all__ = ["Vocab"]
+__all__ = ["SimpleVocab", "Vocab"]
 
 from typing import List
 
@@ -127,9 +127,7 @@ class Vocab(nn.Module):
             end_token,
         ]
         self.stoi = {token: i for i, token in enumerate(self.itos)}
-        self.update_special_idx()
 
-    def update_special_idx(self):
         self.pad_idx = self.itos.index(self.pad_token)
         self.unknown_idx = self.itos.index(self.unknown_token)
         self.start_idx = self.itos.index(self.start_token)

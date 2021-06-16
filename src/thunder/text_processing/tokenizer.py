@@ -86,6 +86,7 @@ def train_sentencepiece_model(
         output_dir: folder to save created tokenizer model and vocab
         sample_size: maximum number of sentences the trainer loads. -1 means to use all the data.
         do_lower_case: if text should be lower cased before tokenizer model is created
+        tokenizer_type: controls the sentencepiece model type.
         character_coverage: float value between 0 and 1 (as a percentage). For languages with a vast charset,
             can be < 1.0, but for all other languages, it should be set as 1.0
         train_extremely_large_corpus: If training on huge datasets, pass this flag to allow SentencePiece
@@ -102,7 +103,7 @@ def train_sentencepiece_model(
         warn(
             "There's already a trained sentencepiece model at the output directory. Skipping train."
         )
-        return SentencepieceModelFile.from_folder(output_dir)
+        return SentencepieceModelFile.from_folder(str(output_dir))
 
     output_dir.mkdir(exist_ok=True)
 
@@ -128,7 +129,7 @@ def train_sentencepiece_model(
 
     sentencepiece.SentencePieceTrainer.Train(cmd)
 
-    return SentencepieceModelFile.from_folder(output_dir)
+    return SentencepieceModelFile.from_folder(str(output_dir))
 
 
 def word_tokenizer(text: str) -> List[str]:
