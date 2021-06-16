@@ -8,25 +8,22 @@
 
 __all__ = [
     "NemoCheckpoint",
-    "download_checkpoint",
     "read_params_from_config",
     "load_quartznet_weights",
 ]
 
-from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import torch
-import wget
 from omegaconf import OmegaConf
 from torch import nn
 
-from thunder.utils import get_default_cache_folder
+from thunder.utils import BaseCheckpoint
 
 
 # fmt:off
-class NemoCheckpoint(str, Enum):
+class NemoCheckpoint(BaseCheckpoint):
     """Trained model weight checkpoints.
     Used by [`download_checkpoint`][thunder.quartznet.compatibility.download_checkpoint] and
     [`QuartznetModule.load_from_nemo`][thunder.quartznet.module.QuartznetModule.load_from_nemo].
@@ -51,50 +48,12 @@ class NemoCheckpoint(str, Enum):
     stt_ru_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_ru_quartznet15x5/versions/1.0.0rc1/files/stt_ru_quartznet15x5.nemo"
     stt_en_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_en_quartznet15x5/versions/1.0.0rc1/files/stt_en_quartznet15x5.nemo"
     stt_zh_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_zh_quartznet15x5/versions/1.0.0rc1/files/stt_zh_quartznet15x5.nemo"
-
-    @staticmethod
-    def from_string(name):
-        """Creates enum value from string. Helper to use with argparse/hydra
-
-        Args:
-            name : Name of the checkpoint
-
-        Raises:
-            ValueError: Name provided is not a valid checkpoint
-
-        Returns:
-            Enum value corresponding to the name
-        """
-        try:
-            return NemoCheckpoint[name]
-        except KeyError as option_does_not_exist:
-            raise ValueError("Name provided is not a valid checkpoint") from option_does_not_exist
 # fmt:on
 
 
-def download_checkpoint(name: NemoCheckpoint, checkpoint_folder: str = None) -> Path:
-    """Download quartznet checkpoint by identifier.
-
-    Args:
-        name: Model identifier. Check checkpoint_archives.keys()
-        checkpoint_folder: Folder where the checkpoint will be saved to.
-
-    Returns:
-        Path to the saved checkpoint file.
-    """
-    if checkpoint_folder is None:
-        checkpoint_folder = get_default_cache_folder()
-
-    url = name.value
-    filename = url.split("/")[-1]
-    checkpoint_path = Path(checkpoint_folder) / filename
-    if not checkpoint_path.exists():
-        wget.download(url, out=str(checkpoint_path))
-
-    return checkpoint_path
-
-
-def read_params_from_config(config_path: str) -> Tuple[Dict, List[str], Dict]:
+def read_params_from_config(
+    config_path: Union[str, Path]
+) -> Tuple[Dict, List[str], Dict]:
     """Read the important parameters from the config stored inside the .nemo
     checkpoint.
 
