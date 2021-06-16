@@ -35,6 +35,7 @@ from typing import List, Tuple
 
 import torch
 from torch import nn
+from torch.nn.common_types import _size_1_t
 
 from thunder.quartznet.blocks import (
     Masked,
@@ -89,9 +90,9 @@ class CitrinetBlock(nn.Module):
         in_channels: int,
         out_channels: int,
         repeat: int = 5,
-        kernel_size: List[int] = [11],
-        stride: List[int] = [1],
-        dilation: List[int] = [1],
+        kernel_size: _size_1_t = (11,),
+        stride: _size_1_t = (1,),
+        dilation: _size_1_t = (1,),
         dropout: float = 0.0,
         residual: bool = True,
         separable: bool = False,
@@ -125,7 +126,7 @@ class CitrinetBlock(nn.Module):
                     inplanes_loop,
                     out_channels,
                     kernel_size=kernel_size,
-                    stride=[1],  # Only stride the last one
+                    stride=(1,),  # Only stride the last one
                     dilation=dilation,
                     padding=padding_val,
                     separable=separable,
@@ -211,7 +212,7 @@ def stem(feat_in: int) -> CitrinetBlock:
         feat_in,
         256,
         repeat=1,
-        kernel_size=[5],
+        kernel_size=(5,),
         residual=False,
         separable=True,
     )
@@ -236,7 +237,7 @@ def body(
     f_in = 256
     for f, k, s in zip(filters, kernel_size, strides):
         layers.append(
-            CitrinetBlock(f_in, f, kernel_size=[k], stride=[s], separable=True)
+            CitrinetBlock(f_in, f, kernel_size=(k,), stride=(s,), separable=True)
         )
         f_in = f
     layers.append(
@@ -244,7 +245,7 @@ def body(
             f_in,
             640,
             repeat=1,
-            kernel_size=[41],
+            kernel_size=(41,),
             residual=False,
             separable=True,
         )

@@ -29,6 +29,8 @@ __all__ = [
     "MaskedConv1d",
     "MultiSequential",
     "Masked",
+    "_get_act_dropout_layer",
+    "_get_conv_bn_layer",
     "QuartznetBlock",
     "stem",
     "body",
@@ -41,6 +43,7 @@ from typing import List, Tuple
 
 import torch
 from torch import nn
+from torch.nn.common_types import _size_1_t
 
 
 class InitMode(str, Enum):
@@ -123,10 +126,10 @@ class MaskedConv1d(nn.Module):
         self,
         in_channels: int,
         out_channels: int,
-        kernel_size: int,
-        stride: int = 1,
-        padding: int = 0,
-        dilation: int = 1,
+        kernel_size: _size_1_t,
+        stride: _size_1_t = 1,
+        padding: _size_1_t = 0,
+        dilation: _size_1_t = 1,
         groups: int = 1,
         bias: bool = False,
         use_mask: bool = True,
@@ -225,10 +228,10 @@ class Masked(nn.Module):
 
 
 def _get_conv_bn_layer(
-    in_channels,
-    out_channels,
-    kernel_size=11,
-    separable=False,
+    in_channels: int,
+    out_channels: int,
+    kernel_size: _size_1_t = 11,
+    separable: bool = False,
     **conv_kwargs,
 ):
 
@@ -266,7 +269,7 @@ def _get_conv_bn_layer(
     return layers
 
 
-def _get_act_dropout_layer(drop_prob=0.2):
+def _get_act_dropout_layer(drop_prob: float = 0.2):
     return [Masked(nn.ReLU(True)), Masked(nn.Dropout(p=drop_prob))]
 
 
@@ -276,9 +279,9 @@ class QuartznetBlock(nn.Module):
         in_channels: int,
         out_channels: int,
         repeat: int = 5,
-        kernel_size: List[int] = [11],
-        stride: List[int] = [1],
-        dilation: List[int] = [1],
+        kernel_size: _size_1_t = (11,),
+        stride: _size_1_t = (1,),
+        dilation: _size_1_t = (1,),
         dropout: float = 0.0,
         residual: bool = True,
         separable: bool = False,
@@ -362,9 +365,11 @@ class QuartznetBlock(nn.Module):
         """
         Args:
             x : Tensor of shape (batch, features, time) where #features == inplanes
+            lens : Tensor containing the lengths of each input in the batch, to be used by the
+                masked convolution that happens internally
 
         Returns:
-            Result of applying the block on the input
+            Result of applying the block on the input, and corresponding output lengths
         """
 
         # compute forward convolutions
@@ -393,8 +398,8 @@ def stem(feat_in: int) -> QuartznetBlock:
         feat_in,
         256,
         repeat=1,
-        stride=[2],
-        kernel_size=[33],
+        stride=(2,),
+        kernel_size=(33,),
         residual=False,
         separable=True,
     )
@@ -417,7 +422,7 @@ def body(
     f_in = 256
     for f, k in zip(filters, kernel_size):
         for _ in range(repeat_blocks):
-            layers.append(QuartznetBlock(f_in, f, kernel_size=[k], separable=True))
+            layers.append(QuartznetBlock(f_in, f, kernel_size=(k,), separable=True))
             f_in = f
     layers.extend(
         [
@@ -425,13 +430,13 @@ def body(
                 f_in,
                 512,
                 repeat=1,
-                dilation=[2],
-                kernel_size=[87],
+                dilation=(2,),
+                kernel_size=(87,),
                 residual=False,
                 separable=True,
             ),
             QuartznetBlock(
-                512, 1024, repeat=1, kernel_size=[1], residual=False, separable=False
+                512, 1024, repeat=1, kernel_size=(1,), residual=False, separable=False
             ),
         ]
     )
@@ -467,6 +472,7 @@ def Quartznet_decoder(num_classes: int, input_channels: int = 1024) -> nn.Module
 
     Args:
         num_classes : Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
+        input_channels: Number of channels in the encoder output representation
 
     Returns:
         Pytorch model of the decoder
