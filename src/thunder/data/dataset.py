@@ -7,7 +7,7 @@ __all__ = ["BaseSpeechDataset", "ManifestSpeechDataset"]
 
 import json
 from pathlib import Path
-from typing import Any, Iterable, List, Tuple, Union
+from typing import Any, List, Sequence, Tuple, Union
 
 import torchaudio
 from torch import Tensor
@@ -18,7 +18,7 @@ from thunder.text_processing.preprocess import lower_text, normalize_text
 
 class BaseSpeechDataset(Dataset):
     def __init__(
-        self, items: Iterable, force_mono: bool = True, sample_rate: int = 16000
+        self, items: Sequence, force_mono: bool = True, sample_rate: int = 16000
     ):
         """This is the base class that implements the minimal functionality to have a compatible
         speech dataset, in a way that can be easily customized by subclassing.
@@ -127,6 +127,16 @@ class BaseSpeechDataset(Dataset):
         raise NotImplementedError()
 
     def preprocess_text(self, text: str) -> str:
+        """Preprocess the text to remove some common problems.
+        By default, it lowers the text and performs normalization,
+        removing any accents or non-ascii characters.
+
+        Args:
+            text : Label text
+
+        Returns:
+            Label text after processing
+        """
         normalized = normalize_text(text)
         lower = lower_text(normalized)
         return lower
