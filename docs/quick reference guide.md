@@ -29,7 +29,7 @@ transcriptions = model.predict(audio)
 ```
 
 ??? note
-    The exported model only depends on pytorch and torchaudio, and the later is only used
+    The exported model only depends on pytorch and torchaudio, and the latter is only used
     to open the audio file into a tensor. If torchaudio.load could be compiled inside the
     model in the future, similar to what already happens with torchvision, the dependency
     can be removed and only the base pytorch will be necessary to run inferece!
@@ -44,7 +44,7 @@ import torch
 import torchaudio
 
 model = torch.jit.load("model_ready_for_inference.pt")
-audio, sr = torchaudio.load(audio_name)
+audio, sr = torchaudio.load("audio_file.wav")
 probs = model(audio)
 # If you also want the transcriptions:
 transcriptions = model.text_transform.decode_prediction(probs.argmax(1))
@@ -77,7 +77,7 @@ trainer.fit(model=model, datamodule=dm)
 
 !!! danger
     This will probably have a subpar result right now, as I'm still working on
-    properly fine tuning (freeze encoder at the start, learning rate scheduling,
+    properly fine-tuning (freeze encoder at the start, learning rate scheduling,
     better defaults)
 
 
