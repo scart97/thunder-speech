@@ -11,7 +11,13 @@ import pytorch_lightning as pl
 import torch
 from torch import Tensor, nn
 from torch.nn.functional import ctc_loss, log_softmax
-from transformers import Wav2Vec2Model
+
+try:
+    from transformers import Wav2Vec2Model
+except ModuleNotFoundError as transformers_not_installed:
+    raise ImportError(
+        "To use wav2vec please install the transformers extension, by calling `pip install thunder-speech[transformers]`"
+    ) from transformers_not_installed
 
 from thunder.metrics import CER, WER
 from thunder.text_processing.transform import BatchTextTransformer, Vocab
