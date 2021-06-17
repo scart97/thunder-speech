@@ -9,11 +9,82 @@ import json
 from pathlib import Path
 from typing import Any, List, Sequence, Tuple, Union
 
+import torch
 import torchaudio
-from torch import Tensor
+from torch import Tensor, nn
 from torch.utils.data import Dataset
+from torchaudio.functional import resample
 
 from thunder.text_processing.preprocess import lower_text, normalize_text
+
+
+class AudioFileLoader(nn.Module):
+    def __init__(self, force_mono: bool = True, sample_rate: int = 16000):
+        """Module containing the data loading and basic preprocessing.
+        It's used internally by the datasets, but can be exported so
+        that during inference time there's no code dependency.
+
+        Args:
+            force_mono : If true, convert all the loaded samples to mono.
+            sample_rate : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
+        """
+        super().__init__()
+        self.force_mono = force_mono
+        self.sample_rate = sample_rate
+
+    @torch.jit.export
+    def open_audio(self, item: str) -> Tuple[Tensor, int]:
+        """Uses the data returned by get_item to open the audio
+
+        Args:
+            item : Data returned by get_item(index)
+
+        Returns:
+            Tuple containing the audio tensor with shape (channels, time), and the corresponding sample rate.
+        """
+        return torchaudio.load(item)
+
+    @torch.jit.export
+    def preprocess_audio(self, audio: Tensor, sample_rate: int) -> Tensor:
+        """Apply some base transforms to the audio, that fix silent problems.
+        It transforms all the audios to mono (depending on class creation parameter),
+        remove the possible DC bias present and then resamples the audios to a common
+        sample rate.
+
+        Args:
+            audio : Audio tensor
+            sample_rate : Sample rate
+
+        Returns:
+            Audio tensor after the transforms.
+        """
+        if self.force_mono and (audio.shape[0] > 1):
+            audio = audio.mean(0, keepdim=True)
+
+        # Removing the dc component from the audio
+        # It happens when a faulty capture device introduce
+        # an offset into the recorded waveform, and this can
+        # cause problems with later transforms.
+        # https://en.wikipedia.org/wiki/DC_bias
+        audio = audio - audio.mean(1)
+
+        if self.sample_rate != sample_rate:
+            audio = resample(
+                audio, orig_freq=float(sample_rate), new_freq=float(self.sample_rate)
+            )
+        return audio
+
+    def forward(self, item: str) -> Tensor:
+        """Opens audio item and do basic preprocessing
+
+        Args:
+            item : Path to the audio to be opened
+
+        Returns:
+            Audio tensor after preprocessing
+        """
+        audio, sample_rate = self.open_audio(item)
+        return self.preprocess_audio(audio, sample_rate)
 
 
 class BaseSpeechDataset(Dataset):
@@ -30,8 +101,7 @@ class BaseSpeechDataset(Dataset):
         """
         super().__init__()
         self.items = items
-        self.sample_rate = sample_rate
-        self.force_mono = force_mono
+        self.loader = AudioFileLoader(force_mono, sample_rate)
 
     def __len__(self):
         return len(self.items)
@@ -83,7 +153,7 @@ class BaseSpeechDataset(Dataset):
         Returns:
             Tuple containing the audio tensor with shape (channels, time), and the corresponding sample rate.
         """
-        return torchaudio.load(item)
+        return self.loader.open_audio(item)
 
     def preprocess_audio(self, audio: Tensor, sample_rate: int) -> Tensor:
         """Apply some base transforms to the audio, that fix silent problems.
@@ -98,22 +168,7 @@ class BaseSpeechDataset(Dataset):
         Returns:
             Audio tensor after the transforms.
         """
-        if self.force_mono and (audio.shape[0] > 1):
-            audio = audio.mean(0, keepdim=True)
-
-        # Removing the dc component from the audio
-        # It happens when a faulty capture device introduce
-        # an offset into the recorded waveform, and this can
-        # cause problems with later transforms.
-        # https://en.wikipedia.org/wiki/DC_bias
-        audio = audio - audio.mean(1)
-
-        if self.sample_rate != sample_rate:
-            tfm = torchaudio.transforms.Resample(
-                orig_freq=sample_rate, new_freq=self.sample_rate
-            )
-            audio = tfm(audio)
-        return audio
+        return self.loader.preprocess_audio(audio, sample_rate)
 
     def open_text(self, item: Any) -> str:
         """Opens the transcription based on the data returned by get_item(index)
@@ -157,7 +212,7 @@ class ManifestSpeechDataset(BaseSpeechDataset):
         super().__init__(items, force_mono=force_mono, sample_rate=sample_rate)
 
     def open_audio(self, item: dict) -> Tuple[Tensor, int]:
-        return torchaudio.load(item["audio_filepath"])
+        return self.loader.open_audio(item["audio_filepath"])
 
     def open_text(self, item: dict) -> str:
         return item["text"]
