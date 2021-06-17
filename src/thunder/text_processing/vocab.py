@@ -8,10 +8,10 @@ __all__ = ["SimpleVocab", "Vocab"]
 from typing import List
 
 import torch
-from torch import nn
 
 
-class SimpleVocab(nn.Module):
+@torch.jit.script
+class SimpleVocab:
     def __init__(
         self,
         initial_vocab_tokens: List[str],
@@ -27,7 +27,6 @@ class SimpleVocab(nn.Module):
             initial_vocab_tokens : Basic list of tokens that will be part of the vocabulary. DO NOT INCLUDE SPECIAL TOKENS THERE. Even the blank is automatically added by the class. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
             blank_token : Token that will represent the special ctc blank.
         """
-        super().__init__()
         # There's no problem if the blank_idx == pad_idx
         self.blank_token = blank_token
 
@@ -50,10 +49,14 @@ class SimpleVocab(nn.Module):
         """
         # When in nemo style vocab, there's no unknown token
         # So we filter out all of the tokens not in the vocab
-        tokens = filter(lambda x: x in self.itos, tokens)
-        return torch.tensor([self.stoi.get(it) for it in tokens], dtype=torch.long)
+        filtered: List[str] = []
+        for t in tokens:
+            if t in self.itos:
+                filtered.append(t)
+        # https://github.com/pytorch/pytorch/issues/27504 - alternative to the loop
+        # filtered = [t for t in tokens if t in self.itos]
+        return torch.tensor([self.stoi.get(it) for it in filtered], dtype=torch.long)
 
-    @torch.jit.export
     def decode_into_text(self, indices: torch.Tensor) -> List[str]:
         """Function to transform back a list of numbers into the corresponding
         tokens.
@@ -66,7 +69,6 @@ class SimpleVocab(nn.Module):
         """
         return [self.itos[it] for it in indices]
 
-    @torch.jit.export
     def add_special_tokens(self, tokens: List[str]) -> List[str]:
         """Function to add the special start and end tokens to some
         tokenized text.
@@ -79,7 +81,6 @@ class SimpleVocab(nn.Module):
         """
         return tokens
 
-    @torch.jit.export
     def remove_special_tokens(self, text: str) -> str:
         """Function to remove the special tokens from the prediction.
 
@@ -92,7 +93,8 @@ class SimpleVocab(nn.Module):
         return text.replace(self.blank_token, "")
 
 
-class Vocab(nn.Module):
+@torch.jit.script
+class Vocab:
     def __init__(
         self,
         initial_vocab_tokens: List[str],
@@ -112,7 +114,6 @@ class Vocab(nn.Module):
             start_token : Token that will represent the beginning of the sequence.
             end_token : Token that will represent the end of the sequence.
         """
-        super().__init__()
         self.pad_token = pad_token
         self.unknown_token = unknown_token
         self.start_token = start_token
@@ -150,7 +151,6 @@ class Vocab(nn.Module):
             [self.stoi.get(it, self.unknown_idx) for it in tokens], dtype=torch.long
         )
 
-    @torch.jit.export
     def decode_into_text(self, indices: torch.Tensor) -> List[str]:
         """Function to transform back a list of numbers into the corresponding
         tokens.
@@ -163,7 +163,6 @@ class Vocab(nn.Module):
         """
         return [self.itos[it] for it in indices]
 
-    @torch.jit.export
     def add_special_tokens(self, tokens: List[str]) -> List[str]:
         """Function to add the special start and end tokens to some
         tokenized text.
@@ -176,7 +175,6 @@ class Vocab(nn.Module):
         """
         return [self.start_token] + tokens + [self.end_token]
 
-    @torch.jit.export
     def remove_special_tokens(self, text: str) -> str:
         """Function to remove the special tokens from the prediction.
 

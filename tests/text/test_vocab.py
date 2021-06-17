@@ -15,19 +15,15 @@ from thunder.text_processing.tokenizer import char_tokenizer
 from thunder.text_processing.vocab import SimpleVocab, Vocab
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture
 def complex_vocab(request):
     vocab = Vocab(initial_vocab_tokens=[" "] + list(ascii_lowercase))
-    if request.param:
-        return torch.jit.script(vocab)
     return vocab
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture
 def simple_vocab(request):
     vocab = SimpleVocab(initial_vocab_tokens=[" "] + list(ascii_lowercase))
-    if request.param:
-        return torch.jit.script(vocab)
     return vocab
 
 
@@ -49,24 +45,18 @@ def test_vocab_blank_is_not_the_unknown(complex_vocab: Vocab):
 
 
 def test_numericalize_adds_unknown_token(complex_vocab: Vocab):
-    if isinstance(complex_vocab, torch.jit.ScriptModule):
-        return
     out = complex_vocab.numericalize(["a", "b", "c", "$"])
     expected = torch.Tensor([1, 2, 3, complex_vocab.unknown_idx])
     assert (out == expected).all()
 
 
 def test_numericalize_nemo_ignores_unknown(simple_vocab: SimpleVocab):
-    if isinstance(simple_vocab, torch.jit.ScriptModule):
-        return
     out = simple_vocab.numericalize(["a", "b", "c", "$"])
     expected = torch.Tensor([1, 2, 3])
     assert (out == expected).all()
 
 
 def test_numericalize_decode_is_bidirectionally_correct(complex_vocab: Vocab):
-    if isinstance(complex_vocab, torch.jit.ScriptModule):
-        return
     inp = ["a", "b", "c", "d", "e"]
     out1 = complex_vocab.numericalize(inp)
     out = complex_vocab.decode_into_text(out1)
@@ -74,8 +64,6 @@ def test_numericalize_decode_is_bidirectionally_correct(complex_vocab: Vocab):
 
 
 def test_nemo_numericalize_decode_is_bidirectionally_correct(simple_vocab: SimpleVocab):
-    if isinstance(simple_vocab, torch.jit.ScriptModule):
-        return
     inp = ["a", "b", "c", "d", "e"]
     out1 = simple_vocab.numericalize(inp)
     out = simple_vocab.decode_into_text(out1)
