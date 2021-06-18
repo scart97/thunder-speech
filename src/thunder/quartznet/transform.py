@@ -71,11 +71,15 @@ class FeatureBatchNormalizer(nn.Module):
         Args:
             x : Tensor of shape (batch, features, time)
         """
-        x_mean = x.mean(dim=2, keepdim=True).detach()
-        x_std = x.std(dim=2, keepdim=True).detach()
+        mask = x.abs() > 0.0
+        num_elements = mask.sum(dim=2, keepdim=True).detach()
+        x_mean = x.sum(dim=2, keepdim=True).detach() / num_elements
+        numerator = (x - x_mean).pow(2).sum(dim=2, keepdim=True).detach()
+        x_std = (numerator / num_elements).sqrt()
         # make sure x_std is not zero
         x_std += self.div_guard
-        return (x - x_mean) / x_std
+        result = (x - x_mean) / x_std
+        return torch.masked_fill(result, ~mask, 0.0)
 
 
 class DitherAudio(nn.Module):
@@ -99,7 +103,8 @@ class DitherAudio(nn.Module):
             x : Tensor of shape (batch, time)
         """
         if self.training:
-            return x + self.dither * torch.randn_like(x)
+            mask = x > 0.0
+            return x + mask * (self.dither * torch.randn_like(x))
         else:
             return x
 
@@ -227,7 +232,9 @@ class MelScale(nn.Module):
         # log features
         # We want to avoid taking the log of zero
         if self.log_scale:
+            mask = x.abs() > 0.0
             x = torch.log(x + 2 ** -24)
+            x[~mask] = 0.0
         return x
 
 
