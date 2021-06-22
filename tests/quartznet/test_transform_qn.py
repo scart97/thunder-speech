@@ -382,6 +382,7 @@ def test_melscale_onnx(**kwargs):
             (x),
             f"{export_path}/melscale.onnx",
             verbose=True,
+            opset_version=11,
         )
 
 
