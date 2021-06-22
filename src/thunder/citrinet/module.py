@@ -95,10 +95,7 @@ class CitrinetModule(pl.LightningModule):
         self.val_cer = CER()
         self.val_wer = WER()
         # Example input is one second of fake audio
-        self.example_input_array = (
-            torch.randn((10, sample_rate)),
-            torch.randint(10, sample_rate, (10,)) / sample_rate,
-        )
+        self.example_input_array = torch.randn((10, sample_rate))
 
     def build_decoder(self, decoder_input_channels: int, vocab_size: int) -> nn.Module:
         """Overwrite this function if you want to change the model decoder.
@@ -140,20 +137,18 @@ class CitrinetModule(pl.LightningModule):
         )
         return BatchTextTransformer(vocab=vocab, tokenizer=tokenizer)
 
-    def forward(self, x: Tensor, lens: Tensor) -> Tuple[Tensor, Tensor]:
+    def forward(self, x: Tensor) -> Tensor:
         """Process the audio tensor to create the predictions.
 
         Args:
             x : Audio tensor of shape [batch_size, time]
-            lens : Normalized original lengths of each element in the audio tensor. It should be a float tensor where the biggest element has length 1.0, and all the others are relative to it.
 
         Returns:
             Tuple with the predictions and output lengths. Notice that the ouput lengths are not normalized, they are a long tensor.
         """
-        features = self.audio_transform(x)  # TODO: maybe mask features
-        feature_lens = (features.shape[-1] * lens).long()
-        encoded, output_lens = self.encoder(features, feature_lens)
-        return self.decoder(encoded), output_lens.long()
+        features = self.audio_transform(x)
+        encoded = self.encoder(features)
+        return self.decoder(encoded)
 
     @torch.jit.export
     def predict(self, x: Tensor) -> List[str]:
@@ -165,15 +160,16 @@ class CitrinetModule(pl.LightningModule):
         Returns:
             A list of strings, each one contains the corresponding transcription to the original batch element.
         """
-        lens = torch.tensor([x.shape[-1]], device=x.device)
-        pred, _ = self(x, lens)
+        pred = self(x)
         return self.text_transform.decode_prediction(pred.argmax(1))
 
     def calculate_loss(self, probabilities, y, prob_lens, y_lens):
         # Change from (batch, #vocab, time) to (time, batch, #vocab)
         probabilities = probabilities.permute(2, 0, 1)
         logprobs = log_softmax(probabilities, dim=2)
-
+        # Calculate the logprobs correct length based on the
+        # normalized original lengths
+        prob_lens = (prob_lens * logprobs.shape[0]).long()
         blank = self.text_transform.vocab.blank_idx
 
         return ctc_loss(
@@ -201,8 +197,8 @@ class CitrinetModule(pl.LightningModule):
         audio, audio_lens, texts = batch
         y, y_lens = self.text_transform.encode(texts, device=self.device)
 
-        probabilities, out_lens = self(audio, audio_lens)
-        loss = self.calculate_loss(probabilities, y, out_lens, y_lens)
+        probabilities = self(audio)
+        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
 
         self.log("loss/train_loss", loss)
         return loss
@@ -222,8 +218,8 @@ class CitrinetModule(pl.LightningModule):
         audio, audio_lens, texts = batch
         y, y_lens = self.text_transform.encode(texts, device=self.device)
 
-        probabilities, out_lens = self(audio, audio_lens)
-        loss = self.calculate_loss(probabilities, y, out_lens, y_lens)
+        probabilities = self(audio)
+        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
 
         decoded_preds = self.text_transform.decode_prediction(probabilities.argmax(1))
         decoded_targets = self.text_transform.decode_prediction(y)
