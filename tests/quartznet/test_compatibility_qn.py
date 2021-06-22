@@ -52,8 +52,7 @@ def test_create_from_manifest():
 
         x = torch.randn(10, 1337)
         feat = fb(x)
-        lens = torch.randint(10, 100, (10,))
-        out, _ = encoder(feat, lens)
+        out = encoder(feat)
         out2 = decoder(out)
         assert feat.shape[0] == x.shape[0]
         assert feat.shape[1] == 64
