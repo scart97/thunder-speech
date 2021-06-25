@@ -10,12 +10,12 @@ from urllib.error import HTTPError
 from torchaudio.datasets.utils import extract_archive
 
 from tests.utils import mark_slow
+from thunder.blocks import conv1d_decoder
 from thunder.citrinet.blocks import Citrinet_encoder
 from thunder.citrinet.compatibility import (
     CitrinetCheckpoint,
     read_params_from_config_citrinet,
 )
-from thunder.quartznet.blocks import Quartznet_decoder
 from thunder.quartznet.compatibility import load_quartznet_weights
 from thunder.utils import download_checkpoint
 
@@ -34,7 +34,7 @@ def test_can_load_weights():
                 config_path
             )
             encoder = Citrinet_encoder(80, **encoder_params)
-            decoder = Quartznet_decoder(len(initial_vocab) + 1, 640)
+            decoder = conv1d_decoder(640, len(initial_vocab) + 1)
             load_quartznet_weights(
                 encoder, decoder, extract_path / "model_weights.ckpt"
             )

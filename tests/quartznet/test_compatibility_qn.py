@@ -11,7 +11,8 @@ import torch
 from torchaudio.datasets.utils import extract_archive
 
 from tests.utils import mark_slow
-from thunder.quartznet.blocks import Quartznet_decoder, Quartznet_encoder
+from thunder.blocks import conv1d_decoder
+from thunder.quartznet.blocks import Quartznet_encoder
 from thunder.quartznet.compatibility import (
     NemoCheckpoint,
     load_quartznet_weights,
@@ -33,7 +34,7 @@ def test_can_load_weights():
             config_path = extract_path / "model_config.yaml"
             encoder_params, initial_vocab, _ = read_params_from_config(config_path)
             encoder = Quartznet_encoder(64, **encoder_params)
-            decoder = Quartznet_decoder(len(initial_vocab) + 1)
+            decoder = conv1d_decoder(1024, len(initial_vocab) + 1)
             load_quartznet_weights(
                 encoder, decoder, extract_path / "model_weights.ckpt"
             )
@@ -48,7 +49,7 @@ def test_create_from_manifest():
         encoder_params, initial_vocab, preprocess_params = read_params_from_config(cfg)
         fb = FilterbankFeatures(**preprocess_params)
         encoder = Quartznet_encoder(64, **encoder_params)
-        decoder = Quartznet_decoder(len(initial_vocab))
+        decoder = conv1d_decoder(1024, len(initial_vocab))
 
         x = torch.randn(10, 1337)
         feat = fb(x)
