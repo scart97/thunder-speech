@@ -10,27 +10,23 @@ import pytest
 import torch
 
 from thunder.text_processing.transform import BatchTextTransformer
-from thunder.text_processing.vocab import Vocab
-
-
-@pytest.fixture
-def simple_vocab():
-    return Vocab([" "] + list(ascii_lowercase))
 
 
 @pytest.fixture(params=[True, False])
-def tfm(simple_vocab, request):
-    transform = BatchTextTransformer(vocab=simple_vocab)
+def tfm(request):
+    transform = BatchTextTransformer(
+        initial_vocab_tokens=[" "] + list(ascii_lowercase), simple_vocab=False
+    )
     if request.param:
         return torch.jit.script(transform)
     return transform
 
 
 @pytest.fixture
-def blank_input(simple_vocab):
+def blank_input(tfm):
     # A tensor full of blank probabilities
-    x = torch.zeros(1, len(simple_vocab), 100)
-    x[:, simple_vocab.blank_idx, :] = 1
+    x = torch.zeros(1, len(tfm.vocab), 100)
+    x[:, tfm.vocab.blank_idx, :] = 1
     return x
 
 
