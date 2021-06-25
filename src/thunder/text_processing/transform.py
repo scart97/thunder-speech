@@ -5,32 +5,40 @@
 
 __all__ = ["BatchTextTransformer", "Vocab"]
 
-from typing import List
+from typing import List, Optional
 
 import torch
 from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 
-from thunder.text_processing.tokenizer import char_tokenizer
-from thunder.text_processing.vocab import Vocab
+from thunder.text_processing.tokenizer import BPETokenizer, char_tokenizer
+from thunder.text_processing.vocab import SimpleVocab, Vocab
 
 
 class BatchTextTransformer(nn.Module):
     def __init__(
         self,
-        vocab: Vocab,
-        tokenizer=char_tokenizer,
+        initial_vocab_tokens: List[str],
+        simple_vocab: bool,
+        sentencepiece_model: Optional[str] = None,
     ):
         """That class is the glue code that uses all of the text processing
-        stuff to encode an entire batch of text at once.
+        functions to encode/decode an entire batch of text at once.
 
         Args:
-            vocab : Vocabulary to be used
-            tokenizer : Function that will perform the tokenization of each individual text sample. Defaults to char_tokenizer.
+            initial_vocab_tokens : List of tokens to create the vocabulary, special tokens should not be included here.
+            simple_vocab : Controls if the used vocabulary will only have the blank token or more additional special tokens.
+            sentencepiece_model: Path to sentencepiece .model file, if applicable
         """
         super().__init__()
-        self.vocab = vocab
-        self.tokenizer = tokenizer
+        self.vocab = (
+            SimpleVocab(initial_vocab_tokens)
+            if simple_vocab
+            else Vocab(initial_vocab_tokens)
+        )
+        self.tokenizer = (
+            BPETokenizer(sentencepiece_model) if sentencepiece_model else char_tokenizer
+        )
 
     def encode(self, items: List[str], return_length: bool = True, device=None):
         tokenized = [self.tokenizer(x) for x in items]
