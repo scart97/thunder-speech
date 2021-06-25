@@ -25,14 +25,12 @@
 __all__ = [
     "InitMode",
     "init_weights",
-    "get_same_padding",
     "_get_act_dropout_layer",
     "_get_conv_bn_layer",
     "QuartznetBlock",
     "stem",
     "body",
     "Quartznet_encoder",
-    "Quartznet_decoder",
 ]
 
 from enum import Enum
@@ -41,6 +39,8 @@ from typing import List
 import torch
 from torch import nn
 from torch.nn.common_types import _size_1_t
+
+from thunder.blocks import get_same_padding
 
 
 class InitMode(str, Enum):
@@ -57,7 +57,7 @@ class InitMode(str, Enum):
 
 
 def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
-    """Initialize Linear, MaskedConv1d/Conv1d or BatchNorm1d weights.
+    """Initialize Linear, Conv1d or BatchNorm1d weights.
     There's no return, the operation occurs inplace.
 
     Args:
@@ -86,32 +86,6 @@ def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
         if m.affine:
             nn.init.ones_(m.weight)
             nn.init.zeros_(m.bias)
-
-
-def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
-    """Calculates the padding size to obtain same padding.
-        Same padding means that the output will have the
-        shape input_shape / stride. That means, for
-        stride = 1 the output shape is the same as the input,
-        and stride = 2 gives an output that is half of the
-        input shape.
-
-    Args:
-        kernel_size : convolution kernel size. Only tested to be correct with odd values.
-        stride : convolution stride
-        dilation : convolution dilation
-
-    Raises:
-        ValueError: Only stride or dilation may be greater than 1
-
-    Returns:
-        padding value to obtain same padding.
-    """
-    if stride > 1 and dilation > 1:
-        raise ValueError("Only stride OR dilation may be greater than 1")
-    if dilation > 1:
-        return (dilation * (kernel_size - 1) + 1) // 2
-    return kernel_size // 2
 
 
 class MaskedBatchNorm1d(nn.Module):
@@ -363,23 +337,3 @@ def Quartznet_encoder(
         stem(feat_in),
         *body(filters, kernel_sizes, repeat_blocks),
     )
-
-
-def Quartznet_decoder(num_classes: int, input_channels: int = 1024) -> nn.Module:
-    """Build the Quartznet decoder.
-
-    Args:
-        num_classes : Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
-        input_channels: Number of channels in the encoder output representation
-
-    Returns:
-        Pytorch model of the decoder
-    """
-    decoder = nn.Conv1d(
-        input_channels,
-        num_classes,
-        kernel_size=1,
-        bias=True,
-    )
-    decoder.apply(init_weights)
-    return decoder
