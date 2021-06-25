@@ -15,23 +15,21 @@ from typing import List, Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
-from torch import Tensor, nn
-from torch.nn.functional import ctc_loss, log_softmax
+from torch import Tensor
 from torchaudio.datasets.utils import extract_archive
 
+from thunder.blocks import conv1d_decoder
 from thunder.citrinet.blocks import Citrinet_encoder
 from thunder.citrinet.compatibility import (
     CitrinetCheckpoint,
     fix_vocab,
     read_params_from_config_citrinet,
 )
+from thunder.ctc_loss import calculate_ctc
 from thunder.metrics import CER, WER
-from thunder.quartznet.blocks import Quartznet_decoder
 from thunder.quartznet.compatibility import load_quartznet_weights
 from thunder.quartznet.transform import FilterbankFeatures
-from thunder.text_processing.tokenizer import BPETokenizer, char_tokenizer
 from thunder.text_processing.transform import BatchTextTransformer
-from thunder.text_processing.vocab import SimpleVocab, Vocab
 from thunder.utils import download_checkpoint
 
 
@@ -86,56 +84,16 @@ class CitrinetModule(pl.LightningModule):
 
         self.encoder = Citrinet_encoder(nfilt, filters, kernel_sizes, strides)
 
-        self.text_transform = self.build_text_transform(
+        self.text_transform = BatchTextTransformer(
             initial_vocab_tokens, nemo_compat_vocab, sentencepiece_model
         )
-        self.decoder = self.build_decoder(640, len(self.text_transform.vocab))
+        self.decoder = conv1d_decoder(640, num_classes=len(self.text_transform.vocab))
 
         # Metrics
         self.val_cer = CER()
         self.val_wer = WER()
         # Example input is one second of fake audio
         self.example_input_array = torch.randn((10, sample_rate))
-
-    def build_decoder(self, decoder_input_channels: int, vocab_size: int) -> nn.Module:
-        """Overwrite this function if you want to change the model decoder.
-
-        Args:
-            decoder_input_channels : Number of input channels of the decoder. That is the number of channels of the features created by the encoder.
-            vocab_size : Number of output classes
-
-        Returns:
-            Module that represents the decoder.
-        """
-        return Quartznet_decoder(
-            num_classes=vocab_size, input_channels=decoder_input_channels
-        )
-
-    def build_text_transform(
-        self,
-        initial_vocab_tokens: List[str],
-        nemo_compat_vocab: bool,
-        sentencepiece_model: Optional[str] = None,
-    ) -> BatchTextTransformer:
-        """Overwrite this function if you want to change how the text processing happens inside the model.
-
-        Args:
-            initial_vocab_tokens : List of tokens to create the vocabulary, special tokens should not be included here.
-            sentencepiece_model: Path to sentencepiece .model file, if applicable
-            nemo_compat_vocab : Controls if the used vocabulary will be compatible with the original nemo implementation.
-
-        Returns:
-            The transform that will both `encode` the text and `decode_prediction`.
-        """
-        vocab = (
-            SimpleVocab(initial_vocab_tokens)
-            if nemo_compat_vocab
-            else Vocab(initial_vocab_tokens)
-        )
-        tokenizer = (
-            BPETokenizer(sentencepiece_model) if sentencepiece_model else char_tokenizer
-        )
-        return BatchTextTransformer(vocab=vocab, tokenizer=tokenizer)
 
     def forward(self, x: Tensor) -> Tensor:
         """Process the audio tensor to create the predictions.
@@ -163,25 +121,6 @@ class CitrinetModule(pl.LightningModule):
         pred = self(x)
         return self.text_transform.decode_prediction(pred.argmax(1))
 
-    def calculate_loss(self, probabilities, y, prob_lens, y_lens):
-        # Change from (batch, #vocab, time) to (time, batch, #vocab)
-        probabilities = probabilities.permute(2, 0, 1)
-        logprobs = log_softmax(probabilities, dim=2)
-        # Calculate the logprobs correct length based on the
-        # normalized original lengths
-        prob_lens = (prob_lens * logprobs.shape[0]).long()
-        blank = self.text_transform.vocab.blank_idx
-
-        return ctc_loss(
-            logprobs,
-            y,
-            prob_lens,
-            y_lens,
-            blank=blank,
-            reduction="mean",
-            zero_infinity=True,
-        )
-
     def training_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor, List[str]], batch_idx: int
     ) -> torch.Tensor:
@@ -198,7 +137,9 @@ class CitrinetModule(pl.LightningModule):
         y, y_lens = self.text_transform.encode(texts, device=self.device)
 
         probabilities = self(audio)
-        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
+        loss = calculate_ctc(
+            probabilities, y, audio_lens, y_lens, self.text_transform.vocab.blank_idx
+        )
 
         self.log("loss/train_loss", loss)
         return loss
@@ -219,7 +160,9 @@ class CitrinetModule(pl.LightningModule):
         y, y_lens = self.text_transform.encode(texts, device=self.device)
 
         probabilities = self(audio)
-        loss = self.calculate_loss(probabilities, y, audio_lens, y_lens)
+        loss = calculate_ctc(
+            probabilities, y, audio_lens, y_lens, self.text_transform.vocab.blank_idx
+        )
 
         decoded_preds = self.text_transform.decode_prediction(probabilities.argmax(1))
         decoded_targets = self.text_transform.decode_prediction(y)
@@ -310,7 +253,7 @@ class CitrinetModule(pl.LightningModule):
         self.hparams.nemo_compat_vocab = nemo_compat
         self.hparams.sentencepiece_model = sentencepiece_model
 
-        self.text_transform = self.build_text_transform(
+        self.text_transform = BatchTextTransformer(
             new_vocab_tokens, nemo_compat, sentencepiece_model
         )
-        self.decoder = self.build_decoder(640, len(self.text_transform.vocab))
+        self.decoder = conv1d_decoder(640, num_classes=len(self.text_transform.vocab))
