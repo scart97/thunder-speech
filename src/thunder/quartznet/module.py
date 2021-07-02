@@ -3,8 +3,16 @@
 
 # Copyright (c) 2021 scart97
 
-__all__ = ["QuartznetModule", "NemoCheckpoint"]
+__all__ = [
+    "QuartznetModule",
+    "NemoCheckpoint",
+    "TextTransformConfig",
+    "EncoderConfig",
+    "FilterbankConfig",
+    "OptimizerConfig",
+]
 
+from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import List, Tuple
@@ -17,77 +25,53 @@ from torchaudio.datasets.utils import extract_archive
 from thunder.blocks import conv1d_decoder
 from thunder.ctc_loss import calculate_ctc
 from thunder.metrics import CER, WER
-from thunder.quartznet.blocks import Quartznet_encoder
+from thunder.quartznet.blocks import EncoderConfig, Quartznet_encoder
 from thunder.quartznet.compatibility import (
     NemoCheckpoint,
     load_quartznet_weights,
     read_params_from_config,
 )
-from thunder.quartznet.transform import FilterbankFeatures
-from thunder.text_processing.transform import BatchTextTransformer
+from thunder.quartznet.transform import FilterbankConfig, FilterbankFeatures
+from thunder.text_processing.transform import BatchTextTransformer, TextTransformConfig
 from thunder.utils import download_checkpoint
+
+
+@dataclass
+class OptimizerConfig:
+    learning_rate: float = 3e-4
+    betas: Tuple[float] = (0.8, 0.5)
 
 
 class QuartznetModule(pl.LightningModule):
     def __init__(
         self,
-        initial_vocab_tokens: List[str],
-        sample_rate: int = 16000,
-        n_window_size: int = 320,
-        n_window_stride: int = 160,
-        n_fft: int = 512,
-        preemph: float = 0.97,
-        nfilt: int = 64,
-        dither: float = 1e-5,
-        filters: List[int] = [256, 256, 512, 512, 512],
-        kernel_sizes: List[int] = [33, 39, 51, 63, 75],
-        repeat_blocks: int = 1,
-        learning_rate: float = 3e-4,
-        nemo_compat_vocab: bool = False,
+        text_cfg: TextTransformConfig,
+        encoder_cfg: EncoderConfig = EncoderConfig(),
+        audio_cfg: FilterbankConfig = FilterbankConfig(),
+        optim_cfg: OptimizerConfig = OptimizerConfig(),
     ):
         """Module containing both the basic quartznet model and helper functionality, such as
         feature creation and text processing.
 
         Args:
-            initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
-            sample_rate : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            n_window_size : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            n_window_stride : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            n_fft : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            preemph : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            nfilt : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            dither : Check [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
-            filters : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
-            kernel_sizes : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
-            repeat_blocks : Check [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
-            learning_rate : Learning rate used by the optimizer
-            nemo_compat_vocab : Controls if the used vocabulary will be compatible with the original nemo implementation.
+            audio_cfg: Configuration for the filterbank features applied to the input audio
+            encoder_cfg: Configuration for the quartznet encoder
+            text_cfg: Configuration for the text processing pipeline
+            optim_cfg: Configuration for the optimizer used during training
         """
         super().__init__()
         self.save_hyperparameters()
 
-        self.audio_transform = FilterbankFeatures(
-            sample_rate=sample_rate,
-            n_window_size=n_window_size,
-            n_window_stride=n_window_stride,
-            n_fft=n_fft,
-            preemph=preemph,
-            nfilt=nfilt,
-            dither=dither,
-        )
-
-        self.encoder = Quartznet_encoder(nfilt, filters, kernel_sizes, repeat_blocks)
-
-        self.text_transform = BatchTextTransformer(
-            initial_vocab_tokens, nemo_compat_vocab
-        )
+        self.audio_transform = FilterbankFeatures(audio_cfg)
+        self.encoder = Quartznet_encoder(encoder_cfg)
+        self.text_transform = BatchTextTransformer(text_cfg)
         self.decoder = conv1d_decoder(1024, len(self.text_transform.vocab))
 
         # Metrics
         self.val_cer = CER()
         self.val_wer = WER()
         # Example input is one second of fake audio
-        self.example_input_array = torch.randn((10, sample_rate))
+        self.example_input_array = torch.randn((10, audio_cfg.sample_rate))
 
     def forward(self, x: Tensor) -> Tensor:
         """Process the audio tensor to create the predictions.
@@ -177,8 +161,8 @@ class QuartznetModule(pl.LightningModule):
         """
         return torch.optim.Adam(
             filter(lambda p: p.requires_grad, self.parameters()),
-            lr=self.hparams.learning_rate,
-            betas=(0.8, 0.5),
+            lr=self.hparams.optim_cfg.learning_rate,
+            betas=self.hparams.optim_cfg.betas,
         )
 
     @classmethod
@@ -210,10 +194,12 @@ class QuartznetModule(pl.LightningModule):
                 config_path
             )
             module = cls(
-                initial_vocab_tokens=initial_vocab,
-                **encoder_params,
-                **preprocess_params,
-                nemo_compat_vocab=True,
+                TextTransformConfig(
+                    initial_vocab_tokens=initial_vocab,
+                    simple_vocab=True,
+                ),
+                EncoderConfig(**encoder_params),
+                FilterbankConfig(**preprocess_params),
             )
             weights_path = extract_path / "model_weights.ckpt"
             load_quartznet_weights(module.encoder, module.decoder, str(weights_path))
@@ -224,7 +210,7 @@ class QuartznetModule(pl.LightningModule):
         module.eval()
         return module
 
-    def change_vocab(self, new_vocab_tokens: List[str], nemo_compat=False):
+    def change_vocab(self, text_cfg: TextTransformConfig):
         """Changes the vocabulary of the model. useful when finetuning to another language.
 
         Args:
@@ -232,8 +218,6 @@ class QuartznetModule(pl.LightningModule):
             nemo_compat : Controls if the used vocabulary will be compatible with the original nemo implementation.
         """
         # Updating hparams so that the saved model can be correctly loaded
-        self.hparams.initial_vocab_tokens = new_vocab_tokens
-        self.hparams.nemo_compat_vocab = nemo_compat
-
-        self.text_transform = BatchTextTransformer(new_vocab_tokens, nemo_compat)
+        self.hparams.text_cfg = text_cfg
+        self.text_transform = BatchTextTransformer(text_cfg)
         self.decoder = conv1d_decoder(1024, len(self.text_transform.vocab))
