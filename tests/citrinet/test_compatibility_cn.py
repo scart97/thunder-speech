@@ -11,7 +11,7 @@ from torchaudio.datasets.utils import extract_archive
 
 from tests.utils import mark_slow
 from thunder.blocks import conv1d_decoder
-from thunder.citrinet.blocks import Citrinet_encoder
+from thunder.citrinet.blocks import Citrinet_encoder, EncoderConfig
 from thunder.citrinet.compatibility import (
     CitrinetCheckpoint,
     read_params_from_config_citrinet,
@@ -33,7 +33,7 @@ def test_can_load_weights():
             encoder_params, initial_vocab, _ = read_params_from_config_citrinet(
                 config_path
             )
-            encoder = Citrinet_encoder(80, **encoder_params)
+            encoder = Citrinet_encoder(EncoderConfig(**encoder_params))
             decoder = conv1d_decoder(640, len(initial_vocab) + 1)
             load_quartznet_weights(
                 encoder, decoder, extract_path / "model_weights.ckpt"
