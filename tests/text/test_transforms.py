@@ -9,13 +9,15 @@ import pytest
 
 import torch
 
-from thunder.text_processing.transform import BatchTextTransformer
+from thunder.text_processing.transform import BatchTextTransformer, TextTransformConfig
 
 
 @pytest.fixture(params=[True, False])
 def tfm(request):
     transform = BatchTextTransformer(
-        initial_vocab_tokens=[" "] + list(ascii_lowercase), simple_vocab=False
+        TextTransformConfig(
+            initial_vocab_tokens=[" "] + list(ascii_lowercase), simple_vocab=False
+        )
     )
     if request.param:
         return torch.jit.script(transform)
