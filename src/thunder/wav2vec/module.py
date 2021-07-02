@@ -50,7 +50,7 @@ class OptimizerConfig:
 class Wav2Vec2Module(pl.LightningModule):
     def __init__(
         self,
-        text_transform_cfg: TextTransformConfig,
+        text_cfg: TextTransformConfig,
         encoder_cfg: ModelConfig = ModelConfig(),
         optim_cfg: OptimizerConfig = OptimizerConfig(),
     ):
@@ -75,7 +75,7 @@ class Wav2Vec2Module(pl.LightningModule):
         )
         self.encoder.feature_extractor._freeze_parameters()
 
-        self.text_transform = BatchTextTransformer(text_transform_cfg)
+        self.text_transform = BatchTextTransformer(text_cfg)
         self.decoder = linear_decoder(
             self.encoder.config.hidden_size,
             len(self.text_transform.vocab),
