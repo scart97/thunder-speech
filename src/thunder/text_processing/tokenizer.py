@@ -5,7 +5,6 @@
 
 __all__ = [
     "BPETokenizer",
-    "SentencepieceModelFile",
     "train_sentencepiece_model",
     "word_tokenizer",
     "char_tokenizer",
@@ -13,7 +12,6 @@ __all__ = [
 ]
 
 from collections import Counter
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, List, Optional
 from warnings import warn
@@ -30,41 +28,6 @@ class BPETokenizer:
         return self.tokenizer.encode_as_pieces(text)
 
 
-@dataclass
-class SentencepieceModelFile:
-    """Dataclass that represents the data from the trained sentencepiece model,
-    processed so that it can be integrated with the models.
-    """
-
-    model_path: str
-    vocabulary_tokens: List[str]
-
-    @classmethod
-    def from_folder(cls, output_dir: str) -> "SentencepieceModelFile":
-        """Load the data from a folder that contains the `tokenizer.vocab`
-        and `tokenizer.model` outputs from sentencepiece.
-
-        Args:
-            output_dir : Output directory of the sentencepiece training, that contains the required files.
-
-        Returns:
-            Instance of `SentencepieceModelFile` with the corresponding data loaded.
-        """
-        special_tokens = ["<s>", "</s>", "<pad>", "<unk>"]
-        vocab = []
-
-        with open(f"{output_dir}/tokenizer.vocab", "r") as f:
-            # Read tokens from each line and parse for vocab
-            for line in f:
-                piece = line.split("\t")[0]
-                if piece in special_tokens:
-                    # skip special tokens
-                    continue
-                vocab.append(piece)
-
-        return cls(f"{output_dir}/tokenizer.model", vocab)
-
-
 def train_sentencepiece_model(
     data_file: str,
     vocab_size: int,
@@ -75,7 +38,7 @@ def train_sentencepiece_model(
     character_coverage: float = 1.0,
     train_extremely_large_corpus: bool = False,
     max_sentencepiece_length: int = -1,
-) -> SentencepieceModelFile:
+) -> str:
     """
     Creates sentence piece tokenizer model from data file.
     This is a direct port of `create_spt_model` present on the NEMO
@@ -103,7 +66,7 @@ def train_sentencepiece_model(
         warn(
             "There's already a trained sentencepiece model at the output directory. Skipping train."
         )
-        return SentencepieceModelFile.from_folder(str(output_dir))
+        return str(output_dir)
 
     output_dir.mkdir(exist_ok=True)
 
@@ -129,7 +92,7 @@ def train_sentencepiece_model(
 
     sentencepiece.SentencePieceTrainer.Train(cmd)
 
-    return SentencepieceModelFile.from_folder(str(output_dir))
+    return str(output_dir)
 
 
 def word_tokenizer(text: str) -> List[str]:
