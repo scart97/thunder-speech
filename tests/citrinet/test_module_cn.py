@@ -87,7 +87,7 @@ def test_change_vocab():
     except HTTPError:
         return
     module.change_vocab(TextTransformConfig(["a", "b", "c"]))
-    assert module.hparams.text_transform_cfg.initial_vocab_tokens == ["a", "b", "c"]
+    assert module.hparams.text_cfg.initial_vocab_tokens == ["a", "b", "c"]
     # comparing to 10 to account for the 3 initial tokens plus
     # the few special tokens automatically added.
     assert len(module.text_transform.vocab) < 10
