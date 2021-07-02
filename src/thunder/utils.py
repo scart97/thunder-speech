@@ -10,13 +10,16 @@ __all__ = [
     "chain_calls",
     "BaseCheckpoint",
     "download_checkpoint",
+    "default_list",
 ]
 
 import functools
 import os
+from copy import copy
+from dataclasses import field
 from enum import Enum
 from pathlib import Path
-from typing import Callable, List, Union
+from typing import Callable, List, TypeVar, Union
 
 import torchaudio
 import wget
@@ -131,3 +134,18 @@ def download_checkpoint(name: BaseCheckpoint, checkpoint_folder: str = None) -> 
         wget.download(url, out=str(checkpoint_path))
 
     return checkpoint_path
+
+
+T = TypeVar("T")
+
+
+def default_list(elements: List[T]) -> List[T]:
+    """Function to create default values on dataclasses that are lists
+
+    Args:
+        elements : List of elements to be the default
+
+    Returns:
+        field compatible with the way dataclasses handle mutable defaults
+    """
+    return field(default_factory=lambda: copy(elements))
