@@ -31,6 +31,7 @@ __all__ = [
     "Citrinet_encoder",
 ]
 
+from dataclasses import dataclass
 from typing import List
 
 import torch
@@ -248,12 +249,15 @@ def body(
     return layers
 
 
-def Citrinet_encoder(
-    feat_in: int,
-    filters: List[int],
-    kernel_sizes: List[int],
-    strides: List[int],
-) -> nn.Module:
+@dataclass
+class EncoderConfig:
+    filters: List[int]
+    kernel_sizes: List[int]
+    strides: List[int]
+    feat_in: int = 80
+
+
+def Citrinet_encoder(cfg: EncoderConfig) -> nn.Module:
     """Basic Citrinet encoder setup.
 
     Args:
@@ -266,6 +270,6 @@ def Citrinet_encoder(
         Pytorch model corresponding to the encoder.
     """
     return nn.Sequential(
-        stem(feat_in),
-        *body(filters, kernel_sizes, strides),
+        stem(cfg.feat_in),
+        *body(cfg.filters, cfg.kernel_sizes, cfg.strides),
     )
