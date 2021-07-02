@@ -52,6 +52,7 @@ __all__ = [
 ]
 
 import math
+from dataclasses import dataclass
 from typing import Optional
 
 import torch
@@ -238,16 +239,18 @@ class MelScale(nn.Module):
         return x
 
 
-def FilterbankFeatures(
-    sample_rate: int = 16000,
-    n_window_size: int = 320,
-    n_window_stride: int = 160,
-    n_fft: int = 512,
-    preemph: float = 0.97,
-    nfilt: int = 64,
-    dither: float = 1e-5,
-    **kwargs,
-) -> nn.Module:
+@dataclass
+class FilterbankConfig:
+    sample_rate: int = 16000
+    n_window_size: int = 320
+    n_window_stride: int = 160
+    n_fft: int = 512
+    preemph: float = 0.97
+    nfilt: int = 64
+    dither: float = 1e-5
+
+
+def FilterbankFeatures(cfg: FilterbankConfig) -> nn.Module:
     """Creates the Filterbank features used in the Quartznet model.
 
     Args:
@@ -263,13 +266,13 @@ def FilterbankFeatures(
         Module that computes the features based on raw audio tensor.
     """
     return nn.Sequential(
-        DitherAudio(dither=dither),
-        PreEmphasisFilter(preemph=preemph),
+        DitherAudio(dither=cfg.dither),
+        PreEmphasisFilter(preemph=cfg.preemph),
         PowerSpectrum(
-            n_window_size=n_window_size,
-            n_window_stride=n_window_stride,
-            n_fft=n_fft,
+            n_window_size=cfg.n_window_size,
+            n_window_stride=cfg.n_window_stride,
+            n_fft=cfg.n_fft,
         ),
-        MelScale(sample_rate=sample_rate, n_fft=n_fft, nfilt=nfilt),
+        MelScale(sample_rate=cfg.sample_rate, n_fft=cfg.n_fft, nfilt=cfg.nfilt),
         FeatureBatchNormalizer(),
     )
