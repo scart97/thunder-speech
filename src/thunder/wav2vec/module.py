@@ -3,8 +3,15 @@
 
 # Copyright (c) 2021 scart97
 
-__all__ = ["Wav2Vec2Module"]
+__all__ = [
+    "Wav2Vec2Module",
+    "TextTransformConfig",
+    "ModelConfig",
+    "OptimizerConfig",
+]
 
+from copy import copy
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Tuple
 
 import pytorch_lightning as pl
@@ -23,19 +30,29 @@ from torchaudio.models.wav2vec2.utils.import_huggingface import _get_config, _ge
 from thunder.blocks import linear_decoder
 from thunder.ctc_loss import calculate_ctc
 from thunder.metrics import CER, WER
-from thunder.text_processing.transform import BatchTextTransformer
+from thunder.text_processing.transform import BatchTextTransformer, TextTransformConfig
 from thunder.wav2vec.transform import Wav2Vec2Preprocess
+
+
+@dataclass
+class ModelConfig:
+    model_name: str = "facebook/wav2vec2-base"
+    gradient_checkpointing: bool = False
+    additional_kwargs: Dict[str, Any] = field(default_factory=lambda: copy({}))
+    decoder_dropout: float = 0.1
+
+
+@dataclass
+class OptimizerConfig:
+    learning_rate: float = 3e-4
 
 
 class Wav2Vec2Module(pl.LightningModule):
     def __init__(
         self,
-        initial_vocab_tokens: List[str],
-        model_name: str = "facebook/wav2vec2-base",
-        gradient_checkpointing: bool = False,
-        decoder_dropout: float = 0.1,
-        learning_rate: float = 3e-4,
-        **kwargs: Dict[str, Any],
+        text_transform_cfg: TextTransformConfig,
+        encoder_cfg: ModelConfig = ModelConfig(),
+        optim_cfg: OptimizerConfig = OptimizerConfig(),
     ):
         """Wav2Vec model for fine-tuning.
 
@@ -52,19 +69,17 @@ class Wav2Vec2Module(pl.LightningModule):
         self.audio_transform = Wav2Vec2Preprocess()
 
         self.encoder = Wav2Vec2Model.from_pretrained(
-            model_name,
-            gradient_checkpointing=gradient_checkpointing,
-            **kwargs,
+            encoder_cfg.model_name,
+            gradient_checkpointing=encoder_cfg.gradient_checkpointing,
+            **encoder_cfg.additional_kwargs,
         )
         self.encoder.feature_extractor._freeze_parameters()
 
-        self.text_transform = BatchTextTransformer(
-            initial_vocab_tokens, simple_vocab=False
-        )
+        self.text_transform = BatchTextTransformer(text_transform_cfg)
         self.decoder = linear_decoder(
             self.encoder.config.hidden_size,
             len(self.text_transform.vocab),
-            decoder_dropout,
+            encoder_cfg.decoder_dropout,
         )
 
         # Metrics
@@ -160,7 +175,7 @@ class Wav2Vec2Module(pl.LightningModule):
         """
         return torch.optim.Adam(
             filter(lambda p: p.requires_grad, self.parameters()),
-            lr=self.hparams.learning_rate,
+            lr=self.hparams.optim_cfg.learning_rate,
         )
 
 
