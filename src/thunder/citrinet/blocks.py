@@ -251,6 +251,15 @@ def body(
 
 @dataclass
 class EncoderConfig:
+    """Configuration to create [`Citrinet_encoder`][thunder.citrinet.blocks.Citrinet_encoder]
+
+    Attributes:
+        filters: List of filter sizes used to create the encoder blocks. required.
+        kernel_sizes: List of kernel sizes corresponding to each filter size. required.
+        strides: List of stride corresponding to each filter size. required.
+        feat_in : Number of input features to the model. defaults to 80.
+    """
+
     filters: List[int]
     kernel_sizes: List[int]
     strides: List[int]
@@ -261,11 +270,7 @@ def Citrinet_encoder(cfg: EncoderConfig) -> nn.Module:
     """Basic Citrinet encoder setup.
 
     Args:
-        feat_in : Number of input features to the model.
-        filters: List of filter sizes used to create the encoder blocks
-        kernel_sizes: List of kernel sizes corresponding to each filter size
-        strides: List of stride corresponding to each filter size
-
+        cfg: required config to create instance
     Returns:
         Pytorch model corresponding to the encoder.
     """
