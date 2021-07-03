@@ -241,6 +241,18 @@ class MelScale(nn.Module):
 
 @dataclass
 class FilterbankConfig:
+    """Configuration to create [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
+
+    Attributes:
+        sample_rate: Sampling rate of the signal. defaults to 16000.
+        n_window_size: Number of elements in the window size. defaults to 320.
+        n_window_stride: Number of elements in the window stride. defaults to 160.
+        n_fft: Number of fourier features. defaults to 512.
+        preemph: Preemphasis filtering control factor. defaults to 0.97.
+        nfilt: Number of output mel filters to use. defaults to 64.
+        dither: Amount of dither to add. defaults to 1e-5.
+    """
+
     sample_rate: int = 16000
     n_window_size: int = 320
     n_window_stride: int = 160
@@ -254,14 +266,7 @@ def FilterbankFeatures(cfg: FilterbankConfig) -> nn.Module:
     """Creates the Filterbank features used in the Quartznet model.
 
     Args:
-        sample_rate : Sampling rate of the signal
-        n_window_size : Number of elements in the window size.
-        n_window_stride : Number of elements in the window stride.
-        n_fft : Number of fourier features.
-        preemph : Preemphasis filtering control factor.
-        nfilt : Number of output mel filters to use
-        dither : Amount of dither to add.
-
+        cfg: required config to create instance
     Returns:
         Module that computes the features based on raw audio tensor.
     """

@@ -38,6 +38,13 @@ from thunder.utils import download_checkpoint
 
 @dataclass
 class OptimizerConfig:
+    """Configuration used by the optimizer
+
+    Attributes:
+        learning_rate: learning rate. defaults to 3e-4.
+        betas: beta1 and beta2 used by adam. defaults to (0.8, 0.5), similar to the novograd values on nemo.
+    """
+
     learning_rate: float = 3e-4
     betas: Tuple[float] = (0.8, 0.5)
 
