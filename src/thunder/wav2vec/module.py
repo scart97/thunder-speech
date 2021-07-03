@@ -36,6 +36,15 @@ from thunder.wav2vec.transform import Wav2Vec2Preprocess
 
 @dataclass
 class ModelConfig:
+    """Configuration to create the wav2vec 2.0 encoder.
+
+    Attributes:
+        model_name: Name of the original huggingface checkpoint to load from. defaults to 'facebook/wav2vec2-base'
+        gradient_checkpointing: Use gradient checkpointing to save memory at the expense of slower backward pass. defaults to False.
+        additional_kwargs: Any other option that can be passed to the original Wav2Vec2Model.from_pretrained. defaults to {}.
+        decoder_dropout: Dropout before the final decoding layer. defaults to 0.1.
+    """
+
     model_name: str = "facebook/wav2vec2-base"
     gradient_checkpointing: bool = False
     additional_kwargs: Dict[str, Any] = field(default_factory=lambda: copy({}))
@@ -44,6 +53,12 @@ class ModelConfig:
 
 @dataclass
 class OptimizerConfig:
+    """Configuration used by the optimizer
+
+    Attributes:
+        learning_rate: learning rate. defaults to 3e-4.
+    """
+
     learning_rate: float = 3e-4
 
 
@@ -57,12 +72,9 @@ class Wav2Vec2Module(pl.LightningModule):
         """Wav2Vec model for fine-tuning.
 
         Args:
-            initial_vocab_tokens : List of tokens to be used in the vocab, special tokens should not be included here. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
-            model_name : Name of the original huggingface checkpoint to load from.
-            gradient_checkpointing : Use gradient checkpointing to save memory at the expense of slower backward pass.
-            decoder_dropout : Dropout before the final decoding layer
-            learning_rate : Learning rate used on the optimizer.
-            kwargs: Any other option that can be passed to the original Wav2Vec2Model.from_pretrained
+            text_cfg: Configuration for the text processing pipeline
+            encoder_cfg: Configuration for the wav2vec encoder
+            optim_cfg: Configuration for the optimizer used during training
         """
         super().__init__()
         self.save_hyperparameters()

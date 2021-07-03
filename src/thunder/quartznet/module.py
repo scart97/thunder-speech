@@ -61,9 +61,9 @@ class QuartznetModule(pl.LightningModule):
         feature creation and text processing.
 
         Args:
-            audio_cfg: Configuration for the filterbank features applied to the input audio
-            encoder_cfg: Configuration for the quartznet encoder
             text_cfg: Configuration for the text processing pipeline
+            encoder_cfg: Configuration for the quartznet encoder
+            audio_cfg: Configuration for the filterbank features applied to the input audio
             optim_cfg: Configuration for the optimizer used during training
         """
         super().__init__()
@@ -85,7 +85,6 @@ class QuartznetModule(pl.LightningModule):
 
         Args:
             x : Audio tensor of shape [batch_size, time]
-            lens : Normalized original lengths of each element in the audio tensor. It should be a float tensor where the biggest element has length 1.0, and all the others are relative to it.
 
         Returns:
             Tuple with the predictions and output lengths. Notice that the ouput lengths are not normalized, they are a long tensor.
@@ -221,8 +220,7 @@ class QuartznetModule(pl.LightningModule):
         """Changes the vocabulary of the model. useful when finetuning to another language.
 
         Args:
-            new_vocab_tokens : List of tokens to be used in the vocabulary, special tokens should not be included here.
-            nemo_compat : Controls if the used vocabulary will be compatible with the original nemo implementation.
+            text_cfg: Configuration for the text processing pipeline
         """
         # Updating hparams so that the saved model can be correctly loaded
         self.hparams.text_cfg = text_cfg

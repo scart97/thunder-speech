@@ -62,13 +62,13 @@ class CitrinetModule(pl.LightningModule):
         audio_cfg: FilterbankConfig = FilterbankConfig(),
         optim_cfg: OptimizerConfig = OptimizerConfig(),
     ):
-        """Module containing both the basic quartznet model and helper functionality, such as
+        """Module containing both the basic citrinet model and helper functionality, such as
         feature creation and text processing.
 
         Args:
-            audio_cfg: Configuration for the filterbank features applied to the input audio
-            encoder_cfg: Configuration for the quartznet encoder
             text_cfg: Configuration for the text processing pipeline
+            encoder_cfg: Configuration for the citrinet encoder
+            audio_cfg: Configuration for the filterbank features applied to the input audio
             optim_cfg: Configuration for the optimizer used during training
         """
         super().__init__()
@@ -233,9 +233,7 @@ class CitrinetModule(pl.LightningModule):
         """Changes the vocabulary of the model. useful when finetuning to another language.
 
         Args:
-            new_vocab_tokens : List of tokens to be used in the vocabulary, special tokens should not be included here.
-            sentencepiece_model: path to the sentencepiece `tokenizer.model` file
-            nemo_compat : Controls if the used vocabulary will be compatible with the original nemo implementation.
+            text_cfg: Configuration for the text processing pipeline
         """
         # Updating hparams so that the saved model can be correctly loaded
         self.hparams.text_cfg = text_cfg

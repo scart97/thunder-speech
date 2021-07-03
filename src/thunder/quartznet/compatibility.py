@@ -25,7 +25,7 @@ from thunder.utils import BaseCheckpoint
 # fmt:off
 class NemoCheckpoint(BaseCheckpoint):
     """Trained model weight checkpoints.
-    Used by [`download_checkpoint`][thunder.quartznet.compatibility.download_checkpoint] and
+    Used by [`download_checkpoint`][thunder.utils.download_checkpoint] and
     [`QuartznetModule.load_from_nemo`][thunder.quartznet.module.QuartznetModule.load_from_nemo].
 
     Note:

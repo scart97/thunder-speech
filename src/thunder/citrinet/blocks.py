@@ -176,8 +176,6 @@ class CitrinetBlock(nn.Module):
         """
         Args:
             x : Tensor of shape (batch, features, time) where #features == inplanes
-            lens : Tensor containing the lengths of each input in the batch, to be used by the
-                masked convolution that happens internally
 
         Returns:
             Result of applying the block on the input, and corresponding output lengths
