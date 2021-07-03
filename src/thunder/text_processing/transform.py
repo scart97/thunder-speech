@@ -18,6 +18,14 @@ from thunder.text_processing.vocab import SimpleVocab, Vocab
 
 @dataclass
 class TextTransformConfig:
+    """Configuration to create [`BatchTextTransformer`][thunder.text_processing.transform.BatchTextTransformer]
+
+    Attributes:
+        initial_vocab_tokens: List of tokens to create the vocabulary, special tokens should not be included here. required.
+        simple_vocab: Controls if the used vocabulary will only have the blank token or more additional special tokens. defaults to `False`.
+        sentencepiece_model: Path to sentencepiece .model file, if applicable.
+    """
+
     initial_vocab_tokens: List[str]
     simple_vocab: bool = False
     sentencepiece_model: Optional[str] = None
@@ -57,9 +65,7 @@ class BatchTextTransformer(nn.Module):
         functions to encode/decode an entire batch of text at once.
 
         Args:
-            initial_vocab_tokens : List of tokens to create the vocabulary, special tokens should not be included here.
-            simple_vocab : Controls if the used vocabulary will only have the blank token or more additional special tokens.
-            sentencepiece_model: Path to sentencepiece .model file, if applicable
+            cfg: required config to create instance
         """
         super().__init__()
         self.vocab = (
