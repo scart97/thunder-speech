@@ -5,7 +5,7 @@
 
 __all__ = [
     "QuartznetModule",
-    "NemoCheckpoint",
+    "QuartznetCheckpoint",
     "TextTransformConfig",
     "EncoderConfig",
     "FilterbankConfig",
@@ -27,7 +27,7 @@ from thunder.ctc_loss import calculate_ctc
 from thunder.metrics import CER, WER
 from thunder.quartznet.blocks import EncoderConfig, Quartznet_encoder
 from thunder.quartznet.compatibility import (
-    NemoCheckpoint,
+    QuartznetCheckpoint,
     load_quartznet_weights,
     read_params_from_config,
 )
@@ -173,7 +173,7 @@ class QuartznetModule(pl.LightningModule):
 
     @classmethod
     def load_from_nemo(
-        cls, *, nemo_filepath: str = None, checkpoint_name: NemoCheckpoint = None
+        cls, *, nemo_filepath: str = None, checkpoint_name: QuartznetCheckpoint = None
     ) -> "QuartznetModule":
         """Load from the original nemo checkpoint.
 

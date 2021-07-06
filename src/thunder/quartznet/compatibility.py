@@ -7,7 +7,7 @@
 # Copyright (c) 2021 scart97
 
 __all__ = [
-    "NemoCheckpoint",
+    "QuartznetCheckpoint",
     "read_params_from_config",
     "load_quartznet_weights",
 ]
@@ -23,7 +23,7 @@ from thunder.utils import BaseCheckpoint
 
 
 # fmt:off
-class NemoCheckpoint(BaseCheckpoint):
+class QuartznetCheckpoint(BaseCheckpoint):
     """Trained model weight checkpoints.
     Used by [`download_checkpoint`][thunder.utils.download_checkpoint] and
     [`QuartznetModule.load_from_nemo`][thunder.quartznet.module.QuartznetModule.load_from_nemo].

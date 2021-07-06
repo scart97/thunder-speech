@@ -14,7 +14,7 @@ from tests.utils import mark_slow
 from thunder.blocks import conv1d_decoder
 from thunder.quartznet.blocks import EncoderConfig, Quartznet_encoder
 from thunder.quartznet.compatibility import (
-    NemoCheckpoint,
+    QuartznetCheckpoint,
     load_quartznet_weights,
     read_params_from_config,
 )
@@ -27,7 +27,7 @@ def test_can_load_weights():
     # Quartznet 5x5 is small (25mb), so it can be downloaded while testing.
     try:
 
-        cfg = download_checkpoint(NemoCheckpoint.QuartzNet5x5LS_En)
+        cfg = download_checkpoint(QuartznetCheckpoint.QuartzNet5x5LS_En)
         with TemporaryDirectory() as extract_path:
             extract_path = Path(extract_path)
             extract_archive(str(cfg), extract_path)
