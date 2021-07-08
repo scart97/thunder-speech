@@ -57,7 +57,7 @@ transcriptions = model.predict(audio)
 
 ## More quick tips
 
-If you want to know how to export the models using torchscript, access the raw probabilities and decode manually or fine-tune the models you can access the documentation [here](https://scart97.github.io/thunder-speech/quick%20reference%20guide/).
+If you want to know how to export the models using torchscript, access the raw probabilities and decode manually or fine-tune the models you can access the documentation [here](https://scart97.github.io/thunder-speech/quick%20reference%20guide.html).
 
 ## Contributing
 
