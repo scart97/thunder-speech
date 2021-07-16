@@ -32,9 +32,7 @@ def test_expected_prediction_from_pretrained_model():
             resume=True,
         )
         # Preparing data and model
-        module = QuartznetModule.load_from_nemo(
-            checkpoint_name=QuartznetCheckpoint.QuartzNet5x5LS_En
-        )
+        module = QuartznetModule.load_from_nemo(QuartznetCheckpoint.QuartzNet5x5LS_En)
         audio, sr = torchaudio.load(folder / "f0001_us_f0001_00001.wav")
         assert sr == 16000
 

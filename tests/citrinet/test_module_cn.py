@@ -24,9 +24,7 @@ def test_expected_prediction_from_pretrained_model():
             filename="f0001_us_f0001_00001.wav",
             resume=True,
         )
-        module = CitrinetModule.load_from_nemo(
-            checkpoint_name=CitrinetCheckpoint.stt_en_citrinet_256
-        )
+        module = CitrinetModule.load_from_nemo(CitrinetCheckpoint.stt_en_citrinet_256)
 
         audio, sr = torchaudio.load(folder / "f0001_us_f0001_00001.wav")
         assert sr == 16000
@@ -43,9 +41,7 @@ def test_expected_prediction_from_pretrained_model():
 @requirescuda
 def test_dev_run_train(sample_manifest):
     try:
-        module = CitrinetModule.load_from_nemo(
-            checkpoint_name=CitrinetCheckpoint.stt_en_citrinet_256
-        )
+        module = CitrinetModule.load_from_nemo(CitrinetCheckpoint.stt_en_citrinet_256)
     except HTTPError:
         return
     data = ManifestDatamodule(
@@ -62,9 +58,7 @@ def test_dev_run_train(sample_manifest):
 
 def test_script_module():
     try:
-        module = CitrinetModule.load_from_nemo(
-            checkpoint_name=CitrinetCheckpoint.stt_en_citrinet_256
-        )
+        module = CitrinetModule.load_from_nemo(CitrinetCheckpoint.stt_en_citrinet_256)
     except HTTPError:
         return
     module_script = torch.jit.script(module)
@@ -81,9 +75,7 @@ def test_try_to_load_without_parameters_raises_error():
 
 def test_change_vocab():
     try:
-        module = CitrinetModule.load_from_nemo(
-            checkpoint_name=CitrinetCheckpoint.stt_en_citrinet_256
-        )
+        module = CitrinetModule.load_from_nemo(CitrinetCheckpoint.stt_en_citrinet_256)
     except HTTPError:
         return
     module.change_vocab(TextTransformConfig(["a", "b", "c"]))
