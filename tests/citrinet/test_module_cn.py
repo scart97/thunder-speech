@@ -1,7 +1,5 @@
 from urllib.error import HTTPError
 
-import pytest
-
 import pytorch_lightning as pl
 import torch
 import torchaudio
@@ -66,11 +64,6 @@ def test_script_module():
     out1 = module.predict(x)[0]
     out2 = module_script.predict(x)[0]
     assert out1 == out2
-
-
-def test_try_to_load_without_parameters_raises_error():
-    with pytest.raises(ValueError):
-        CitrinetModule.load_from_nemo()
 
 
 def test_change_vocab():
