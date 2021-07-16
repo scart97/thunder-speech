@@ -15,7 +15,7 @@ __all__ = [
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import pytorch_lightning as pl
 import torch
@@ -173,24 +173,21 @@ class QuartznetModule(pl.LightningModule):
 
     @classmethod
     def load_from_nemo(
-        cls, *, nemo_filepath: str = None, checkpoint_name: QuartznetCheckpoint = None
+        cls, checkpoint: Union[str, QuartznetCheckpoint], save_folder: str = None
     ) -> "QuartznetModule":
         """Load from the original nemo checkpoint.
 
         Args:
-            nemo_filepath : Path to local .nemo file.
-            checkpoint_name : Name of checkpoint to be downloaded locally and lodaded.
-
-        Raises:
-            ValueError: You need to pass only one of the two parameters.
+            checkpoint : Path to local .nemo file or checkpoint to be downloaded locally and lodaded.
+            save_folder : Path to save the checkpoint when downloading it. Ignored if you pass a .nemo file as the first argument.
 
         Returns:
             The model loaded from the checkpoint
         """
-        if checkpoint_name is not None:
-            nemo_filepath = download_checkpoint(checkpoint_name)
-        if nemo_filepath is None and checkpoint_name is None:
-            raise ValueError("Either nemo_filepath or checkpoint_name must be passed")
+        if isinstance(checkpoint, QuartznetCheckpoint):
+            nemo_filepath = download_checkpoint(checkpoint, save_folder)
+        else:
+            nemo_filepath = checkpoint
 
         with TemporaryDirectory() as extract_path:
             extract_archive(str(nemo_filepath), extract_path)
