@@ -15,8 +15,6 @@ from torch import Tensor, nn
 from torch.utils.data import Dataset
 from torchaudio.functional import resample
 
-from thunder.text_processing.preprocess import lower_text, normalize_text
-
 
 class AudioFileLoader(nn.Module):
     def __init__(self, force_mono: bool = True, sample_rate: int = 16000):
@@ -182,9 +180,7 @@ class BaseSpeechDataset(Dataset):
         raise NotImplementedError()
 
     def preprocess_text(self, text: str) -> str:
-        """Preprocess the text to remove some common problems.
-        By default, it lowers the text and performs normalization,
-        removing any accents or non-ascii characters.
+        """Add here preprocessing steps to remove some common problems in the text.
 
         Args:
             text : Label text
@@ -192,9 +188,7 @@ class BaseSpeechDataset(Dataset):
         Returns:
             Label text after processing
         """
-        normalized = normalize_text(text)
-        lower = lower_text(normalized)
-        return lower
+        return text
 
 
 class ManifestSpeechDataset(BaseSpeechDataset):
