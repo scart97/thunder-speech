@@ -42,7 +42,7 @@ pip install thunder-speech[transformers]
 from thunder.quartznet.module import QuartznetModule,  QuartznetCheckpoint
 
 # Tab completion works to discover other QuartznetCheckpoint.*
-model = QuartznetModule.load_from_nemo(checkpoint_name = QuartznetCheckpoint.QuartzNet5x5LS_En)
+model = QuartznetModule.load_from_nemo(QuartznetCheckpoint.QuartzNet5x5LS_En)
 ```
 ### Load audio and predict
 

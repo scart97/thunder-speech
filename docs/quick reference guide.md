@@ -7,9 +7,7 @@ from thunder.quartznet.module import QuartznetModule
 from thunder.data.dataset import AudioFileLoader
 import torch
 
-module = QuartznetModule.load_from_nemo(
-    nemo_filepath="/path/to/checkpoint.nemo"
-)
+module = QuartznetModule.load_from_nemo("/path/to/checkpoint.nemo")
 module.to_torchscript("model_ready_for_inference.pt")
 
 # Optional step: also export audio loading pipeline
@@ -66,7 +64,7 @@ dm = ManifestDatamodule(
     test_manifest="/path/to/test_manifest.json",
 )
 # Tab completion works to discover other QuartznetCheckpoint.*
-model = QuartznetModule.load_from_nemo(checkpoint_name=QuartznetCheckpoint.QuartzNet5x5LS_En)
+model = QuartznetModule.load_from_nemo(QuartznetCheckpoint.QuartzNet5x5LS_En)
 
 trainer = pl.Trainer(
     gpus=-1, # Use all gpus
