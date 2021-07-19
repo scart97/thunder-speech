@@ -8,16 +8,19 @@
 
 __all__ = ["CitrinetCheckpoint", "read_params_from_config_citrinet", "fix_vocab"]
 
-from enum import Enum
-from typing import Dict, List, Tuple
+
+from pathlib import Path
+from typing import Dict, List, Tuple, Union
 
 from omegaconf import OmegaConf
 
+from thunder.utils import BaseCheckpoint
+
 
 # fmt:off
-class CitrinetCheckpoint(str, Enum):
+class CitrinetCheckpoint(BaseCheckpoint):
     """Trained model weight checkpoints.
-    Used by [`download_checkpoint`][thunder.quartznet.compatibility.download_checkpoint] and
+    Used by [`download_checkpoint`][thunder.utils.download_checkpoint] and
     [`CitrinetModule.load_from_nemo`][thunder.citrinet.module.CitrinetModule.load_from_nemo].
 
     Note:
@@ -27,28 +30,12 @@ class CitrinetCheckpoint(str, Enum):
     stt_en_citrinet_512 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_en_citrinet_512/versions/1.0.0rc1/files/stt_en_citrinet_512.nemo"
     stt_en_citrinet_1024 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_en_citrinet_1024/versions/1.0.0rc1/files/stt_en_citrinet_1024.nemo"
     stt_es_citrinet_512 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_es_citrinet_512/versions/1.0.0/files/stt_es_citrinet_512.nemo"
-
-    @staticmethod
-    def from_string(name):
-        """Creates enum value from string. Helper to use with argparse/hydra
-
-        Args:
-            name : Name of the checkpoint
-
-        Raises:
-            ValueError: Name provided is not a valid checkpoint
-
-        Returns:
-            Enum value corresponding to the name
-        """
-        try:
-            return CitrinetCheckpoint[name]
-        except KeyError as option_does_not_exist:
-            raise ValueError("Name provided is not a valid checkpoint") from option_does_not_exist
 # fmt:on
 
 
-def read_params_from_config_citrinet(config_path: str) -> Tuple[Dict, List[str], Dict]:
+def read_params_from_config_citrinet(
+    config_path: Union[str, Path]
+) -> Tuple[Dict, List[str], Dict]:
     """Read the important parameters from the config stored inside the .nemo
     checkpoint.
 

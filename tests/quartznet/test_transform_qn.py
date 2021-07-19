@@ -20,6 +20,7 @@ from tests.utils import (
 from thunder.quartznet.transform import (
     DitherAudio,
     FeatureBatchNormalizer,
+    FilterbankConfig,
     FilterbankFeatures,
     MelScale,
     PowerSpectrum,
@@ -382,6 +383,7 @@ def test_melscale_onnx(**kwargs):
             (x),
             f"{export_path}/melscale.onnx",
             verbose=True,
+            opset_version=11,
         )
 
 
@@ -398,7 +400,7 @@ filterbank_params = given(
 
 @filterbank_params
 def test_filterbank_shape(**kwargs):
-    fb = FilterbankFeatures(**kwargs)
+    fb = FilterbankFeatures(FilterbankConfig(**kwargs))
     x = torch.randn(10, 1337)
     out = fb(x)
     assert out.shape[0] == x.shape[0]
@@ -408,7 +410,7 @@ def test_filterbank_shape(**kwargs):
 @filterbank_params
 @settings(deadline=None)
 def test_filterbank_device_move(**kwargs):
-    fb = FilterbankFeatures(**kwargs)
+    fb = FilterbankFeatures(FilterbankConfig(**kwargs))
     x = torch.randn(10, 1337)
     # Relaxed tolerance because of log operation
     # inside the Melscale
@@ -418,7 +420,7 @@ def test_filterbank_device_move(**kwargs):
 @mark_slow
 @filterbank_params
 def test_filterbank_trace(**kwargs):
-    fb = FilterbankFeatures(**kwargs)
+    fb = FilterbankFeatures(FilterbankConfig(**kwargs))
     fb.eval()
     x = torch.randn(10, 1337)
     fb_trace = torch.jit.trace(fb, (x))
@@ -429,7 +431,7 @@ def test_filterbank_trace(**kwargs):
 @mark_slow
 @filterbank_params
 def test_filterbank_script(**kwargs):
-    fb = FilterbankFeatures(**kwargs)
+    fb = FilterbankFeatures(FilterbankConfig(**kwargs))
     fb.eval()
     x = torch.randn(10, 1337)
     fb_script = torch.jit.script(fb)
@@ -440,7 +442,7 @@ def test_filterbank_script(**kwargs):
 @pytest.mark.xfail
 @filterbank_params
 def test_filterbank_onnx(**kwargs):
-    fb = FilterbankFeatures(**kwargs)
+    fb = FilterbankFeatures(FilterbankConfig(**kwargs))
     fb.eval()
     x = torch.randn(10, 1337)
 

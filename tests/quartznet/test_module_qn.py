@@ -6,8 +6,6 @@
 from string import ascii_lowercase
 from urllib.error import HTTPError
 
-import pytest
-
 import pytorch_lightning as pl
 import torch
 import torchaudio
@@ -15,8 +13,8 @@ from torchaudio.datasets.utils import download_url
 
 from tests.utils import mark_slow, requirescuda
 from thunder.data.datamodule import ManifestDatamodule
-from thunder.quartznet.compatibility import NemoCheckpoint
-from thunder.quartznet.module import QuartznetModule
+from thunder.quartznet.compatibility import QuartznetCheckpoint
+from thunder.quartznet.module import QuartznetModule, TextTransformConfig
 from thunder.utils import get_default_cache_folder
 
 
@@ -32,9 +30,7 @@ def test_expected_prediction_from_pretrained_model():
             resume=True,
         )
         # Preparing data and model
-        module = QuartznetModule.load_from_nemo(
-            checkpoint_name=NemoCheckpoint.QuartzNet5x5LS_En
-        )
+        module = QuartznetModule.load_from_nemo(QuartznetCheckpoint.QuartzNet5x5LS_En)
         audio, sr = torchaudio.load(folder / "f0001_us_f0001_00001.wav")
         assert sr == 16000
 
@@ -48,7 +44,7 @@ def test_expected_prediction_from_pretrained_model():
 @mark_slow
 @requirescuda
 def test_dev_run_train(sample_manifest):
-    module = QuartznetModule(list(ascii_lowercase))
+    module = QuartznetModule(TextTransformConfig(list(ascii_lowercase)))
     data = ManifestDatamodule(
         train_manifest=sample_manifest,
         val_manifest=sample_manifest,
@@ -62,7 +58,7 @@ def test_dev_run_train(sample_manifest):
 
 
 def test_script_module():
-    module = QuartznetModule(list(ascii_lowercase))
+    module = QuartznetModule(TextTransformConfig(list(ascii_lowercase)))
     module_script = torch.jit.script(module)
     x = torch.randn(10, 1337)
     out1 = module.predict(x)[0]
@@ -70,15 +66,10 @@ def test_script_module():
     assert out1 == out2
 
 
-def test_try_to_load_without_parameters_raises_error():
-    with pytest.raises(ValueError):
-        QuartznetModule.load_from_nemo()
-
-
 def test_change_vocab():
-    module = QuartznetModule(list(ascii_lowercase))
-    module.change_vocab(["a", "b", "c"])
-    assert module.hparams.initial_vocab_tokens == ["a", "b", "c"]
+    module = QuartznetModule(TextTransformConfig(list(ascii_lowercase)))
+    module.change_vocab(TextTransformConfig(["a", "b", "c"]))
+    assert module.hparams.text_cfg.initial_vocab_tokens == ["a", "b", "c"]
     # comparing to 10 to account for the 3 initial tokens plus
     # the few special tokens automatically added.
     assert len(module.text_transform.vocab) < 10

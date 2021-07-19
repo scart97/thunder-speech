@@ -5,6 +5,8 @@
 
 __all__ = ["BaseDataModule", "ManifestDatamodule"]
 
+from typing import Optional
+
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
@@ -34,7 +36,7 @@ class BaseDataModule(LightningDataModule):
         """
         raise NotImplementedError()
 
-    def setup(self, stage):
+    def setup(self, stage: Optional[str] = None):
         if stage in (None, "fit"):
             self.train_dataset = self.get_dataset(split="train")
             self.val_dataset = self.get_dataset(split="valid")

@@ -4,11 +4,16 @@
 
 ```py
 from thunder.quartznet.module import QuartznetModule
+from thunder.data.dataset import AudioFileLoader
+import torch
 
-module = QuartznetModule.load_from_nemo(
-    nemo_filepath="/path/to/checkpoint.nemo"
-)
+module = QuartznetModule.load_from_nemo("/path/to/checkpoint.nemo")
 module.to_torchscript("model_ready_for_inference.pt")
+
+# Optional step: also export audio loading pipeline
+loader = AudioFileLoader(sample_rate=16000)
+scripted_loader = torch.jit.script(loader)
+scripted_loader.save("audio_loader.pt")
 ```
 
 
@@ -20,31 +25,25 @@ import torch
 import torchaudio
 
 model = torch.jit.load("model_ready_for_inference.pt")
-audio, sr = torchaudio.load("audio_file.wav")
-# Optionally resample if sr is different from original model sample rate
-# tfm = torchaudio.transforms.Resample(orig_freq=sr, new_freq=16000)
-# audio = tfm(audio)
-transcriptions = model.predict(audio)
+loader = torch.jit.load("audio_loader.pt")
+# Open audio
+audio = loader("audio_file.wav")
 # transcriptions is a list of strings with the captions.
+transcriptions = model.predict(audio)
 ```
-
-??? note
-    The exported model only depends on pytorch and torchaudio, and the later is only used
-    to open the audio file into a tensor. If torchaudio.load could be compiled inside the
-    model in the future, similar to what already happens with torchvision, the dependency
-    can be removed and only the base pytorch will be necessary to run inferece!
-
 
 ## What if I want the probabilities instead of the captions?
 
 Instead of `model.predict(audio)`, use just `model(audio)`
 
-``` python hl_lines="6"
+``` python hl_lines="8"
 import torch
 import torchaudio
 
 model = torch.jit.load("model_ready_for_inference.pt")
-audio, sr = torchaudio.load(audio_name)
+loader = torch.jit.load("audio_loader.pt")
+# Open audio
+audio = loader("audio_file.wav")
 probs = model(audio)
 # If you also want the transcriptions:
 transcriptions = model.text_transform.decode_prediction(probs.argmax(1))
@@ -57,15 +56,15 @@ transcriptions = model.text_transform.decode_prediction(probs.argmax(1))
 import pytorch_lightning as pl
 
 from thunder.data.datamodule import ManifestDatamodule
-from thunder.quartznet.module import QuartznetModule,  NemoCheckpoint
+from thunder.quartznet.module import QuartznetModule,  QuartznetCheckpoint
 
 dm = ManifestDatamodule(
     train_manifest="/path/to/train_manifest.json",
     val_manifest="/path/to/val_manifest.json",
     test_manifest="/path/to/test_manifest.json",
 )
-# Tab completion works to discover other Nemocheckpoint.*
-model = QuartznetModule.load_from_nemo(checkpoint_name=NemoCheckpoint.QuartzNet5x5LS_En)
+# Tab completion works to discover other QuartznetCheckpoint.*
+model = QuartznetModule.load_from_nemo(QuartznetCheckpoint.QuartzNet5x5LS_En)
 
 trainer = pl.Trainer(
     gpus=-1, # Use all gpus
@@ -74,12 +73,6 @@ trainer = pl.Trainer(
 
 trainer.fit(model=model, datamodule=dm)
 ```
-
-!!! danger
-    This will probably have a subpar result right now, as I'm still working on
-    properly fine tuning (freeze encoder at the start, learning rate scheduling,
-    better defaults)
-
 
 ## How to get the initial_vocab_tokens from my dataset?
 

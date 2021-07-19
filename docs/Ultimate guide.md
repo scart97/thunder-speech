@@ -11,7 +11,7 @@ Also, they usually require from hundreads to thousands of hours depending on the
 Some good sources for data are [Mozilla commonvoice](https://commonvoice.mozilla.org/en/datasets), the [OpenSLR project](https://openslr.org/resources.php) or [Tatoeba](https://tatoeba.org/en/).
 
 After you download some initial data, there's a number of data quality problems that are expected and need to be fixed if you want to increase the performance of the trained models.
-First of all, list all of the audio files by increasing size and check if there's any corrupted file (usually they're very small).
+First, list all the audio files by increasing size and check if there's any corrupted file (usually they're very small).
 Remove them from the training data.
 
 Then install [sox](http://sox.sourceforge.net/), that's the best tool to inspect and convert audio files.
@@ -38,7 +38,7 @@ level or directly after loading with torchaudio.
 
 Sox has more capabilities than just listing audio metadata.
 It can read almost any file format and convert to others.
-If you have an mp3 file at 44.1 kHz, and want to convert into the usual wav format above, you can use:
+If you have a mp3 file at 44.1 kHz, and want to convert into the usual wav format above, you can use:
 
 ```
 sox input_file.mp3 -r 16000 -c 1 -b 16 output_file.wav
@@ -51,7 +51,7 @@ The flags used represent:
 * `-b 16`: convert to PCM 16-bit
 * `output_file.wav`: Sox understand that the output will be wav just by the file extension
 
-Ideally all of the training and inference audio files should have the same characteristics, so it's a good idea to transform them into a common format before training.
+Ideally all the training and inference audio files should have the same characteristics, so it's a good idea to transform them into a common format before training.
 As the wav format does not have any compression, the resulting data will demand a huge HDD space.
 If that's a problem, you can instead convert the files to mp3, that way you lose a small percentage of the performance but can achieve up to 10x smaller dataset sizes.
 
@@ -83,7 +83,7 @@ After you train the first couple of models, it's possible to use the model itsel
 ## First train
 
 For this first train, you should only try to overfit one batch.
-This is the most simple test, and if you can't get past it then anything
+This is the simplest test, and if you can't get past it then anything
 more complex that you try will be wasted time.
 
 To do it, try to load a training dataset with only one batch worth of data.
@@ -92,7 +92,7 @@ As we are using pytorch lightning, there's a trainer flag to limit the number of
 Also, remember to disable any shuffle at the dataloader, to ensure the same batch will be used every epoch.
 
 
-Before you run the training, disable any augmentation, regularization and advanced stuff like learning rate scheduling. You can start with either a pretrained model or a clean new one,
+Before you run the training, disable any augmentation, regularization and advanced stuff like learning rate scheduling. You can start with either a pretrained model, or a clean new one,
 but either way don't freeze any parameters, just let it all train.
 
 Start the training, and you should see the loss follow a pattern where, the more time you let it run,
@@ -104,9 +104,9 @@ Some problems that can happen:
 
 * **The loss is negative**: There's a blank in the target text, find and remove it. Blanks should only be produced by the model, never at the labels.
 
-* **There's no predictions at all**: let it train for more time
+* **There're no predictions at all**: let it train for more time
 
-* **Still, there's no predictions after a long time**: Check if the target texts are being processed correctly. Inside the training step, decode the target text and assert that it returns what you expect
+* **Still, there're no predictions after a long time**: Check if the target texts are being processed correctly. Inside the training step, decode the target text and assert that it returns what you expect
 
 * **The loss does a 'U' curve where it starts normally but then turns around and just keep increasing**: try to lower the learning rate
 
@@ -119,7 +119,7 @@ but something that gives you 2 minute epochs is a good amount.
 This time, you're not trying to overfit anymore.
 The validation loss will start to get lower,
 and the metrics will improve compared to the first training.
-But, quickly, the model will reach the point where the data is enough and it will start to overfit to the training data.
+Quickly, the model will reach the point where the data is enough, and it will start to overfit to the training data.
 
 `TODO: better graphs?`
 

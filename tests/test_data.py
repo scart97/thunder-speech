@@ -4,12 +4,15 @@
 # Copyright (c) 2021 scart97
 
 from pathlib import Path
+from urllib.error import HTTPError
 
 import pytest
 
 import torch
+from torchaudio.datasets.utils import download_url
 
 from thunder.data.datamodule import ManifestDatamodule
+from thunder.utils import get_default_cache_folder
 
 
 @pytest.fixture
@@ -51,6 +54,33 @@ def test_all_outputs(single_process_loader):
     assert len(outputs) == len(dataset)
     assert isinstance(outputs, list)
     assert outputs[0] == dataset[0][1]
+
+
+def test_export_loader(single_process_loader):
+    dataset = single_process_loader.train_dataset
+
+    scripted_loader = torch.jit.script(dataset.loader)
+
+    try:
+        folder = get_default_cache_folder()
+        download_url(
+            "https://github.com/fastaudio/10_Speakers_Sample/raw/76f365de2f4d282ec44450d68f5b88de37b8b7ad/train/f0001_us_f0001_00001.wav",
+            download_folder=str(folder),
+            filename="f0001_us_f0001_00001.wav",
+            resume=True,
+        )
+        # Testing forward
+        audio = scripted_loader(str(folder / "f0001_us_f0001_00001.wav"))
+        assert torch.is_tensor(audio)
+        assert audio.ndim == 2
+        assert audio.size(0) == 1
+        # Testing exported methods
+        aud, sr = scripted_loader.open_audio(str(folder / "f0001_us_f0001_00001.wav"))
+        audio2 = scripted_loader.preprocess_audio(aud, sr)
+        assert torch.allclose(audio, audio2)
+
+    except HTTPError:
+        return
 
 
 @pytest.mark.parametrize("subset", ["train_dataset", "val_dataset", "test_dataset"])

@@ -52,12 +52,12 @@ __all__ = [
 ]
 
 import math
+from dataclasses import dataclass
 from typing import Optional
 
 import torch
 from torch import nn
-
-from thunder.librosa_compat import create_fb_matrix
+from torchaudio.functional import create_fb_matrix
 
 
 class FeatureBatchNormalizer(nn.Module):
@@ -72,11 +72,15 @@ class FeatureBatchNormalizer(nn.Module):
         Args:
             x : Tensor of shape (batch, features, time)
         """
-        x_mean = x.mean(dim=2, keepdim=True).detach()
-        x_std = x.std(dim=2, keepdim=True).detach()
+        mask = x.abs() > 0.0
+        num_elements = mask.sum(dim=2, keepdim=True).detach()
+        x_mean = x.sum(dim=2, keepdim=True).detach() / num_elements
+        numerator = (x - x_mean).pow(2).sum(dim=2, keepdim=True).detach()
+        x_std = (numerator / num_elements).sqrt()
         # make sure x_std is not zero
         x_std += self.div_guard
-        return (x - x_mean) / x_std
+        result = (x - x_mean) / x_std
+        return torch.masked_fill(result, ~mask, 0.0)
 
 
 class DitherAudio(nn.Module):
@@ -100,7 +104,8 @@ class DitherAudio(nn.Module):
             x : Tensor of shape (batch, time)
         """
         if self.training:
-            return x + self.dither * torch.randn_like(x)
+            mask = x > 0.0
+            return x + mask * (self.dither * torch.randn_like(x))
         else:
             return x
 
@@ -209,7 +214,7 @@ class MelScale(nn.Module):
                 f_min=0,
                 f_max=sample_rate / 2,
                 norm="slaney",
-                htk=False,
+                mel_scale="slaney",
             )
             .transpose(0, 1)
             .unsqueeze(0)
@@ -228,42 +233,51 @@ class MelScale(nn.Module):
         # log features
         # We want to avoid taking the log of zero
         if self.log_scale:
+            mask = x.abs() > 0.0
             x = torch.log(x + 2 ** -24)
+            x[~mask] = 0.0
         return x
 
 
-def FilterbankFeatures(
-    sample_rate: int = 16000,
-    n_window_size: int = 320,
-    n_window_stride: int = 160,
-    n_fft: int = 512,
-    preemph: float = 0.97,
-    nfilt: int = 64,
-    dither: float = 1e-5,
-    **kwargs,
-) -> nn.Module:
+@dataclass
+class FilterbankConfig:
+    """Configuration to create [`FilterbankFeatures`][thunder.quartznet.transform.FilterbankFeatures]
+
+    Attributes:
+        sample_rate: Sampling rate of the signal. defaults to 16000.
+        n_window_size: Number of elements in the window size. defaults to 320.
+        n_window_stride: Number of elements in the window stride. defaults to 160.
+        n_fft: Number of fourier features. defaults to 512.
+        preemph: Preemphasis filtering control factor. defaults to 0.97.
+        nfilt: Number of output mel filters to use. defaults to 64.
+        dither: Amount of dither to add. defaults to 1e-5.
+    """
+
+    sample_rate: int = 16000
+    n_window_size: int = 320
+    n_window_stride: int = 160
+    n_fft: int = 512
+    preemph: float = 0.97
+    nfilt: int = 64
+    dither: float = 1e-5
+
+
+def FilterbankFeatures(cfg: FilterbankConfig) -> nn.Module:
     """Creates the Filterbank features used in the Quartznet model.
 
     Args:
-        sample_rate : Sampling rate of the signal
-        n_window_size : Number of elements in the window size.
-        n_window_stride : Number of elements in the window stride.
-        n_fft : Number of fourier features.
-        preemph : Preemphasis filtering control factor.
-        nfilt : Number of output mel filters to use
-        dither : Amount of dither to add.
-
+        cfg: required config to create instance
     Returns:
         Module that computes the features based on raw audio tensor.
     """
     return nn.Sequential(
-        DitherAudio(dither=dither),
-        PreEmphasisFilter(preemph=preemph),
+        DitherAudio(dither=cfg.dither),
+        PreEmphasisFilter(preemph=cfg.preemph),
         PowerSpectrum(
-            n_window_size=n_window_size,
-            n_window_stride=n_window_stride,
-            n_fft=n_fft,
+            n_window_size=cfg.n_window_size,
+            n_window_stride=cfg.n_window_stride,
+            n_fft=cfg.n_fft,
         ),
-        MelScale(sample_rate=sample_rate, n_fft=n_fft, nfilt=nfilt),
+        MelScale(sample_rate=cfg.sample_rate, n_fft=cfg.n_fft, nfilt=cfg.nfilt),
         FeatureBatchNormalizer(),
     )

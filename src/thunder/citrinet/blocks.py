@@ -31,14 +31,14 @@ __all__ = [
     "Citrinet_encoder",
 ]
 
-from typing import List, Tuple
+from dataclasses import dataclass
+from typing import List
 
 import torch
 from torch import nn
+from torch.nn.common_types import _size_1_t
 
 from thunder.quartznet.blocks import (
-    Masked,
-    MultiSequential,
     _get_act_dropout_layer,
     _get_conv_bn_layer,
     get_same_padding,
@@ -89,9 +89,9 @@ class CitrinetBlock(nn.Module):
         in_channels: int,
         out_channels: int,
         repeat: int = 5,
-        kernel_size: List[int] = [11],
-        stride: List[int] = [1],
-        dilation: List[int] = [1],
+        kernel_size: _size_1_t = (11,),
+        stride: _size_1_t = (1,),
+        dilation: _size_1_t = (1,),
         dropout: float = 0.0,
         residual: bool = True,
         separable: bool = False,
@@ -125,7 +125,7 @@ class CitrinetBlock(nn.Module):
                     inplanes_loop,
                     out_channels,
                     kernel_size=kernel_size,
-                    stride=[1],  # Only stride the last one
+                    stride=(1,),  # Only stride the last one
                     dilation=dilation,
                     padding=padding_val,
                     separable=separable,
@@ -151,14 +151,14 @@ class CitrinetBlock(nn.Module):
             )
         )
 
-        conv.append(Masked(SqueezeExcite(out_channels, reduction_ratio=8)))
+        conv.append(SqueezeExcite(out_channels, reduction_ratio=8))
 
-        self.mconv = MultiSequential(*conv)
+        self.mconv = nn.Sequential(*conv)
 
         if residual:
             stride_residual = stride if stride[0] == 1 else stride[0]
 
-            self.res = MultiSequential(
+            self.res = nn.Sequential(
                 *_get_conv_bn_layer(
                     in_channels,
                     out_channels,
@@ -170,32 +170,27 @@ class CitrinetBlock(nn.Module):
         else:
             self.res = None
 
-        self.mout = MultiSequential(*_get_act_dropout_layer(drop_prob=dropout))
+        self.mout = nn.Sequential(*_get_act_dropout_layer(drop_prob=dropout))
 
-    def forward(
-        self, x: torch.Tensor, lens: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
             x : Tensor of shape (batch, features, time) where #features == inplanes
-            lens : Tensor containing the lengths of each input in the batch, to be used by the
-                masked convolution that happens internally
 
         Returns:
             Result of applying the block on the input, and corresponding output lengths
         """
 
         # compute forward convolutions
-        out, lens_out = self.mconv(x, lens)
+        out = self.mconv(x)
 
         # compute the residuals
         if self.res is not None:
-            res_out, _ = self.res(x, lens)
+            res_out = self.res(x)
             out = out + res_out
 
         # compute the output
-        out, lens_out = self.mout(out, lens_out)
-        return out, lens_out
+        return self.mout(out)
 
 
 def stem(feat_in: int) -> CitrinetBlock:
@@ -211,7 +206,7 @@ def stem(feat_in: int) -> CitrinetBlock:
         feat_in,
         256,
         repeat=1,
-        kernel_size=[5],
+        kernel_size=(5,),
         residual=False,
         separable=True,
     )
@@ -236,7 +231,7 @@ def body(
     f_in = 256
     for f, k, s in zip(filters, kernel_size, strides):
         layers.append(
-            CitrinetBlock(f_in, f, kernel_size=[k], stride=[s], separable=True)
+            CitrinetBlock(f_in, f, kernel_size=(k,), stride=(s,), separable=True)
         )
         f_in = f
     layers.append(
@@ -244,7 +239,7 @@ def body(
             f_in,
             640,
             repeat=1,
-            kernel_size=[41],
+            kernel_size=(41,),
             residual=False,
             separable=True,
         )
@@ -252,24 +247,32 @@ def body(
     return layers
 
 
-def Citrinet_encoder(
-    feat_in: int,
-    filters: List[int],
-    kernel_sizes: List[int],
-    strides: List[int],
-) -> nn.Module:
+@dataclass
+class EncoderConfig:
+    """Configuration to create [`Citrinet_encoder`][thunder.citrinet.blocks.Citrinet_encoder]
+
+    Attributes:
+        filters: List of filter sizes used to create the encoder blocks. required.
+        kernel_sizes: List of kernel sizes corresponding to each filter size. required.
+        strides: List of stride corresponding to each filter size. required.
+        feat_in : Number of input features to the model. defaults to 80.
+    """
+
+    filters: List[int]
+    kernel_sizes: List[int]
+    strides: List[int]
+    feat_in: int = 80
+
+
+def Citrinet_encoder(cfg: EncoderConfig) -> nn.Module:
     """Basic Citrinet encoder setup.
 
     Args:
-        feat_in : Number of input features to the model.
-        filters: List of filter sizes used to create the encoder blocks
-        kernel_sizes: List of kernel sizes corresponding to each filter size
-        strides: List of stride corresponding to each filter size
-
+        cfg: required config to create instance
     Returns:
         Pytorch model corresponding to the encoder.
     """
-    return MultiSequential(
-        stem(feat_in),
-        *body(filters, kernel_sizes, strides),
+    return nn.Sequential(
+        stem(cfg.feat_in),
+        *body(cfg.filters, cfg.kernel_sizes, cfg.strides),
     )

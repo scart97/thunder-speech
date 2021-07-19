@@ -1,7 +1,5 @@
 from urllib.error import HTTPError
 
-import pytest
-
 import pytorch_lightning as pl
 import torch
 import torchaudio
@@ -10,6 +8,7 @@ from torchaudio.datasets.utils import download_url
 from tests.utils import mark_slow, requirescuda
 from thunder.citrinet.module import CitrinetCheckpoint, CitrinetModule
 from thunder.data.datamodule import ManifestDatamodule
+from thunder.text_processing.transform import TextTransformConfig
 from thunder.utils import get_default_cache_folder
 
 
@@ -23,9 +22,7 @@ def test_expected_prediction_from_pretrained_model():
             filename="f0001_us_f0001_00001.wav",
             resume=True,
         )
-        module = CitrinetModule.load_from_nemo(
-            checkpoint_name=CitrinetCheckpoint.stt_en_citrinet_256
-        )
+        module = CitrinetModule.load_from_nemo(CitrinetCheckpoint.stt_en_citrinet_256)
 
         audio, sr = torchaudio.load(folder / "f0001_us_f0001_00001.wav")
         assert sr == 16000
@@ -42,9 +39,7 @@ def test_expected_prediction_from_pretrained_model():
 @requirescuda
 def test_dev_run_train(sample_manifest):
     try:
-        module = CitrinetModule.load_from_nemo(
-            checkpoint_name=CitrinetCheckpoint.stt_en_citrinet_256
-        )
+        module = CitrinetModule.load_from_nemo(CitrinetCheckpoint.stt_en_citrinet_256)
     except HTTPError:
         return
     data = ManifestDatamodule(
@@ -61,9 +56,7 @@ def test_dev_run_train(sample_manifest):
 
 def test_script_module():
     try:
-        module = CitrinetModule.load_from_nemo(
-            checkpoint_name=CitrinetCheckpoint.stt_en_citrinet_256
-        )
+        module = CitrinetModule.load_from_nemo(CitrinetCheckpoint.stt_en_citrinet_256)
     except HTTPError:
         return
     module_script = torch.jit.script(module)
@@ -73,20 +66,13 @@ def test_script_module():
     assert out1 == out2
 
 
-def test_try_to_load_without_parameters_raises_error():
-    with pytest.raises(ValueError):
-        CitrinetModule.load_from_nemo()
-
-
 def test_change_vocab():
     try:
-        module = CitrinetModule.load_from_nemo(
-            checkpoint_name=CitrinetCheckpoint.stt_en_citrinet_256
-        )
+        module = CitrinetModule.load_from_nemo(CitrinetCheckpoint.stt_en_citrinet_256)
     except HTTPError:
         return
-    module.change_vocab(["a", "b", "c"])
-    assert module.hparams.initial_vocab_tokens == ["a", "b", "c"]
+    module.change_vocab(TextTransformConfig(["a", "b", "c"]))
+    assert module.hparams.text_cfg.initial_vocab_tokens == ["a", "b", "c"]
     # comparing to 10 to account for the 3 initial tokens plus
     # the few special tokens automatically added.
     assert len(module.text_transform.vocab) < 10

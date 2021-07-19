@@ -7,28 +7,25 @@
 # Copyright (c) 2021 scart97
 
 __all__ = [
-    "NemoCheckpoint",
-    "download_checkpoint",
+    "QuartznetCheckpoint",
     "read_params_from_config",
     "load_quartznet_weights",
 ]
 
-from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import torch
-import wget
 from omegaconf import OmegaConf
 from torch import nn
 
-from thunder.utils import get_default_cache_folder
+from thunder.utils import BaseCheckpoint
 
 
 # fmt:off
-class NemoCheckpoint(str, Enum):
+class QuartznetCheckpoint(BaseCheckpoint):
     """Trained model weight checkpoints.
-    Used by [`download_checkpoint`][thunder.quartznet.compatibility.download_checkpoint] and
+    Used by [`download_checkpoint`][thunder.utils.download_checkpoint] and
     [`QuartznetModule.load_from_nemo`][thunder.quartznet.module.QuartznetModule.load_from_nemo].
 
     Note:
@@ -38,52 +35,25 @@ class NemoCheckpoint(str, Enum):
         `stt_zh_quartznet15x5`
     """
     QuartzNet15x5Base_En = "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-En.nemo"
-    QuartzNet15x5Base_Zh = "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-Zh.nemo",
-    QuartzNet5x5LS_En = "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet5x5LS-En.nemo",
-    QuartzNet15x5NR_En = "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5NR-En.nemo",
+    QuartzNet15x5Base_Zh = "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5Base-Zh.nemo"
+    QuartzNet5x5LS_En = "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet5x5LS-En.nemo"
+    QuartzNet15x5NR_En = "https://api.ngc.nvidia.com/v2/models/nvidia/nemospeechmodels/versions/1.0.0a5/files/QuartzNet15x5NR-En.nemo"
 
-    stt_ca_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_ca_quartznet15x5/versions/1.0.0rc1/files/stt_ca_quartznet15x5.nemo",
-    stt_it_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_it_quartznet15x5/versions/1.0.0rc1/files/stt_it_quartznet15x5.nemo",
-    stt_fr_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_fr_quartznet15x5/versions/1.0.0rc1/files/stt_fr_quartznet15x5.nemo",
-    stt_es_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_es_quartznet15x5/versions/1.0.0rc1/files/stt_es_quartznet15x5.nemo",
-    stt_de_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_de_quartznet15x5/versions/1.0.0rc1/files/stt_de_quartznet15x5.nemo",
-    stt_pl_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_pl_quartznet15x5/versions/1.0.0rc1/files/stt_pl_quartznet15x5.nemo",
-    stt_ru_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_ru_quartznet15x5/versions/1.0.0rc1/files/stt_ru_quartznet15x5.nemo",
-    stt_en_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_en_quartznet15x5/versions/1.0.0rc1/files/stt_en_quartznet15x5.nemo",
-    stt_zh_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_zh_quartznet15x5/versions/1.0.0rc1/files/stt_zh_quartznet15x5.nemo",
-
-    @staticmethod
-    def from_string(name):
-        try:
-            return NemoCheckpoint[name]
-        except KeyError:
-            raise ValueError()
+    stt_ca_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_ca_quartznet15x5/versions/1.0.0rc1/files/stt_ca_quartznet15x5.nemo"
+    stt_it_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_it_quartznet15x5/versions/1.0.0rc1/files/stt_it_quartznet15x5.nemo"
+    stt_fr_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_fr_quartznet15x5/versions/1.0.0rc1/files/stt_fr_quartznet15x5.nemo"
+    stt_es_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_es_quartznet15x5/versions/1.0.0rc1/files/stt_es_quartznet15x5.nemo"
+    stt_de_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_de_quartznet15x5/versions/1.0.0rc1/files/stt_de_quartznet15x5.nemo"
+    stt_pl_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_pl_quartznet15x5/versions/1.0.0rc1/files/stt_pl_quartznet15x5.nemo"
+    stt_ru_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_ru_quartznet15x5/versions/1.0.0rc1/files/stt_ru_quartznet15x5.nemo"
+    stt_en_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_en_quartznet15x5/versions/1.0.0rc1/files/stt_en_quartznet15x5.nemo"
+    stt_zh_quartznet15x5 = "https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_zh_quartznet15x5/versions/1.0.0rc1/files/stt_zh_quartznet15x5.nemo"
 # fmt:on
 
 
-def download_checkpoint(name: NemoCheckpoint, checkpoint_folder: str = None) -> Path:
-    """Download quartznet checkpoint by identifier.
-
-    Args:
-        name: Model identifier. Check checkpoint_archives.keys()
-        checkpoint_folder: Folder where the checkpoint will be saved to.
-
-    Returns:
-        Path to the saved checkpoint file.
-    """
-    if checkpoint_folder is None:
-        checkpoint_folder = get_default_cache_folder()
-
-    url = name.value
-    filename = url.split("/")[-1]
-    checkpoint_path = Path(checkpoint_folder) / filename
-    if not checkpoint_path.exists():
-        wget.download(url, out=str(checkpoint_path))
-
-    return checkpoint_path
-
-
-def read_params_from_config(config_path: str) -> Tuple[Dict, List[str], Dict]:
+def read_params_from_config(
+    config_path: Union[str, Path]
+) -> Tuple[Dict, List[str], Dict]:
     """Read the important parameters from the config stored inside the .nemo
     checkpoint.
 
@@ -139,12 +109,13 @@ def load_quartznet_weights(encoder: nn.Module, decoder: nn.Module, weights_path:
 
     def fix_encoder_name(x: str) -> str:
         x = x.replace("encoder.", "").replace(".res.0", ".res")
-        # Add another abstraction layer if it's not a masked conv
-        # This is caused by the new Masked wrapper
-        if ".conv" not in x:
+        # Add another abstraction layer
+        # This is caused by the new MaskedBatchNorm
+        # Skip convolution and SqueezeExcite layers
+        if (".conv" not in x) and (".fc" not in x):
             parts = x.split(".")
-            x = ".".join(parts[:3] + ["layer", "0"] + parts[3:])
-        return x
+            x = ".".join(parts[:3] + ["layer"] + parts[3:])
+        return x.replace(".conv", "")  # Fix convolutions
 
     # We remove the 'encoder.' and 'decoder.' prefix from the weights to enable
     # compatibility to load with plain nn.Modules created by reading the config

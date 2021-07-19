@@ -25,22 +25,24 @@
 __all__ = [
     "InitMode",
     "init_weights",
-    "get_same_padding",
-    "MaskedConv1d",
-    "MultiSequential",
-    "Masked",
+    "_get_act_dropout_layer",
+    "_get_conv_bn_layer",
     "QuartznetBlock",
     "stem",
     "body",
     "Quartznet_encoder",
-    "Quartznet_decoder",
 ]
 
+from dataclasses import dataclass
 from enum import Enum
-from typing import List, Tuple
+from typing import List
 
 import torch
 from torch import nn
+from torch.nn.common_types import _size_1_t
+
+from thunder.blocks import get_same_padding
+from thunder.utils import default_list
 
 
 class InitMode(str, Enum):
@@ -57,7 +59,7 @@ class InitMode(str, Enum):
 
 
 def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
-    """Initialize Linear, MaskedConv1d/Conv1d or BatchNorm1d weights.
+    """Initialize Linear, Conv1d or BatchNorm1d weights.
     There's no return, the operation occurs inplace.
 
     Args:
@@ -67,8 +69,6 @@ def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
     Raises:
         ValueError: Raised when the initial mode is not one of the possible options.
     """
-    if isinstance(m, MaskedConv1d):
-        init_weights(m.conv, mode)
     if isinstance(m, (nn.Conv1d, nn.Linear)):
         if mode == InitMode.xavier_uniform:
             nn.init.xavier_uniform_(m.weight, gain=1.0)
@@ -90,158 +90,38 @@ def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
             nn.init.zeros_(m.bias)
 
 
-def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
-    """Calculates the padding size to obtain same padding.
-        Same padding means that the output will have the
-        shape input_shape / stride. That means, for
-        stride = 1 the output shape is the same as the input,
-        and stride = 2 gives an output that is half of the
-        input shape.
-
-    Args:
-        kernel_size : convolution kernel size. Only tested to be correct with odd values.
-        stride : convolution stride
-        dilation : convolution dilation
-
-    Raises:
-        ValueError: Only stride or dilation may be greater than 1
-
-    Returns:
-        padding value to obtain same padding.
-    """
-    if stride > 1 and dilation > 1:
-        raise ValueError("Only stride OR dilation may be greater than 1")
-    if dilation > 1:
-        return (dilation * (kernel_size - 1) + 1) // 2
-    return kernel_size // 2
-
-
-class MaskedConv1d(nn.Module):
-    __constants__ = ["use_mask", "padding", "dilation", "kernel_size", "stride"]
-
-    def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        kernel_size: int,
-        stride: int = 1,
-        padding: int = 0,
-        dilation: int = 1,
-        groups: int = 1,
-        bias: bool = False,
-        use_mask: bool = True,
-    ):
-        """Masked Convolution.
-        This module correspond to a 1d convolution with input masking. Arguments to create are the
-        same as nn.Conv1d, but with the addition of use_mask for special behaviour.
-        Args:
-            in_channels : Same as nn.Conv1d
-            out_channels : Same as nn.Conv1d
-            kernel_size : Same as nn.Conv1d
-            stride : Same as nn.Conv1d
-            padding : Same as nn.Conv1d
-            dilation : Same as nn.Conv1d
-            groups : Same as nn.Conv1d
-            bias : Same as nn.Conv1d
-            use_mask : Controls the masking of input before the convolution during the forward.
-        """
-        super(MaskedConv1d, self).__init__()
-
-        self.use_mask = use_mask
-
-        self.conv = nn.Conv1d(
-            in_channels,
-            out_channels,
-            kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias,
-        )
-
-        self.padding = self.conv.padding[0]
-        self.dilation = self.conv.dilation[0]
-        self.kernel_size = self.conv.kernel_size[0]
-        self.stride = self.conv.stride[0]
-
-    def get_seq_len(self, lens: torch.Tensor) -> torch.Tensor:
-        """Get the lengths of the inputs after the convolution operation is applied.
-        Args:
-            lens : Original lengths of the inputs
-        Returns:
-            Resulting lengths after the convolution
-        """
-        return (
-            lens + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1
-        ) // self.stride + 1
-
-    def mask_fill(self, x: torch.Tensor, lens: torch.Tensor) -> torch.Tensor:
-        """Mask the input based on it's respective lengths.
-        Args:
-            x : Signal to be processed, of shape (batch, features, time)
-            lens : Lenghts of each element in the batch of x, with shape (batch)
-        Returns:
-            The masked signal
-        """
-        lens = lens.to(dtype=torch.long)
-        max_len = x.size(2)
-        mask = torch.arange(max_len, device=lens.device).expand(
-            lens.shape[0], max_len
-        ) >= lens.unsqueeze(1)
-        x = x.masked_fill(mask.unsqueeze(1).to(device=x.device), 0)
-        return x
-
-    def forward(
-        self, x: torch.Tensor, lens: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Forward method
-        Args:
-            x : Signal to be processed, of shape (batch, features, time)
-            lens : Lenghts of each element in the batch of x, with shape (batch)
-        Returns:
-            Both the signal processed by the convolution and the resulting lengths
-        """
-        if self.use_mask:
-            x = self.mask_fill(x, lens)
-        out = self.conv(x)
-        return out, self.get_seq_len(lens)
-
-
-class MultiSequential(nn.Sequential):
-    def forward(self, x1, x2):
-        for module in self.children():
-            x1, x2 = module(x1, x2)
-        return x1, x2
-
-
-class Masked(nn.Module):
-    def __init__(self, *layers):
+class MaskedBatchNorm1d(nn.Module):
+    def __init__(self, out_channels: int):
         super().__init__()
-        self.layer = nn.Sequential(*layers)
+        self.layer = nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1)
 
-    def forward(self, x: torch.Tensor, lens: torch.Tensor):
-        return self.layer(x), lens
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.training:
+            mask = x == 0.0
+            result = self.layer(x)
+            return torch.masked_fill(result, mask, 0.0)
+        else:
+            return self.layer(x)
 
 
 def _get_conv_bn_layer(
-    in_channels,
-    out_channels,
-    kernel_size=11,
-    separable=False,
+    in_channels: int,
+    out_channels: int,
+    kernel_size: _size_1_t = 11,
+    separable: bool = False,
     **conv_kwargs,
 ):
 
     if separable:
         layers = [
-            MaskedConv1d(
+            nn.Conv1d(
                 in_channels,
                 in_channels,
                 kernel_size,
                 groups=in_channels,
                 **conv_kwargs,
             ),
-            MaskedConv1d(
+            nn.Conv1d(
                 in_channels,
                 out_channels,
                 kernel_size=1,
@@ -253,7 +133,7 @@ def _get_conv_bn_layer(
         ]
     else:
         layers = [
-            MaskedConv1d(
+            nn.Conv1d(
                 in_channels,
                 out_channels,
                 kernel_size,
@@ -261,13 +141,13 @@ def _get_conv_bn_layer(
             )
         ]
 
-    layers.append(Masked(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1)))
+    layers.append(MaskedBatchNorm1d(out_channels))
 
     return layers
 
 
-def _get_act_dropout_layer(drop_prob=0.2):
-    return [Masked(nn.ReLU(True)), Masked(nn.Dropout(p=drop_prob))]
+def _get_act_dropout_layer(drop_prob: float = 0.2):
+    return [nn.ReLU(True), nn.Dropout(p=drop_prob)]
 
 
 class QuartznetBlock(nn.Module):
@@ -276,9 +156,9 @@ class QuartznetBlock(nn.Module):
         in_channels: int,
         out_channels: int,
         repeat: int = 5,
-        kernel_size: List[int] = [11],
-        stride: List[int] = [1],
-        dilation: List[int] = [1],
+        kernel_size: _size_1_t = (11,),
+        stride: _size_1_t = (1,),
+        dilation: _size_1_t = (1,),
         dropout: float = 0.0,
         residual: bool = True,
         separable: bool = False,
@@ -337,12 +217,12 @@ class QuartznetBlock(nn.Module):
             )
         )
 
-        self.mconv = MultiSequential(*conv)
+        self.mconv = nn.Sequential(*conv)
 
         if residual:
             stride_residual = stride if stride[0] == 1 else stride[0] ** repeat
 
-            self.res = MultiSequential(
+            self.res = nn.Sequential(
                 *_get_conv_bn_layer(
                     in_channels,
                     out_channels,
@@ -354,30 +234,27 @@ class QuartznetBlock(nn.Module):
         else:
             self.res = None
 
-        self.mout = MultiSequential(*_get_act_dropout_layer(drop_prob=dropout))
+        self.mout = nn.Sequential(*_get_act_dropout_layer(drop_prob=dropout))
 
-    def forward(
-        self, x: torch.Tensor, lens: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
             x : Tensor of shape (batch, features, time) where #features == inplanes
 
         Returns:
-            Result of applying the block on the input
+            Result of applying the block on the input, and corresponding output lengths
         """
 
         # compute forward convolutions
-        out, lens_out = self.mconv(x, lens)
+        out = self.mconv(x)
 
         # compute the residuals
         if self.res is not None:
-            res_out, _ = self.res(x, lens)
+            res_out = self.res(x)
             out = out + res_out
 
         # compute the output
-        out, lens_out = self.mout(out, lens_out)
-        return out, lens_out
+        return self.mout(out)
 
 
 def stem(feat_in: int) -> QuartznetBlock:
@@ -393,8 +270,8 @@ def stem(feat_in: int) -> QuartznetBlock:
         feat_in,
         256,
         repeat=1,
-        stride=[2],
-        kernel_size=[33],
+        stride=(2,),
+        kernel_size=(33,),
         residual=False,
         separable=True,
     )
@@ -417,7 +294,7 @@ def body(
     f_in = 256
     for f, k in zip(filters, kernel_size):
         for _ in range(repeat_blocks):
-            layers.append(QuartznetBlock(f_in, f, kernel_size=[k], separable=True))
+            layers.append(QuartznetBlock(f_in, f, kernel_size=(k,), separable=True))
             f_in = f
     layers.extend(
         [
@@ -425,57 +302,46 @@ def body(
                 f_in,
                 512,
                 repeat=1,
-                dilation=[2],
-                kernel_size=[87],
+                dilation=(2,),
+                kernel_size=(87,),
                 residual=False,
                 separable=True,
             ),
             QuartznetBlock(
-                512, 1024, repeat=1, kernel_size=[1], residual=False, separable=False
+                512, 1024, repeat=1, kernel_size=(1,), residual=False, separable=False
             ),
         ]
     )
     return layers
 
 
-def Quartznet_encoder(
-    feat_in: int,
-    filters: List[int] = [256, 256, 512, 512, 512],
-    kernel_sizes: List[int] = [33, 39, 51, 63, 75],
-    repeat_blocks: int = 1,
-) -> nn.Module:
+@dataclass
+class EncoderConfig:
+    """Configuration to create [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
+
+    Attributes:
+        feat_in: Number of input features to the model. defaults to 64.
+        filters: List of filter sizes used to create the encoder blocks. defaults to [256, 256, 512, 512, 512].
+        kernel_sizes: List of kernel sizes corresponding to each filter size. defaults to [33, 39, 51, 63, 75].
+        repeat_blocks: Number of repetitions of each block. defaults to 1.
+    """
+
+    feat_in: int = 64
+    filters: List[int] = default_list([256, 256, 512, 512, 512])
+    kernel_sizes: List[int] = default_list([33, 39, 51, 63, 75])
+    repeat_blocks: int = 1
+
+
+def Quartznet_encoder(cfg: EncoderConfig = EncoderConfig()) -> nn.Module:
     """Basic Quartznet encoder setup.
     Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (repeat_blocks=3)
 
     Args:
-        feat_in : Number of input features to the model.
-        filters: List of filter sizes used to create the encoder blocks
-        kernel_sizes: List of kernel sizes corresponding to each filter size
-        repeat_blocks : Number of repetitions of each block.
-
+        cfg: required config to create instance
     Returns:
         Pytorch model corresponding to the encoder.
     """
-    return MultiSequential(
-        stem(feat_in),
-        *body(filters, kernel_sizes, repeat_blocks),
+    return nn.Sequential(
+        stem(cfg.feat_in),
+        *body(cfg.filters, cfg.kernel_sizes, cfg.repeat_blocks),
     )
-
-
-def Quartznet_decoder(num_classes: int, input_channels: int = 1024) -> nn.Module:
-    """Build the Quartznet decoder.
-
-    Args:
-        num_classes : Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
-
-    Returns:
-        Pytorch model of the decoder
-    """
-    decoder = nn.Conv1d(
-        input_channels,
-        num_classes,
-        kernel_size=1,
-        bias=True,
-    )
-    decoder.apply(init_weights)
-    return decoder

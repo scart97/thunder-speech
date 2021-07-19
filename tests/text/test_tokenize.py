@@ -14,12 +14,12 @@ from hypothesis.strategies import text
 
 from thunder.text_processing.tokenizer import (
     BPETokenizer,
-    SentencepieceModelFile,
     char_tokenizer,
     get_most_frequent_tokens,
     train_sentencepiece_model,
     word_tokenizer,
 )
+from thunder.text_processing.transform import TextTransformConfig
 
 
 def test_bpe_tokenizer_load():
@@ -66,17 +66,18 @@ def test_train_sentencepiece():
             do_lower_case=True,
             sample_size=150,
         )
-        assert isinstance(trained, SentencepieceModelFile)
-        assert Path(trained.model_path).exists()
-        assert len(trained.vocabulary_tokens) <= 50
+        trained = TextTransformConfig.from_sentencepiece(trained)
+        assert Path(trained.sentencepiece_model).exists()
+        assert len(trained.initial_vocab_tokens) <= 50
 
         with pytest.warns(UserWarning):
             # Trained model already exists, emit warning
             train_skipped = train_sentencepiece_model(
                 file_with_text, vocab_size=50, output_dir=str(output_dir)
             )
-            assert train_skipped.model_path == trained.model_path
-            assert train_skipped.vocabulary_tokens == trained.vocabulary_tokens
+            train_skipped = TextTransformConfig.from_sentencepiece(train_skipped)
+            assert train_skipped.sentencepiece_model == trained.sentencepiece_model
+            assert train_skipped.initial_vocab_tokens == trained.initial_vocab_tokens
 
 
 def test_train_sentencepiece_exception():
