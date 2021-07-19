@@ -21,7 +21,6 @@ import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from tests.utils import mark_slow
 from thunder.callbacks import FinetuneEncoderDecoder
 
 
@@ -115,7 +114,6 @@ class BoringModel(pl.LightningModule):
         return DataLoader(RandomDataset(32, 64))
 
 
-@mark_slow
 def test_finetune_callback():
     module = BoringModel()
     original_weight = module.encoder.weight.detach().clone()
