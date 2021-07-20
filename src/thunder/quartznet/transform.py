@@ -59,6 +59,8 @@ import torch
 from torch import nn
 from torchaudio.functional import create_fb_matrix
 
+from thunder.blocks import convolution_stft
+
 
 class FeatureBatchNormalizer(nn.Module):
     def __init__(self):
@@ -166,6 +168,10 @@ class PowerSpectrum(nn.Module):
 
         window_tensor = torch.hann_window(self.win_length, periodic=False)
         self.register_buffer("window", window_tensor)
+        # This way so that the torch.stft can be changed to the patched version
+        # before scripting. That way it works correctly when the export option
+        # doesnt support fft, like mobile or onnx.
+        self.stft_func = torch.stft
 
     @torch.no_grad()
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -173,7 +179,7 @@ class PowerSpectrum(nn.Module):
         Args:
             x : Tensor of shape (batch, time)
         """
-        x = torch.stft(
+        x = self.stft_func(
             x,
             n_fft=self.n_fft,
             hop_length=self.hop_length,
@@ -281,3 +287,18 @@ def FilterbankFeatures(cfg: FilterbankConfig) -> nn.Module:
         MelScale(sample_rate=cfg.sample_rate, n_fft=cfg.n_fft, nfilt=cfg.nfilt),
         FeatureBatchNormalizer(),
     )
+
+
+def patch_stft(filterbank: nn.Module) -> nn.Module:
+    """This function applies a patch to the FilterbankFeatures to use instead a convolution
+    layer based stft. That makes possible to export to onnx and use the scripted model
+    directly on arm cpu's, inside mobile applications.
+
+    Args:
+        filterbank : the FilterbankFeatures layer to be patched
+
+    Returns:
+        Layer with the stft operation patched.
+    """
+    filterbank[2].stft_func = convolution_stft
+    return filterbank
