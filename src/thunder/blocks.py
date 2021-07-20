@@ -6,9 +6,66 @@
 
 # Copyright (c) 2021 scart97
 
-__all__ = ["get_same_padding", "conv1d_decoder"]
+__all__ = ["convolution_stft", "get_same_padding", "conv1d_decoder"]
 
+import torch
+import torch.nn.functional as F
 from torch import Tensor, nn
+
+
+def convolution_stft(
+    input_data,
+    n_fft: int = 1024,
+    hop_length: int = 512,
+    win_length: int = 1024,
+    window: torch.Tensor = torch.hann_window(1024, periodic=False),
+    center: bool = True,
+    return_complex: bool = False,
+):
+    """Implements the stft operation using the convolution method. This is one alternative
+    to make possible to export code using this operation to onnx and arm based environments.
+    The signature shuld follow the same as torch.stft, making it possible to just swap the two.
+    The code is based on https://github.com/pseeth/torch-stft
+    """
+    assert n_fft >= win_length
+    pad_amount = int(n_fft / 2)
+
+    fourier_basis = torch.fft.fft(torch.eye(n_fft))
+
+    cutoff = int((n_fft / 2 + 1))
+    fourier_basis = torch.vstack(
+        [torch.real(fourier_basis[:cutoff, :]), torch.imag(fourier_basis[:cutoff, :])]
+    )
+    forward_basis = fourier_basis[:, None, :].float()
+
+    window_pad = (n_fft - win_length) // 2
+    window_pad2 = n_fft - (window_pad + win_length)
+    fft_window = torch.nn.functional.pad(window, [window_pad, window_pad2])
+    # window the bases
+    forward_basis *= fft_window
+    forward_basis = forward_basis.float()
+
+    num_batches = input_data.shape[0]
+    num_samples = input_data.shape[-1]
+
+    # similar to librosa, reflect-pad the input
+    input_data = input_data.view(num_batches, 1, num_samples)
+
+    input_data = F.pad(
+        input_data.unsqueeze(1),
+        (pad_amount, pad_amount, 0, 0),
+        mode="reflect",
+    )
+    input_data = input_data.squeeze(1)
+
+    forward_transform = F.conv1d(
+        input_data, forward_basis, stride=hop_length, padding=0
+    )
+
+    cutoff = int((n_fft / 2) + 1)
+    real_part = forward_transform[:, :cutoff, :]
+    imag_part = forward_transform[:, cutoff:, :]
+    return torch.stack((real_part, imag_part), dim=-1)
 
 
 def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
