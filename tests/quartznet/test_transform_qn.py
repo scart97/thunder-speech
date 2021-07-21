@@ -17,6 +17,7 @@ from tests.utils import (
     mark_slow,
     requirescuda,
 )
+from thunder.blocks import convolution_stft
 from thunder.quartznet.transform import (
     DitherAudio,
     FeatureBatchNormalizer,
@@ -25,6 +26,7 @@ from thunder.quartznet.transform import (
     MelScale,
     PowerSpectrum,
     PreEmphasisFilter,
+    patch_stft,
 )
 
 
@@ -291,7 +293,6 @@ def test_powerspectrum_script(**kwargs):
     assert torch.allclose(spec(x), spec_script(x))
 
 
-@pytest.mark.xfail
 @powerspec_params
 def test_powerspectrum_onnx(**kwargs):
     # ONNX doesn't support fft or stft computation
@@ -302,6 +303,7 @@ def test_powerspectrum_onnx(**kwargs):
     # https://github.com/onnx/onnx/issues/1646
     # https://github.com/onnx/onnx/pull/2625
     spec = PowerSpectrum(**kwargs)
+    spec.stft_func = convolution_stft
     spec.eval()
     x = torch.randn(10, 1337)
 
@@ -406,6 +408,17 @@ def test_filterbank_shape(**kwargs):
     assert out.shape[0] == x.shape[0]
 
 
+def test_patch_stft_similar_output():
+    fb = FilterbankFeatures(FilterbankConfig())
+    fb.eval()
+    x = torch.randn(10, 1000)
+    out1 = fb(x)
+    fb = patch_stft(fb)
+    torch.jit.script(fb)
+    out2 = fb(x)
+    assert torch.allclose(out1, out2, atol=1e-4)
+
+
 @requirescuda
 @filterbank_params
 @settings(deadline=None)
@@ -439,10 +452,11 @@ def test_filterbank_script(**kwargs):
     assert torch.allclose(fb(x), fb_script(x))
 
 
-@pytest.mark.xfail
 @filterbank_params
+@settings(deadline=None)
 def test_filterbank_onnx(**kwargs):
     fb = FilterbankFeatures(FilterbankConfig(**kwargs))
+    fb = patch_stft(fb)
     fb.eval()
     x = torch.randn(10, 1337)
 
@@ -452,4 +466,5 @@ def test_filterbank_onnx(**kwargs):
             (x),
             f"{export_path}/filterbank.onnx",
             verbose=True,
+            opset_version=11,
         )
