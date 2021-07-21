@@ -1,6 +1,7 @@
 import torch
 from pytorch_lightning import seed_everything
 
+from tests.utils import requirescuda
 from thunder.blocks import _fourier_matrix, convolution_stft
 
 
@@ -24,6 +25,7 @@ def test_convolution_stft():
     assert torch.allclose(stft, out_original, atol=1e-2)
 
 
+@requirescuda
 def test_convolution_stft_device_move():
     x = torch.randn(10, 1000)
     window_tensor = torch.hann_window(256, periodic=False)
