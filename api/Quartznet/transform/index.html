@@ -269,6 +269,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../../blocks/" class="md-nav__link">
+        Blocks
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../callbacks/" class="md-nav__link">
         Callbacks
       </a>
@@ -308,14 +320,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_4" type="checkbox" id="__nav_4_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
       
-      <label class="md-nav__link" for="__nav_4_4">
+      <label class="md-nav__link" for="__nav_4_5">
         Citrinet
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Citrinet" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_4">
+        <label class="md-nav__title" for="__nav_4_5">
           <span class="md-nav__icon md-icon"></span>
           Citrinet
         </label>
@@ -371,14 +383,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_6" type="checkbox" id="__nav_4_6" >
       
-      <label class="md-nav__link" for="__nav_4_5">
+      <label class="md-nav__link" for="__nav_4_6">
         Data
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Data" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_5">
+        <label class="md-nav__title" for="__nav_4_6">
           <span class="md-nav__icon md-icon"></span>
           Data
         </label>
@@ -436,14 +448,14 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_6" type="checkbox" id="__nav_4_6" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_7" type="checkbox" id="__nav_4_7" checked>
       
-      <label class="md-nav__link" for="__nav_4_6">
+      <label class="md-nav__link" for="__nav_4_7">
         Quartznet
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Quartznet" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_6">
+        <label class="md-nav__title" for="__nav_4_7">
           <span class="md-nav__icon md-icon"></span>
           Quartznet
         </label>
@@ -674,6 +686,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.transform.patch_stft" class="md-nav__link">
+    patch_stft()
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -696,14 +715,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_7" type="checkbox" id="__nav_4_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_8" type="checkbox" id="__nav_4_8" >
       
-      <label class="md-nav__link" for="__nav_4_7">
+      <label class="md-nav__link" for="__nav_4_8">
         Text Processing
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Text Processing" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_7">
+        <label class="md-nav__title" for="__nav_4_8">
           <span class="md-nav__icon md-icon"></span>
           Text Processing
         </label>
@@ -771,14 +790,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_8" type="checkbox" id="__nav_4_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_9" type="checkbox" id="__nav_4_9" >
       
-      <label class="md-nav__link" for="__nav_4_8">
+      <label class="md-nav__link" for="__nav_4_9">
         Wav2Vec
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Wav2Vec" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_8">
+        <label class="md-nav__title" for="__nav_4_9">
           <span class="md-nav__icon md-icon"></span>
           Wav2Vec
         </label>
@@ -995,6 +1014,13 @@
         <li class="md-nav__item">
   <a href="#thunder.quartznet.transform.FilterbankFeatures" class="md-nav__link">
     FilterbankFeatures()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.quartznet.transform.patch_stft" class="md-nav__link">
+    patch_stft()
   </a>
   
 </li>
@@ -1721,6 +1747,10 @@ method as used in NEMO.</p>
 
     <span class="n">window_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">hann_window</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">win_length</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;window&quot;</span><span class="p">,</span> <span class="n">window_tensor</span><span class="p">)</span>
+    <span class="c1"># This way so that the torch.stft can be changed to the patched version</span>
+    <span class="c1"># before scripting. That way it works correctly when the export option</span>
+    <span class="c1"># doesnt support fft, like mobile or onnx.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stft_func</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stft</span>
 </code></pre></div>
         </details>
     </div>
@@ -1769,7 +1799,7 @@ method as used in NEMO.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        x : Tensor of shape (batch, time)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stft</span><span class="p">(</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stft_func</span><span class="p">(</span>
         <span class="n">x</span><span class="p">,</span>
         <span class="n">n_fft</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_fft</span><span class="p">,</span>
         <span class="n">hop_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hop_length</span><span class="p">,</span>
@@ -2023,6 +2053,79 @@ low frequency. It applies a FIR filter of the form:</p>
         <span class="n">MelScale</span><span class="p">(</span><span class="n">sample_rate</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">n_fft</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">n_fft</span><span class="p">,</span> <span class="n">nfilt</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">nfilt</span><span class="p">),</span>
         <span class="n">FeatureBatchNormalizer</span><span class="p">(),</span>
     <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="thunder.quartznet.transform.patch_stft" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">patch_stft</span><span class="p">(</span><span class="n">filterbank</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>This function applies a patch to the FilterbankFeatures to use instead a convolution
+layer based stft. That makes possible to export to onnx and use the scripted model
+directly on arm cpu's, inside mobile applications.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>filterbank</code></td>
+        <td><code>Module</code></td>
+        <td><p>the FilterbankFeatures layer to be patched</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Module</code></td>
+      <td><p>Layer with the stft operation patched.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>thunder/quartznet/transform.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">patch_stft</span><span class="p">(</span><span class="n">filterbank</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This function applies a patch to the FilterbankFeatures to use instead a convolution</span>
+<span class="sd">    layer based stft. That makes possible to export to onnx and use the scripted model</span>
+<span class="sd">    directly on arm cpu&#39;s, inside mobile applications.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filterbank : the FilterbankFeatures layer to be patched</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Layer with the stft operation patched.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filterbank</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">stft_func</span> <span class="o">=</span> <span class="n">convolution_stft</span>
+    <span class="k">return</span> <span class="n">filterbank</span>
 </code></pre></div>
         </details>
     </div>

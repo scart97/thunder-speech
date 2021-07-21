@@ -335,6 +335,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../api/blocks/" class="md-nav__link">
+        Blocks
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../api/callbacks/" class="md-nav__link">
         Callbacks
       </a>
@@ -374,14 +386,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_4" type="checkbox" id="__nav_4_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
       
-      <label class="md-nav__link" for="__nav_4_4">
+      <label class="md-nav__link" for="__nav_4_5">
         Citrinet
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Citrinet" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_4">
+        <label class="md-nav__title" for="__nav_4_5">
           <span class="md-nav__icon md-icon"></span>
           Citrinet
         </label>
@@ -437,14 +449,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_6" type="checkbox" id="__nav_4_6" >
       
-      <label class="md-nav__link" for="__nav_4_5">
+      <label class="md-nav__link" for="__nav_4_6">
         Data
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Data" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_5">
+        <label class="md-nav__title" for="__nav_4_6">
           <span class="md-nav__icon md-icon"></span>
           Data
         </label>
@@ -500,14 +512,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_6" type="checkbox" id="__nav_4_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_7" type="checkbox" id="__nav_4_7" >
       
-      <label class="md-nav__link" for="__nav_4_6">
+      <label class="md-nav__link" for="__nav_4_7">
         Quartznet
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Quartznet" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_6">
+        <label class="md-nav__title" for="__nav_4_7">
           <span class="md-nav__icon md-icon"></span>
           Quartznet
         </label>
@@ -575,14 +587,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_7" type="checkbox" id="__nav_4_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_8" type="checkbox" id="__nav_4_8" >
       
-      <label class="md-nav__link" for="__nav_4_7">
+      <label class="md-nav__link" for="__nav_4_8">
         Text Processing
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Text Processing" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_7">
+        <label class="md-nav__title" for="__nav_4_8">
           <span class="md-nav__icon md-icon"></span>
           Text Processing
         </label>
@@ -650,14 +662,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_8" type="checkbox" id="__nav_4_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_9" type="checkbox" id="__nav_4_9" >
       
-      <label class="md-nav__link" for="__nav_4_8">
+      <label class="md-nav__link" for="__nav_4_9">
         Wav2Vec
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Wav2Vec" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_8">
+        <label class="md-nav__title" for="__nav_4_9">
           <span class="md-nav__icon md-icon"></span>
           Wav2Vec
         </label>
@@ -776,9 +788,12 @@
 <h2 id="how-to-export-a-quartznet-nemo-file-to-a-pure-pytorch-model">How to export a Quartznet .nemo file to a pure pytorch model?</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">thunder.quartznet.module</span> <span class="kn">import</span> <span class="n">QuartznetModule</span>
 <span class="kn">from</span> <span class="nn">thunder.data.dataset</span> <span class="kn">import</span> <span class="n">AudioFileLoader</span>
+<span class="kn">from</span> <span class="nn">thunder.quartznet.transform</span> <span class="kn">import</span> <span class="n">patch_stft</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="n">module</span> <span class="o">=</span> <span class="n">QuartznetModule</span><span class="o">.</span><span class="n">load_from_nemo</span><span class="p">(</span><span class="s2">&quot;/path/to/checkpoint.nemo&quot;</span><span class="p">)</span>
+<span class="c1"># Uncomment the following line if exporting to onnx or mobile use</span>
+<span class="c1"># module.audio_transform = patch_stft(module.audio_transform)</span>
 <span class="n">module</span><span class="o">.</span><span class="n">to_torchscript</span><span class="p">(</span><span class="s2">&quot;model_ready_for_inference.pt&quot;</span><span class="p">)</span>
 
 <span class="c1"># Optional step: also export audio loading pipeline</span>
@@ -786,6 +801,16 @@
 <span class="n">scripted_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span><span class="p">(</span><span class="n">loader</span><span class="p">)</span>
 <span class="n">scripted_loader</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;audio_loader.pt&quot;</span><span class="p">)</span>
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the model uses features based on stft (quartznet, citrinet) and you're exporting to onnx
+or to use in mobile apps, there's one additional step before exporting that will replace the
+<code>torch.stft</code> operator to a custom implementation that works in those environments.
+Related issues:
+<a href="https://github.com/pytorch/pytorch/issues/31317">pytorch</a>,
+<a href="https://github.com/pytorch/audio/issues/408">torchaudio</a>,
+<a href="https://github.com/onnx/onnx/issues/1646">onnx</a></p>
+</div>
 <h2 id="how-to-run-inference-on-that-exported-file">How to run inference on that exported file?</h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torchaudio</span>
@@ -815,6 +840,7 @@
 
 <span class="kn">from</span> <span class="nn">thunder.data.datamodule</span> <span class="kn">import</span> <span class="n">ManifestDatamodule</span>
 <span class="kn">from</span> <span class="nn">thunder.quartznet.module</span> <span class="kn">import</span> <span class="n">QuartznetModule</span><span class="p">,</span>  <span class="n">QuartznetCheckpoint</span>
+<span class="kn">from</span> <span class="nn">thunder.callbacks</span> <span class="kn">import</span> <span class="n">FinetuneEncoderDecoder</span>
 
 <span class="n">dm</span> <span class="o">=</span> <span class="n">ManifestDatamodule</span><span class="p">(</span>
     <span class="n">train_manifest</span><span class="o">=</span><span class="s2">&quot;/path/to/train_manifest.json&quot;</span><span class="p">,</span>
@@ -827,6 +853,7 @@
 <span class="n">trainer</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span>
     <span class="n">gpus</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Use all gpus</span>
     <span class="n">max_epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">FinetuneEncoderDecoder</span><span class="p">(</span><span class="n">unfreeze_encoder_at_epoch</span><span class="o">=</span><span class="mi">1</span><span class="p">)],</span>
 <span class="p">)</span>
 
 <span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">datamodule</span><span class="o">=</span><span class="n">dm</span><span class="p">)</span>
@@ -876,13 +903,13 @@
       
       
         
-        <a href="../api/callbacks/" class="md-footer__link md-footer__link--next" aria-label="Next: Callbacks" rel="next">
+        <a href="../api/blocks/" class="md-footer__link md-footer__link--next" aria-label="Next: Blocks" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Callbacks
+              Blocks
             </div>
           </div>
           <div class="md-footer__button md-icon">
