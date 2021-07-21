@@ -115,6 +115,8 @@ def conv1d_decoder(decoder_input_channels: int, num_classes: int) -> nn.Module:
 
 
 class SwapLastDimension(nn.Module):
+    """Layer that swap the last two dimensions of the data."""
+
     def forward(self, x: Tensor) -> Tensor:
         return x.transpose(-1, -2)
 
