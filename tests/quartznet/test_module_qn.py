@@ -52,7 +52,7 @@ def test_dev_run_train(sample_manifest):
         num_workers=0,
     )
     trainer = pl.Trainer(
-        fast_dev_run=True, logger=None, checkpoint_callback=None, gpus=-1
+        fast_dev_run=True, logger=False, checkpoint_callback=False, gpus=-1
     )
     trainer.fit(module, datamodule=data)
 
