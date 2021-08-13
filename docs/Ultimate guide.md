@@ -66,18 +66,55 @@ Try to fix those label problems, or remove them from the training set if you hav
 Don't spend weeks just looking at the data, but have a small subset that you can trust is properly cleaned, even if that means manually labeling again.
 After you train the first couple of models, it's possible to use the model itself to help find problems in the training data.
 
-## Writing the dataset/datamodule
+## Loading the data
 
-`TODO: fill this section with the nemo manifest example`
+The first step to train a speech recognition model is to load the collected data into the specific format the model expects.
+Usually, data from different sources will have unique ways in that the label is encoded.
+Sometimes it's multiple `.txt` files, one for each audio.
+Another popular option is to have some `.csv` or `.json` file with the metadata of multiple examples.
 
-* load source
-* load audio
-* load text
-* fix text
-    * Expand contractions (`I'm` becomes `I am`)
-    * Expand numbers (`42` becomes `forty two`)
-    * Optionally remove punctuation
-* datamodule with sources
+The recomendation here is that you convert all of the labels to the same format before training.
+This will simplify the data loading, and any tools that you build to inspect the data can be shared between datasets.
+There's no obvious choice here, but the nemo manifest format has some pros:
+
+* It's easy to save and version the manifest, to have fully reproducible training
+* An increasing number of tools support it, including [NeMo](https://developer.nvidia.com/nvidia-nemo) and [Label Studio](https://labelstud.io/guide/export.html#ASR-MANIFEST).
+* The code to load the metadata is simple and intuitive
+* It can store additional metadata as necessary
+
+In this format, each of the train/validation/test splits has one file containing the metadata. It has the extension `.json`,
+and contains one json in each line, with the relevant data to one example:
+
+```
+{"audio_filepath": "commonvoice/pt/train/22026127.mp3", "duration": 4.32, "text": "Quatro"}
+{"audio_filepath": "commonvoice/pt/train/23920071.mp3", "duration": 2.256, "text": "Oito"}
+{"audio_filepath": "commonvoice/pt/train/20272843.mp3", "duration": 2.544, "text": "Eu vou desligar"}
+```
+
+These three keys for each example are required:
+
+* **audio_filepath**: Contains the path to the input audio
+* **duration**: has the duration of the audio, in seconds
+* **text**: that's the corresponding label
+
+Make sure that each example starts and end in the same line.
+This is one example of invalid manifest:
+
+```
+{"audio_filepath": "example1.mp3", "duration": 1.0, "text": "This label starts
+in one line but
+has multiple line breaks
+making this manifest
+invalid"}
+{"audio_filepath": "example2.mp3", "duration": 2.0, "text": "this label is really long similar to the one above it, but it's contained into a single line making it valid"}
+```
+
+To load this data, the corresponding `LightningModule` is already implemented:
+
+```python
+from thunder.data.datamodule ManifestDatamodule
+datamodule = ManifestDatamodule("train_manifest.json", "val_manifest.json", "test_manifest.json", batch_size = 32)
+```
 
 
 ## First train
@@ -100,15 +137,28 @@ the final value will be lower. This means that small bumps will happen, but it w
 and keep going down. The ideal point is where you run the prediction on the batch that you overfit,
 and the model doesn't make a single mistake.
 
+Expected train loss:
+
+![train_loss](images/first_train/train_loss.png)
+
+The validation loss is not important at this stage, we are trying to overfit on purpose to check if the model is learning correctly.
+It's possible to notice that it improved in the first epoch, but instantly went back up and keep increasing as the training goes.
+
+Expected validation loss:
+
+![val_loss](images/first_train/val_loss.png)
+
 Some problems that can happen:
 
-* **The loss is negative**: There's a blank in the target text, find and remove it. Blanks should only be produced by the model, never at the labels.
+* **The train loss doesn't go below a certain value**: Check if it' always the same batch being trained. It can happen when you forget to disable the shuffling in the train dataloader.
+
+* **The train loss is negative**: There's a blank in the target text, find and remove it. Blanks should only be produced by the model, never at the labels.
 
 * **There're no predictions at all**: let it train for more time
 
 * **Still, there're no predictions after a long time**: Check if the target texts are being processed correctly. Inside the training step, decode the target text and assert that it returns what you expect
 
-* **The loss does a 'U' curve where it starts normally but then turns around and just keep increasing**: try to lower the learning rate
+* **The train loss just keep increasing**: try to lower the learning rate
 
 ## Second train
 
@@ -121,27 +171,18 @@ The validation loss will start to get lower,
 and the metrics will improve compared to the first training.
 Quickly, the model will reach the point where the data is enough, and it will start to overfit to the training data.
 
-`TODO: better graphs?`
 
 Expected train loss:
 
-```
-\
- \
-  \
-   \
-    \______
-```
+![train_loss2](images/second_train/train_loss.png)
 
-Expected val loss/metrics:
+Expected validation loss:
 
-```
-\
- \
-  \
-   \      /
-    \____/
-```
+![val_loss2](images/second_train/val_loss.png)
+
+
+At this point the model is still overfitting, but it should be way less than the first train.
+The objective of this training round is to confirm that the model performance improves as the amount of training data increases, and also to find any problems that were not caught when using only a single batch.
 
 ## Scaling to the whole dataset
 
@@ -149,7 +190,7 @@ Expected val loss/metrics:
 
 * break long audios - more than 25s is usually bad
 * Use the model to find problems
-    * Sort by loss descending and manually check the files
+    * Sort by train loss descending and manually check the files
     * Sort by CER descending and manually check the files
     * Sort by CER ascending on the validation/test set to find possible data leak
 * Watch for the loss spikes during training
