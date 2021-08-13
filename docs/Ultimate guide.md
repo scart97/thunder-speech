@@ -186,14 +186,23 @@ The objective of this training round is to confirm that the model performance im
 
 ## Scaling to the whole dataset
 
-`TODO: expand this section`
+Now that we confirmed the model is training properly, it's time to use all the training data available.
+Remember that speech recognition models are really sensitive to the quality of the labels, and transcription errors across the dataset can make the training unstable.
+The improvements from cleaning the labels and collecting more data can be an order of magnitude higher than using the new fancy SOTA model of the month with mislabeled data.
 
-* break long audios - more than 25s is usually bad
-* Use the model to find problems
-    * Sort by train loss descending and manually check the files
-    * Sort by CER descending and manually check the files
-    * Sort by CER ascending on the validation/test set to find possible data leak
-* Watch for the loss spikes during training
+
+Some tips at this step:
+
+* **break long audios**: more than 25 seconds is usually bad for each train example, it can cause catastrofic learning on sequence based models, or out-of-memory errors
+* **Use the model to find problems**: After the first few models are trained, they can be used to aid while cleaning the data:
+    * Sort by train loss descending and manually check the files. This will show the examples where the model is having the most difficult to learn, and that can be caused by bad data or outliers
+    * Sort by Character Error Rate (CER) descending and manually check the files. Similar to the test above, but this time sorting by the character error rate. Most of the top audios will be the same, but this test can also show new problematic ones.
+    * Sort by CER ascending on the validation/test set to find possible data leak. If there's some data repeated between train and validation/test, the metrics will be lower compared to samples that are new to the model.
+
+* **Watch for the loss spikes during training**: Sometimes the loss will have spikes as show in the next figure, where it went from around 0.1 to 1.1 during a single step. This can be caused by mislabeled data, try to log the full batch when this happens and check manually.
+
+![loss spikes](images/loss_spikes.png)
+
 
 ## Reducing overfit
 
