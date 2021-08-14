@@ -206,19 +206,34 @@ Some tips at this step:
 
 ## Reducing overfit
 
-`TODO: expand this section`
+To reduce the overfit in trained models, follow the recipe given by [fast.ai](https://youtu.be/4u8FxNEDUeg?t=1333), in this order of priority:
 
-* fastai recipe
-    * https://youtu.be/4u8FxNEDUeg?t=1333
-        * Add more data
-        * Add augmentation
-        * Regularization
+1. Add more data
+2. Data augmentation
+3. Generalizable architectures
+4. Regularization
+5. Reduce architecture complexity
+
+While adding more data, try to follow the tips in the [Scaling to the whole dataset](#scaling-to-the-whole-dataset) section to use trained models to find problem in the new data.
+Also, when doing any of the other steps, it's best to repeat the [Second train](#second-train) to quickly confirm that the modified model is still training properly.
 
 ## Deploy!
 
-`TODO: expand this section`
+Finally it's time to deploy the trained model.
+This includes exporting the model, writing the data pipelines, building the server/mobile app where the model will run and monitoring.
 
-* torch jit
-* Streamlit
-* torchserve
-* bentoml
+The recommended way to export models is using torchscript.
+This will ensure that they preserve correct behaviour, and every model implemented in this library is rigorously tested to be compatible with it.
+Pytorch tracing and onnx are also tested to export, but those methods have limitations around variable input shapes.
+
+The audio loading and preprocessing is also implemented as a `nn.Module`, so that it can be scripted and exported for inference.
+It exists as the `.loader` attribute inside the datasets, or can be directly instantiated from `thunder.data.dataset.AudioFileLoader`.
+This way, there's no need to reimplement the input pipeline when deploying the model.
+As a bonus, the exported models using torchscript remove the dependency on thunder, only pytorch is necessary to run the model, and optionally torchaudio to load the audio data using `AudioFileLoader`.
+
+
+It's possible to use the torchscript model inside a mobile app.
+Before exporting, one patch need to be applied so that operations that are not natively supported on mobile are changed to compatible implementations. One example of implementing a simple speech recognition app can be found [here](https://github.com/scart97/quartznet-android).
+
+
+To learn more about deployment and MLOps, there are free courses from [made with ml](https://madewithml.com/#mlops) and [full stack deep learning](https://fullstackdeeplearning.com/) that go in depth.
