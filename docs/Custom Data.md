@@ -27,9 +27,9 @@ class BaseSpeechDataset(Dataset):
 The flow of loading the data happens as follows:
 
 1. `self.get_item` is called with a specific index. It uses `self.items` to return the specific metadata to that example
-2. All of the metadata is sent to `self.open_audio`. The relevand subset is used to load the audio tensor and corresponding sample rate, using `self.loader.open_audio(...)`
+2. All the metadata is sent to `self.open_audio`. The relevant subset is used to load the audio tensor and corresponding sample rate, using `self.loader.open_audio(...)`
 3. Inside `self.preprocess_audio` the audio tensor is resampled and converted to mono if necessary using `self.loader.preprocess_audio(...)`.
-At this point, any augmentation that happens at the signal level to individual items can be applyed.
+At this point, any augmentation that happens at the signal level to individual items can be applied.
 Only the audio tensor is returned, because it's assumed that every audio in the dataset will be resampled to the same sample rate
 4. `self.open_text` uses the same metadata to open the corresponding text label
 5. `self.preprocess_text` can be used to apply any transform directly to the text. Common options are lower case, expanding contractions (`I'm` becomes `I am`), expanding numbers (`42` becomes `forty two`) and removing punctuation

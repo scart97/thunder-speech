@@ -1,4 +1,4 @@
-# The ultimate guide to speech recognition (WIP)
+# The ultimate guide to speech recognition
 
 This guide has the purpose to give you all the steps necessary to achieve a decent (but not necessarily state-of-the-art) speech recognition system in a new language.
 
@@ -6,7 +6,7 @@ This guide has the purpose to give you all the steps necessary to achieve a dece
 ## Gathering the data
 
 Speech recognition systems are really sensitive to the quality of data used to train them.
-Also, they usually require from hundreads to thousands of hours depending on the quality expected.
+Also, they usually require from hundreds to thousands of hours depending on the quality expected.
 
 Some good sources for data are [Mozilla commonvoice](https://commonvoice.mozilla.org/en/datasets), the [OpenSLR project](https://openslr.org/resources.php) or [Tatoeba](https://tatoeba.org/en/).
 
@@ -73,7 +73,7 @@ Usually, data from different sources will have unique ways in that the label is 
 Sometimes it's multiple `.txt` files, one for each audio.
 Another popular option is to have some `.csv` or `.json` file with the metadata of multiple examples.
 
-The recomendation here is that you convert all of the labels to the same format before training.
+The recommendation here is that you convert all the labels to the same format before training.
 This will simplify the data loading, and any tools that you build to inspect the data can be shared between datasets.
 There's no obvious choice here, but the nemo manifest format has some pros:
 
@@ -112,7 +112,7 @@ invalid"}
 To load this data, the corresponding `LightningModule` is already implemented:
 
 ```python
-from thunder.data.datamodule ManifestDatamodule
+from thunder.data.datamodule import ManifestDatamodule
 datamodule = ManifestDatamodule("train_manifest.json", "val_manifest.json", "test_manifest.json", batch_size = 32)
 ```
 
@@ -154,9 +154,9 @@ Some problems that can happen:
 
 * **The train loss is negative**: There's a blank in the target text, find and remove it. Blanks should only be produced by the model, never at the labels.
 
-* **There're no predictions at all**: let it train for more time
+* **There are no predictions at all**: let it train for more time
 
-* **Still, there're no predictions after a long time**: Check if the target texts are being processed correctly. Inside the training step, decode the target text and assert that it returns what you expect
+* **Still, there are no predictions after a long time**: Check if the target texts are being processed correctly. Inside the training step, decode the target text and assert that it returns what you expect
 
 * **The train loss just keep increasing**: try to lower the learning rate
 
@@ -193,7 +193,7 @@ The improvements from cleaning the labels and collecting more data can be an ord
 
 Some tips at this step:
 
-* **break long audios**: more than 25 seconds is usually bad for each train example, it can cause catastrofic learning on sequence based models, or out-of-memory errors
+* **break long audios**: more than 25 seconds is usually bad for each train example, it can cause catastrophic forgetting on sequence based models, or out-of-memory errors
 * **Use the model to find problems**: After the first few models are trained, they can be used to aid while cleaning the data:
     * Sort by train loss descending and manually check the files. This will show the examples where the model is having the most difficult to learn, and that can be caused by bad data or outliers
     * Sort by Character Error Rate (CER) descending and manually check the files. Similar to the test above, but this time sorting by the character error rate. Most of the top audios will be the same, but this test can also show new problematic ones.
@@ -219,7 +219,7 @@ Also, when doing any of the other steps, it's best to repeat the [Second train](
 
 ## Deploy!
 
-Finally it's time to deploy the trained model.
+Finally, it's time to deploy the trained model.
 This includes exporting the model, writing the data pipelines, building the server/mobile app where the model will run and monitoring.
 
 The recommended way to export models is using torchscript.
