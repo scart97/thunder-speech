@@ -1,6 +1,6 @@
 # The ultimate guide to speech recognition
 
-This guide has the purpose to give you all the steps necessary to achieve a decent (but not necessarily state-of-the-art) speech recognition system in a new language.
+This guide is meant to give you all the steps necessary to achieve a decent (but not necessarily state-of-the-art) speech recognition system in a new language.
 
 
 ## Gathering the data
@@ -33,8 +33,8 @@ Sample Encoding: 16-bit Signed Integer PCM
 That's the usual format of files used in speech recognition research.
 Wav files, encoded with a 16-bit PCM codec and a sample rate of 16 kHz.
 The file format and codec can vary and will only affect the quality of the audio, but the sample rate is the essential one.
-Trained models only work with a specific sample rate, and any file with a different one must be resampled either at the file
-level or directly after loading with torchaudio.
+Trained models will only predict well on audios that have the same sample rate as the data the model was trained on.
+Any file with a different sample rate must be resampled at the file level with sox or after loading with torchaudio.
 
 Sox has more capabilities than just listing audio metadata.
 It can read almost any file format and convert to others.
@@ -46,10 +46,10 @@ sox input_file.mp3 -r 16000 -c 1 -b 16 output_file.wav
 
 The flags used represent:
 
-* `-r 16000`: 16 kHz sample rate
+* `-r 16000`: resample to a 16kHz sample rate
 * `-c 1`: convert to mono (1 channel)
 * `-b 16`: convert to PCM 16-bit
-* `output_file.wav`: Sox understand that the output will be wav just by the file extension
+* `output_file.wav`: Sox understands that the output will be wav just by the file extension
 
 Ideally all the training and inference audio files should have the same characteristics, so it's a good idea to transform them into a common format before training.
 As the wav format does not have any compression, the resulting data will demand a huge HDD space.
@@ -69,7 +69,7 @@ After you train the first couple of models, it's possible to use the model itsel
 ## Loading the data
 
 The first step to train a speech recognition model is to load the collected data into the specific format the model expects.
-Usually, data from different sources will have unique ways in that the label is encoded.
+Usually, data from different sources will have unique ways that the label is encoded.
 Sometimes it's multiple `.txt` files, one for each audio.
 Another popular option is to have some `.csv` or `.json` file with the metadata of multiple examples.
 
@@ -83,7 +83,7 @@ There's no obvious choice here, but the nemo manifest format has some pros:
 * It can store additional metadata as necessary
 
 In this format, each of the train/validation/test splits has one file containing the metadata. It has the extension `.json`,
-and contains one json in each line, with the relevant data to one example:
+and contains one json in each line with the relevant data to one example, following the [Json lines](https://jsonlines.org/) format:
 
 ```
 {"audio_filepath": "commonvoice/pt/train/22026127.mp3", "duration": 4.32, "text": "Quatro"}
@@ -97,7 +97,7 @@ These three keys for each example are required:
 * **duration**: has the duration of the audio, in seconds
 * **text**: that's the corresponding label
 
-Make sure that each example starts and end in the same line.
+Make sure that each example starts and end on the same line.
 This is one example of invalid manifest:
 
 ```
@@ -125,15 +125,14 @@ more complex that you try will be wasted time.
 
 To do it, try to load a training dataset with only one batch worth of data.
 The validation/test sets can be as usual, you will ignore them at this step.
-As we are using pytorch lightning, there's a trainer flag to limit the number of training batches (`limit_train_batches=1`) that can be used.
-Also, remember to disable any shuffle at the dataloader, to ensure the same batch will be used every epoch.
+As we are using pytorch lightning, there's a trainer flag to limit the number of training batches (`overfit_batches=1`) that can be used.
 
 
 Before you run the training, disable any augmentation, regularization and advanced stuff like learning rate scheduling. You can start with either a pretrained model, or a clean new one,
 but either way don't freeze any parameters, just let it all train.
 
 Start the training, and you should see the loss follow a pattern where, the more time you let it run,
-the final value will be lower. This means that small bumps will happen, but it will always recover
+the lower the final value will be. This means that small bumps will happen, but it will always recover
 and keep going down. The ideal point is where you run the prediction on the batch that you overfit,
 and the model doesn't make a single mistake.
 
@@ -147,6 +146,8 @@ It's possible to notice that it improved in the first epoch, but instantly went 
 Expected validation loss:
 
 ![val_loss](images/first_train/val_loss.png)
+
+Note that if you're using the `overfit_batches` flag, the same training batch will be used during the validation step, and the validation loss/metrics will follow the same pattern as the training loss instead.
 
 Some problems that can happen:
 

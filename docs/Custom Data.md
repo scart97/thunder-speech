@@ -40,7 +40,8 @@ This example will implement `thunder.data.datamodule.ManifestDatamodule` and `th
 
 ### Load source
 
-The nemo manifest file contains one json in each line, with the relevant data:
+The nemo manifest file follows the [Json lines](https://jsonlines.org/) format, where each line is a valid json containing the metadata relevant to one example:
+
 
 ```
 {"audio_filepath": "commonvoice/pt/train/22026127.mp3", "duration": 4.32, "text": "Quatro"}
