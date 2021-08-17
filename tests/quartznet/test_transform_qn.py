@@ -416,7 +416,7 @@ def test_patch_stft_similar_output():
     fb = patch_stft(fb)
     torch.jit.script(fb)
     out2 = fb(x)
-    assert torch.allclose(out1, out2, atol=1e-4)
+    assert torch.allclose(out1, out2, atol=1e-3)
 
 
 @requirescuda
