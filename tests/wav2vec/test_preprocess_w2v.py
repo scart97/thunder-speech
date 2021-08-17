@@ -27,4 +27,4 @@ def test_feature_extractor():
     )
 
     thunder_result = thunder_tfm(input_tensor)
-    assert torch.allclose(original_result.input_values, thunder_result, atol=1e-4)
+    assert torch.allclose(original_result.input_values, thunder_result, atol=1e-3)
