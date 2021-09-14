@@ -170,7 +170,9 @@ class Wav2Vec2Module(pl.LightningModule):
         )
 
         decoded_preds = self.text_transform.decode_prediction(probabilities.argmax(1))
-        decoded_targets = self.text_transform.decode_prediction(y)
+        decoded_targets = self.text_transform.decode_prediction(
+            y, remove_repeated=False
+        )
         self.val_cer(decoded_preds, decoded_targets)
         self.val_wer(decoded_preds, decoded_targets)
 
