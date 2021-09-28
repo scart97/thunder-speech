@@ -3,7 +3,6 @@
 
 # Copyright (c) 2021 scart97
 
-from pathlib import Path
 from string import ascii_letters
 from tempfile import TemporaryDirectory
 
@@ -19,7 +18,7 @@ from thunder.text_processing.tokenizer import (
     train_sentencepiece_model,
     word_tokenizer,
 )
-from thunder.text_processing.transform import TextTransformConfig
+from thunder.text_processing.transform import BatchTextTransformer
 
 
 def test_bpe_tokenizer_load():
@@ -66,18 +65,18 @@ def test_train_sentencepiece():
             do_lower_case=True,
             sample_size=150,
         )
-        trained = TextTransformConfig.from_sentencepiece(trained)
-        assert Path(trained.sentencepiece_model).exists()
-        assert len(trained.initial_vocab_tokens) <= 50
+        trained = BatchTextTransformer.from_sentencepiece(trained)
+        assert isinstance(trained.tokenizer, BPETokenizer)
+        assert len(trained.vocab.itos) <= 55
 
         with pytest.warns(UserWarning):
             # Trained model already exists, emit warning
             train_skipped = train_sentencepiece_model(
                 file_with_text, vocab_size=50, output_dir=str(output_dir)
             )
-            train_skipped = TextTransformConfig.from_sentencepiece(train_skipped)
-            assert train_skipped.sentencepiece_model == trained.sentencepiece_model
-            assert train_skipped.initial_vocab_tokens == trained.initial_vocab_tokens
+            train_skipped = BatchTextTransformer.from_sentencepiece(train_skipped)
+            assert isinstance(train_skipped.tokenizer, BPETokenizer)
+            assert train_skipped.vocab.itos == trained.vocab.itos
 
 
 def test_train_sentencepiece_exception():
