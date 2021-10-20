@@ -8,18 +8,25 @@
 
 __all__ = [
     "QuartznetCheckpoint",
-    "read_params_from_config",
+    "load_components_from_quartznet_config",
     "load_quartznet_weights",
+    "load_quartznet_checkpoint",
 ]
 
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from tempfile import TemporaryDirectory
+from typing import Tuple, Union
 
 import torch
 from omegaconf import OmegaConf
 from torch import nn
+from torchaudio.datasets.utils import extract_archive
 
-from thunder.utils import BaseCheckpoint
+from thunder.blocks import conv1d_decoder
+from thunder.quartznet.blocks import QuartznetEncoder
+from thunder.quartznet.transform import FilterbankFeatures
+from thunder.text_processing.transform import BatchTextTransformer
+from thunder.utils import BaseCheckpoint, CheckpointResult, download_checkpoint
 
 
 # fmt:off
@@ -51,9 +58,9 @@ class QuartznetCheckpoint(BaseCheckpoint):
 # fmt:on
 
 
-def read_params_from_config(
+def load_components_from_quartznet_config(
     config_path: Union[str, Path]
-) -> Tuple[Dict, List[str], Dict]:
+) -> Tuple[nn.Module, nn.Module, BatchTextTransformer]:
     """Read the important parameters from the config stored inside the .nemo
     checkpoint.
 
@@ -61,7 +68,7 @@ def read_params_from_config(
         config_path : Path to the .yaml file, usually called model_config.yaml
 
     Returns:
-        A tuple containing, in this order, the encoder hyperparameters, the vocabulary, and the preprocessing hyperparameters
+        A tuple containing, in this order, the encoder, the audio transform and the text transform
     """
     conf = OmegaConf.load(config_path)
     encoder_params = conf["encoder"]["params"]
@@ -90,10 +97,17 @@ def read_params_from_config(
         conf["labels"] if "labels" in conf else conf["decoder"]["params"]["vocabulary"]
     )
 
+    audio_transform = FilterbankFeatures(**preprocess_cfg)
+    encoder = QuartznetEncoder(**encoder_cfg)
+    text_transform = BatchTextTransformer(
+        initial_vocab_tokens=OmegaConf.to_container(labels),
+        simple_vocab=True,
+    )
+
     return (
-        encoder_cfg,
-        OmegaConf.to_container(labels),
-        preprocess_cfg,
+        encoder,
+        audio_transform,
+        text_transform,
     )
 
 
@@ -130,3 +144,43 @@ def load_quartznet_weights(encoder: nn.Module, decoder: nn.Module, weights_path:
         if "decoder" in k
     }
     decoder.load_state_dict(decoder_weights, strict=True)
+
+
+def load_quartznet_checkpoint(
+    checkpoint: Union[str, QuartznetCheckpoint], save_folder: str = None
+) -> CheckpointResult:
+    """Load from the original nemo checkpoint.
+
+    Args:
+        checkpoint : Path to local .nemo file or checkpoint to be downloaded locally and lodaded.
+        save_folder : Path to save the checkpoint when downloading it. Ignored if you pass a .nemo file as the first argument.
+
+    Returns:
+        The model loaded from the checkpoint
+    """
+    if isinstance(checkpoint, QuartznetCheckpoint):
+        nemo_filepath = download_checkpoint(checkpoint, save_folder)
+    else:
+        nemo_filepath = Path(checkpoint)
+
+    with TemporaryDirectory() as extract_folder:
+        extract_archive(str(nemo_filepath), extract_folder)
+        extract_path = Path(extract_folder)
+        config_path = extract_path / "model_config.yaml"
+        (
+            encoder,
+            audio_transform,
+            text_transform,
+        ) = load_components_from_quartznet_config(config_path)
+
+        decoder = conv1d_decoder(1024, text_transform.num_tokens)
+
+        weights_path = extract_path / "model_weights.ckpt"
+        load_quartznet_weights(encoder, decoder, str(weights_path))
+        return CheckpointResult(
+            encoder,
+            decoder,
+            audio_transform,
+            text_transform,
+            encoder_final_dimension=1024,
+        )
