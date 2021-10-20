@@ -30,10 +30,9 @@ __all__ = [
     "QuartznetBlock",
     "stem",
     "body",
-    "Quartznet_encoder",
+    "QuartznetEncoder",
 ]
 
-from dataclasses import dataclass
 from enum import Enum
 from typing import List
 
@@ -42,7 +41,6 @@ from torch import nn
 from torch.nn.common_types import _size_1_t
 
 from thunder.blocks import get_same_padding
-from thunder.utils import default_list
 
 
 class InitMode(str, Enum):
@@ -315,33 +313,24 @@ def body(
     return layers
 
 
-@dataclass
-class EncoderConfig:
-    """Configuration to create [`Quartznet_encoder`][thunder.quartznet.blocks.Quartznet_encoder]
-
-    Attributes:
-        feat_in: Number of input features to the model. defaults to 64.
-        filters: List of filter sizes used to create the encoder blocks. defaults to [256, 256, 512, 512, 512].
-        kernel_sizes: List of kernel sizes corresponding to each filter size. defaults to [33, 39, 51, 63, 75].
-        repeat_blocks: Number of repetitions of each block. defaults to 1.
-    """
-
-    feat_in: int = 64
-    filters: List[int] = default_list([256, 256, 512, 512, 512])
-    kernel_sizes: List[int] = default_list([33, 39, 51, 63, 75])
-    repeat_blocks: int = 1
-
-
-def Quartznet_encoder(cfg: EncoderConfig = EncoderConfig()) -> nn.Module:
+def QuartznetEncoder(
+    feat_in: int = 64,
+    filters: List[int] = [256, 256, 512, 512, 512],
+    kernel_sizes: List[int] = [33, 39, 51, 63, 75],
+    repeat_blocks: int = 1,
+) -> nn.Module:
     """Basic Quartznet encoder setup.
     Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (repeat_blocks=3)
 
     Args:
-        cfg: required config to create instance
+        feat_in: Number of input features to the model.
+        filters: List of filter sizes used to create the encoder blocks.
+        kernel_sizes: List of kernel sizes corresponding to each filter size.
+        repeat_blocks: Number of repetitions of each block.
     Returns:
         Pytorch model corresponding to the encoder.
     """
     return nn.Sequential(
-        stem(cfg.feat_in),
-        *body(cfg.filters, cfg.kernel_sizes, cfg.repeat_blocks),
+        stem(feat_in),
+        *body(filters, kernel_sizes, repeat_blocks),
     )
