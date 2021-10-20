@@ -10,19 +10,21 @@ __all__ = [
     "chain_calls",
     "BaseCheckpoint",
     "download_checkpoint",
-    "default_list",
+    "CheckpointResult",
 ]
 
 import functools
 import os
-from copy import copy
-from dataclasses import field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Callable, List, TypeVar, Union
+from typing import Callable, List, Union
 
 import torchaudio
 import wget
+from torch import nn
+
+from thunder.text_processing.transform import BatchTextTransformer
 
 
 def audio_len(item: Union[Path, str]) -> float:
@@ -136,16 +138,10 @@ def download_checkpoint(name: BaseCheckpoint, checkpoint_folder: str = None) -> 
     return checkpoint_path
 
 
-T = TypeVar("T")
-
-
-def default_list(elements: List[T]) -> List[T]:
-    """Function to create default values on dataclasses that are lists
-
-    Args:
-        elements : List of elements to be the default
-
-    Returns:
-        field compatible with the way dataclasses handle mutable defaults
-    """
-    return field(default_factory=lambda: copy(elements))
+@dataclass
+class CheckpointResult:
+    encoder: nn.Module
+    decoder: nn.Module
+    audio_transform: nn.Module
+    text_transform: BatchTextTransformer
+    encoder_final_dimension: int
