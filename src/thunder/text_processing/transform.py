@@ -112,3 +112,7 @@ class BatchTextTransformer(nn.Module):
             initial_vocab_tokens=vocab,
             sentencepiece_model=f"{output_dir}/tokenizer.model",
         )
+
+    @property
+    def num_tokens(self):
+        return len(self.vocab.itos)
