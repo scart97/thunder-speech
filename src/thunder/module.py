@@ -15,6 +15,7 @@ from thunder.ctc_loss import calculate_ctc
 from thunder.metrics import CER, WER
 from thunder.registry import CHECKPOINT_REGISTRY
 from thunder.text_processing.transform import BatchTextTransformer
+from thunder.wav2vec.compatibility import load_huggingface_checkpoint
 
 
 class BaseCTCModule(pl.LightningModule):
@@ -163,8 +164,12 @@ def load_pretrained(checkpoint: str, **load_kwargs) -> BaseCTCModule:
     Returns:
         The module loaded from the checkpoint
     """
-    load_fn = CHECKPOINT_REGISTRY[checkpoint]
-    encoder_data = load_fn(**load_kwargs)
+    # Special case when dealing with any huggingface model
+    if "/" in checkpoint:
+        encoder_data = load_huggingface_checkpoint(checkpoint, **load_kwargs)
+    else:
+        load_fn = CHECKPOINT_REGISTRY[checkpoint]
+        encoder_data = load_fn(**load_kwargs)
     instantiated = BaseCTCModule(
         encoder_data.encoder,
         encoder_data.decoder,
