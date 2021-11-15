@@ -12,29 +12,40 @@ from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 
 from thunder.text_processing.tokenizer import BPETokenizer, char_tokenizer
-from thunder.text_processing.vocab import SimpleVocab, Vocab
+from thunder.text_processing.vocab import Vocabulary
 
 
 class BatchTextTransformer(nn.Module):
     def __init__(
         self,
-        initial_vocab_tokens: List[str],
-        simple_vocab: bool = False,
+        tokens: List[str],
+        blank_token: str = "<blank>",
+        pad_token: str = None,
+        unknown_token: str = None,
+        start_token: str = None,
+        end_token: str = None,
         sentencepiece_model: Optional[str] = None,
     ):
         """That class is the glue code that uses all of the text processing
         functions to encode/decode an entire batch of text at once.
 
         Args:
-            initial_vocab_tokens: List of tokens to create the vocabulary, special tokens should not be included here. required.
-            simple_vocab: Controls if the used vocabulary will only have the blank token or more additional special tokens. defaults to `False`.
+            tokens : Basic list of tokens that will be part of the vocabulary.
+            blank_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            pad_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            unknown_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            start_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            end_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
             sentencepiece_model: Path to sentencepiece .model file, if applicable.
         """
         super().__init__()
-        self.vocab = (
-            SimpleVocab(initial_vocab_tokens)
-            if simple_vocab
-            else Vocab(initial_vocab_tokens)
+        self.vocab = Vocabulary(
+            tokens,
+            blank_token,
+            pad_token,
+            unknown_token,
+            start_token,
+            end_token,
         )
         self.tokenizer = (
             BPETokenizer(sentencepiece_model) if sentencepiece_model else char_tokenizer
@@ -80,6 +91,8 @@ class BatchTextTransformer(nn.Module):
             out = "".join(out)
             # _ is a special char only present on sentencepiece
             out = out.replace("▁", " ")
+            # | is a special char used by huggingface as space
+            out = out.replace("|", " ")
             out = self.vocab.remove_special_tokens(out)
             out_list.append(out)
 
@@ -109,7 +122,7 @@ class BatchTextTransformer(nn.Module):
                 vocab.append(piece)
 
         return cls(
-            initial_vocab_tokens=vocab,
+            tokens=vocab,
             sentencepiece_model=f"{output_dir}/tokenizer.model",
         )
 
