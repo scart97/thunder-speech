@@ -82,9 +82,8 @@ def load_components_from_citrinet_config(
 
     encoder = CitrinetEncoder(**encoder_cfg)
     text_transform = BatchTextTransformer(
-        initial_vocab_tokens=fix_vocab(labels),
+        tokens=fix_vocab(labels),
         sentencepiece_model=sentencepiece_path,
-        simple_vocab=True,
     )
     audio_transform = FilterbankFeatures(**preprocess_cfg)
 

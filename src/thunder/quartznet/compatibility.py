@@ -100,8 +100,7 @@ def load_components_from_quartznet_config(
     audio_transform = FilterbankFeatures(**preprocess_cfg)
     encoder = QuartznetEncoder(**encoder_cfg)
     text_transform = BatchTextTransformer(
-        initial_vocab_tokens=OmegaConf.to_container(labels),
-        simple_vocab=True,
+        tokens=OmegaConf.to_container(labels),
     )
 
     return (
