@@ -3,26 +3,30 @@
 
 # Copyright (c) 2021 scart97
 
-from string import ascii_lowercase
 
-import pytest
+from urllib.error import HTTPError
 
 import pytorch_lightning as pl
 import torch
+import torchaudio
+from torchaudio.datasets.utils import download_url
 
 from tests.utils import mark_slow, requirescuda
 from thunder.data.datamodule import ManifestDatamodule
-from thunder.wav2vec.module import (
-    TextTransformConfig,
-    Wav2Vec2Module,
-    Wav2Vec2Scriptable,
-)
+from thunder.module import load_pretrained
+from thunder.utils import get_default_cache_folder
+from thunder.wav2vec.compatibility import Wav2Vec2Scriptable
 
 
 @mark_slow
 @requirescuda
 def test_dev_run_train(sample_manifest):
-    module = Wav2Vec2Module(TextTransformConfig(list(ascii_lowercase)))
+    module = load_pretrained("facebook/wav2vec2-base-960h")
+    # Lowercase the vocab just to run this test, as labeled text is lowercase
+    module.text_transform.vocab.itos = [
+        x.lower() for x in module.text_transform.vocab.itos
+    ]
+
     data = ManifestDatamodule(
         train_manifest=sample_manifest,
         val_manifest=sample_manifest,
@@ -36,18 +40,30 @@ def test_dev_run_train(sample_manifest):
 
 
 @mark_slow
-def test_predict():
-    module = Wav2Vec2Module(TextTransformConfig(list(ascii_lowercase)))
-    fake_input = torch.randn(1, 16000)
-    fake_transcription = module.predict(fake_input)
-    assert isinstance(fake_transcription, list)
-    assert len(fake_transcription) == 1
-    assert isinstance(fake_transcription[0], str)
+def test_expected_prediction_from_pretrained_model():
+    try:
+        folder = get_default_cache_folder()
+        download_url(
+            "https://github.com/fastaudio/10_Speakers_Sample/raw/76f365de2f4d282ec44450d68f5b88de37b8b7ad/train/f0001_us_f0001_00001.wav",
+            download_folder=str(folder),
+            filename="f0001_us_f0001_00001.wav",
+            resume=True,
+        )
+        # Preparing data and model
+        module = load_pretrained("facebook/wav2vec2-base-960h")
+        audio, sr = torchaudio.load(folder / "f0001_us_f0001_00001.wav")
+        assert sr == 16000
+
+        output = module.predict(audio)
+        expected = "THE WORLD NEEDS OPPORTUNITIES FOR NEW LEADERS AND NEW IDEAS"
+        assert output[0].strip() == expected
+    except HTTPError:
+        return
 
 
 @mark_slow
 def test_script_module():
-    module = Wav2Vec2Module(TextTransformConfig(list(ascii_lowercase)))
+    module = load_pretrained("facebook/wav2vec2-base-960h")
     module.eval()
     torchaudio_module = Wav2Vec2Scriptable(module)
     torchaudio_module.eval()
@@ -62,12 +78,9 @@ def test_script_module():
     assert fake_transcription[0] == scripted_transcription[0]
 
 
-@pytest.mark.xfail
 @mark_slow
 def test_quantized_script_module():
-    # TODO: check why the quantized model is creating different predictions
-    # I'm not sure if that's expected or a bug
-    module = Wav2Vec2Module(TextTransformConfig(list(ascii_lowercase)))
+    module = load_pretrained("facebook/wav2vec2-base-960h")
     module.eval()
     torchaudio_module = Wav2Vec2Scriptable(module, quantized=True)
     torchaudio_module.eval()
