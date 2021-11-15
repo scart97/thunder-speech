@@ -15,7 +15,12 @@ from thunder.text_processing.transform import BatchTextTransformer
 @pytest.fixture(params=[True, False])
 def tfm(request):
     transform = BatchTextTransformer(
-        initial_vocab_tokens=[" "] + list(ascii_lowercase), simple_vocab=False
+        tokens=[" "] + list(ascii_lowercase),
+        blank_token="<blank>",
+        pad_token="<blank>",
+        unknown_token="<unk>",
+        start_token="<bos>",
+        end_token="<eos>",
     )
     if request.param:
         return torch.jit.script(transform)
@@ -25,7 +30,8 @@ def tfm(request):
 @pytest.fixture
 def blank_input(tfm):
     # A tensor full of blank probabilities
-    x = torch.zeros(1, len(tfm.vocab), 100)
+    # torchscript seems to nuke the properties, cant use tfm.num_tokens
+    x = torch.zeros(1, len(tfm.vocab.itos), 100)
     x[:, tfm.vocab.blank_idx, :] = 1
     return x
 
