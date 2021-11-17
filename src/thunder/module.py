@@ -55,6 +55,7 @@ class BaseCTCModule(pl.LightningModule):
         self.optimizer_kwargs = optimizer_kwargs or {}
         self.lr_scheduler_class = lr_scheduler_class
         self.lr_scheduler_kwargs = lr_scheduler_kwargs or {}
+        self.lr_scheduler_frequency = self.lr_scheduler_kwargs.pop("frequency", "step")
 
         # Metrics
         self.validation_cer = CER()
@@ -151,7 +152,13 @@ class BaseCTCModule(pl.LightningModule):
             return optimizer
 
         lr_scheduler = self.lr_scheduler_class(optimizer, **self.lr_scheduler_kwargs)
-        return [optimizer], [lr_scheduler]
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": lr_scheduler,
+                "frequency": self.lr_scheduler_frequency,
+            },
+        }
 
 
 def load_pretrained(checkpoint: str, **load_kwargs) -> BaseCTCModule:
