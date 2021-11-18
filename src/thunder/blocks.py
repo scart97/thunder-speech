@@ -45,9 +45,9 @@ def convolution_stft(
     fourier_basis = _fourier_matrix(n_fft, device=input_data.device)
 
     cutoff = int((n_fft / 2 + 1))
-    fourier_basis = torch.vstack(
+    fourier_basis = torch.stack(
         [torch.real(fourier_basis[:cutoff, :]), torch.imag(fourier_basis[:cutoff, :])]
-    )
+    ).reshape(-1, n_fft)
     forward_basis = fourier_basis[:, None, :].float()
 
     window_pad = (n_fft - win_length) // 2
