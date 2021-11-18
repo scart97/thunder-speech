@@ -68,7 +68,7 @@ class AudioFileLoader(nn.Module):
 
         if self.sample_rate != sample_rate:
             audio = resample(
-                audio, orig_freq=float(sample_rate), new_freq=float(self.sample_rate)
+                audio, orig_freq=int(sample_rate), new_freq=int(self.sample_rate)
             )
         return audio
 
