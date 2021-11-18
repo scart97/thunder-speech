@@ -10,9 +10,10 @@ from typing import Any, Dict, List, Tuple, Type
 import pytorch_lightning as pl
 import torch
 from torch import Tensor, nn
+from torchmetrics.text.cer import CharErrorRate
+from torchmetrics.text.wer import WER
 
 from thunder.ctc_loss import calculate_ctc
-from thunder.metrics import CER, WER
 from thunder.registry import CHECKPOINT_REGISTRY
 from thunder.text_processing.transform import BatchTextTransformer
 from thunder.wav2vec.compatibility import load_huggingface_checkpoint
@@ -58,7 +59,7 @@ class BaseCTCModule(pl.LightningModule):
         self.lr_scheduler_frequency = self.lr_scheduler_kwargs.pop("frequency", "step")
 
         # Metrics
-        self.validation_cer = CER()
+        self.validation_cer = CharErrorRate()
         self.validation_wer = WER()
         self.example_input_array = example_input_array
 
