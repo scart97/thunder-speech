@@ -15,7 +15,7 @@ from tests.utils import mark_slow, requirescuda
 from thunder.data.datamodule import ManifestDatamodule
 from thunder.module import load_pretrained
 from thunder.utils import get_default_cache_folder
-from thunder.wav2vec.compatibility import Wav2Vec2Scriptable
+from thunder.wav2vec.compatibility import prepare_scriptable_wav2vec
 
 
 @mark_slow
@@ -65,8 +65,9 @@ def test_expected_prediction_from_pretrained_model():
 def test_script_module():
     module = load_pretrained("facebook/wav2vec2-base-960h")
     module.eval()
-    torchaudio_module = Wav2Vec2Scriptable(module)
+    torchaudio_module = load_pretrained("facebook/wav2vec2-base-960h")
     torchaudio_module.eval()
+    torchaudio_module = prepare_scriptable_wav2vec(torchaudio_module)
     scripted = torch.jit.script(torchaudio_module)
 
     fake_input = torch.randn(1, 16000)
@@ -82,7 +83,8 @@ def test_script_module():
 def test_quantized_script_module():
     module = load_pretrained("facebook/wav2vec2-base-960h")
     module.eval()
-    torchaudio_module = Wav2Vec2Scriptable(module, quantized=True)
+    torchaudio_module = load_pretrained("facebook/wav2vec2-base-960h")
+    torchaudio_module = prepare_scriptable_wav2vec(torchaudio_module, quantized=True)
     torchaudio_module.eval()
 
     fake_input = torch.randn(1, 16000)
