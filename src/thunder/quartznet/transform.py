@@ -56,7 +56,7 @@ from typing import Optional
 
 import torch
 from torch import nn
-from torchaudio.functional import create_fb_matrix
+from torchaudio.functional import melscale_fbanks
 
 from thunder.blocks import convolution_stft
 
@@ -212,7 +212,7 @@ class MelScale(nn.Module):
         super().__init__()
 
         filterbanks = (
-            create_fb_matrix(
+            melscale_fbanks(
                 int(1 + n_fft // 2),
                 n_mels=nfilt,
                 sample_rate=sample_rate,
