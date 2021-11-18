@@ -209,7 +209,7 @@ def test_preemph_filter_trace(preemph):
     x = torch.randn(10, 1337)
     filt_trace = torch.jit.trace(filt, (x))
 
-    assert torch.allclose(filt(x), filt_trace(x))
+    assert torch.allclose(filt(x), filt_trace(x), atol=1e-6)
 
 
 @preemph_params
@@ -219,7 +219,7 @@ def test_preemph_filter_script(preemph):
     x = torch.randn(10, 1337)
     filt_script = torch.jit.script(filt)
 
-    assert torch.allclose(filt(x), filt_script(x))
+    assert torch.allclose(filt(x), filt_script(x), atol=1e-6)
 
 
 @mark_slow
@@ -311,6 +311,7 @@ def test_powerspectrum_onnx(**kwargs):
             spec,
             (x),
             f"{export_path}/Powerspectrum.onnx",
+            opset_version=11,
             verbose=True,
         )
 
@@ -420,7 +421,7 @@ def test_patch_stft_similar_output():
 
 @requirescuda
 @filterbank_params
-@settings(deadline=None)
+@settings(deadline=None, max_examples=10)
 def test_filterbank_device_move(**kwargs):
     fb = FilterbankFeatures(**kwargs)
     x = torch.randn(10, 1337)
@@ -431,28 +432,30 @@ def test_filterbank_device_move(**kwargs):
 
 @mark_slow
 @filterbank_params
+@settings(deadline=None, max_examples=5)
 def test_filterbank_trace(**kwargs):
     fb = FilterbankFeatures(**kwargs)
     fb.eval()
     x = torch.randn(10, 1337)
     fb_trace = torch.jit.trace(fb, (x))
 
-    assert torch.allclose(fb(x), fb_trace(x))
+    assert torch.allclose(fb(x), fb_trace(x), atol=1e-3)
 
 
 @mark_slow
 @filterbank_params
+@settings(deadline=None, max_examples=10)
 def test_filterbank_script(**kwargs):
     fb = FilterbankFeatures(**kwargs)
     fb.eval()
     x = torch.randn(10, 1337)
     fb_script = torch.jit.script(fb)
 
-    assert torch.allclose(fb(x), fb_script(x))
+    assert torch.allclose(fb(x), fb_script(x), atol=1e-3)
 
 
 @filterbank_params
-@settings(deadline=None)
+@settings(deadline=None, max_examples=5)
 def test_filterbank_onnx(**kwargs):
     fb = FilterbankFeatures(**kwargs)
     fb = patch_stft(fb)
