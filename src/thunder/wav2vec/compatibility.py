@@ -1,7 +1,5 @@
 try:
-    # TODO: update transformers to use all models, not only wav2vec
-    # from transformers import AutomodelForCTC
-    from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+    from transformers import AutoModelForCTC, Wav2Vec2Processor
 except ModuleNotFoundError as transformers_not_installed:
     raise ImportError(
         "To use any huggingface model please install the transformers extension, by calling `pip install thunder-speech[transformers]`"
@@ -32,7 +30,7 @@ class HuggingFaceEncoderAdapt(nn.Module):
 
 
 def load_huggingface_checkpoint(model_name: str, **model_kwargs) -> CheckpointResult:
-    model = Wav2Vec2ForCTC.from_pretrained(model_name, **model_kwargs)
+    model = AutoModelForCTC.from_pretrained(model_name, **model_kwargs)
     processor = Wav2Vec2Processor.from_pretrained(model_name)
     vocab = list(processor.tokenizer.get_vocab().keys())
     text_transform = BatchTextTransformer(
