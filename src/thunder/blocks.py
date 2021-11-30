@@ -117,6 +117,23 @@ def normalize_tensor(
     return (input_values - mean) / std
 
 
+def lengths_to_mask(lens: torch.Tensor, max_len: int) -> torch.Tensor:
+    """Convert from integer lengths of each element to mask representation
+
+    Args:
+        lens : lengths of each element in the batch
+        max_len : maximum length expected. Can be greater than lens.max()
+
+    Returns:
+        Corresponding boolean mask indicating the valid region of the tensor.
+    """
+    lens = lens.type(torch.long)
+    mask = torch.arange(max_len, device=lens.device).expand(
+        lens.shape[0], max_len
+    ) < lens.unsqueeze(1)
+    return mask
+
+
 def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
     """Calculates the padding size to obtain same padding.
         Same padding means that the output will have the
