@@ -122,13 +122,12 @@ def load_quartznet_weights(encoder: nn.Module, decoder: nn.Module, weights_path:
 
     def fix_encoder_name(x: str) -> str:
         x = x.replace("encoder.", "").replace(".res.0", ".res")
-        # Add another abstraction layer
-        # This is caused by the new MaskedBatchNorm
-        # Skip convolution and SqueezeExcite layers
-        if (".conv" not in x) and (".fc" not in x):
+        # Add another abstraction layer if it's not a masked conv
+        # This is caused by the new Masked wrapper
+        if ".conv" not in x:
             parts = x.split(".")
-            x = ".".join(parts[:3] + ["layer"] + parts[3:])
-        return x.replace(".conv", "")  # Fix convolutions
+            x = ".".join(parts[:3] + ["layer", "0"] + parts[3:])
+        return x
 
     # We remove the 'encoder.' and 'decoder.' prefix from the weights to enable
     # compatibility to load with plain nn.Modules created by reading the config
