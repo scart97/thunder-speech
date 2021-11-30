@@ -58,7 +58,7 @@ import torch
 from torch import nn
 from torchaudio.functional import melscale_fbanks
 
-from thunder.blocks import convolution_stft
+from thunder.blocks import convolution_stft, normalize_tensor
 
 
 class FeatureBatchNormalizer(nn.Module):
@@ -67,21 +67,16 @@ class FeatureBatchNormalizer(nn.Module):
         super().__init__()
         self.div_guard = 1e-5
 
-    @torch.no_grad()
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
             x : Tensor of shape (batch, features, time)
         """
-        mask = x.abs() > 0.0
-        num_elements = mask.sum(dim=2, keepdim=True).detach()
-        x_mean = x.sum(dim=2, keepdim=True).detach() / num_elements
-        numerator = (x - x_mean).pow(2).sum(dim=2, keepdim=True).detach()
-        x_std = (numerator / num_elements).sqrt()
-        # make sure x_std is not zero
-        x_std += self.div_guard
-        result = (x - x_mean) / x_std
-        return torch.masked_fill(result, ~mask, 0.0)
+        # https://github.com/pytorch/pytorch/issues/45208
+        # https://github.com/pytorch/pytorch/issues/44768
+        with torch.no_grad():
+            mask = x.abs() > 0.0
+            return normalize_tensor(x, mask, div_guard=self.div_guard)
 
 
 class DitherAudio(nn.Module):
