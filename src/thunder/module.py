@@ -14,9 +14,8 @@ from torchmetrics.text.cer import CharErrorRate
 from torchmetrics.text.wer import WER
 
 from thunder.ctc_loss import calculate_ctc
-from thunder.registry import CHECKPOINT_REGISTRY
+from thunder.registry import load_checkpoint_data
 from thunder.text_processing.transform import BatchTextTransformer
-from thunder.wav2vec.compatibility import load_huggingface_checkpoint
 
 
 class BaseCTCModule(pl.LightningModule):
@@ -30,7 +29,6 @@ class BaseCTCModule(pl.LightningModule):
         optimizer_kwargs: Dict = None,
         lr_scheduler_class: Any = None,
         lr_scheduler_kwargs: Dict = None,
-        example_input_array: Tensor = torch.randn((10, 16000)),
     ):
         """Base module for all systems that follow the same CTC training procedure.
 
@@ -43,7 +41,6 @@ class BaseCTCModule(pl.LightningModule):
             optimizer_kwargs: Optional extra kwargs to the optimizer. Defaults to None.
             lr_scheduler_class: Optional class to use a learning rate scheduler with the optimizer. Defaults to None.
             lr_scheduler_kwargs: Optional extra kwargs to the learning rate scheduler. Defaults to None.
-            example_input_array: Example input, use by pytorch lightning to print nice stuff before training. Defaults to torch.randn((10, 16000)).
         """
         super().__init__()
 
@@ -61,7 +58,7 @@ class BaseCTCModule(pl.LightningModule):
         # Metrics
         self.validation_cer = CharErrorRate()
         self.validation_wer = WER()
-        self.example_input_array = example_input_array
+        self.example_input_array = torch.randn((10, 16000))
 
     def forward(self, x: Tensor) -> Tensor:
         """Process the audio tensor to create the predictions.
@@ -162,27 +159,22 @@ class BaseCTCModule(pl.LightningModule):
         }
 
 
-def load_pretrained(checkpoint: str, **load_kwargs) -> BaseCTCModule:
+def load_pretrained(checkpoint_name: str, **load_kwargs) -> BaseCTCModule:
     """Load from the original checkpoint into a LightningModule ready for training or inference.
 
     Args:
-        checkpoint : Checkpoint to be downloaded locally and lodaded.
+        checkpoint_name : Checkpoint to be downloaded locally and lodaded.
         load_kwargs : Keyword arguments used by the checkpoint loading function.
 
     Returns:
         The module loaded from the checkpoint
     """
-    # Special case when dealing with any huggingface model
-    if "/" in checkpoint:
-        encoder_data = load_huggingface_checkpoint(checkpoint, **load_kwargs)
-    else:
-        load_fn = CHECKPOINT_REGISTRY[checkpoint]
-        encoder_data = load_fn(**load_kwargs)
+    checkpoint_data = load_checkpoint_data(checkpoint_name, **load_kwargs)
     instantiated = BaseCTCModule(
-        encoder_data.encoder,
-        encoder_data.decoder,
-        encoder_data.audio_transform,
-        encoder_data.text_transform,
+        checkpoint_data.encoder,
+        checkpoint_data.decoder,
+        checkpoint_data.audio_transform,
+        checkpoint_data.text_transform,
     )
     instantiated.eval()
     return instantiated
