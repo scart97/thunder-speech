@@ -11,22 +11,29 @@ import torch
 from torch import Tensor, nn
 from torchaudio.models.wav2vec2.utils import import_huggingface_model
 
-from thunder.blocks import linear_decoder
+from thunder.blocks import lengths_to_mask, linear_decoder
 from thunder.text_processing.transform import BatchTextTransformer
 from thunder.utils import CheckpointResult
 from thunder.wav2vec.transform import Wav2Vec2Preprocess
 
 
 class _HuggingFaceEncoderAdapt(nn.Module):
-    def __init__(self, encoder):
+    def __init__(self, encoder, mask_input: bool = False):
         super().__init__()
         self.original_encoder = encoder
         if hasattr(self.original_encoder, "freeze_feature_extractor"):
             self.original_encoder.freeze_feature_extractor()
+        self.mask_input = mask_input
 
-    def forward(self, x):
-        out = self.original_encoder(x)
-        return out.last_hidden_state
+    def forward(self, x: Tensor, audio_lengths: Tensor) -> Tuple[Tensor, Tensor]:
+        attention_mask: Optional[Tensor] = None
+        if self.mask_input:
+            attention_mask = lengths_to_mask(audio_lengths, max_len=x.size(-1)).int()
+        out = self.original_encoder(x, attention_mask=attention_mask)
+        return (
+            out.last_hidden_state,
+            self.original_encoder._get_feat_extract_output_lengths(audio_lengths),
+        )
 
 
 def load_huggingface_checkpoint(model_name: str, **model_kwargs) -> CheckpointResult:
@@ -48,17 +55,17 @@ def load_huggingface_checkpoint(model_name: str, **model_kwargs) -> CheckpointRe
         decoder[1].load_state_dict(model.lm_head.state_dict())
 
     return CheckpointResult(
-        encoder=_HuggingFaceEncoderAdapt(model.base_model),
+        encoder=_HuggingFaceEncoderAdapt(
+            model.base_model,
+            mask_input=processor.feature_extractor.return_attention_mask,
+        ),
         decoder=decoder,
         text_transform=text_transform,
-        audio_transform=Wav2Vec2Preprocess(),
+        audio_transform=Wav2Vec2Preprocess(
+            mask_input=processor.feature_extractor.return_attention_mask,
+        ),
         encoder_final_dimension=model.base_model.config.hidden_size,
     )
-
-
-class _GetFirstElement(nn.Module):
-    def forward(self, x: Tuple[Tensor, Optional[Tensor]]) -> Tensor:
-        return x[0]
 
 
 def prepare_scriptable_wav2vec(module, quantized: bool = False):
@@ -68,5 +75,5 @@ def prepare_scriptable_wav2vec(module, quantized: bool = False):
         imported = torch.quantization.quantize_dynamic(
             imported, qconfig_spec={torch.nn.Linear}, dtype=torch.qint8
         )
-    module.encoder = nn.Sequential(imported, _GetFirstElement())
+    module.encoder = imported
     return module
