@@ -35,8 +35,9 @@ def test_create_from_manifest():
         decoder = conv1d_decoder(1024, text_tfm.num_tokens)
 
         x = torch.randn(10, 1337)
-        feat = fb(x)
-        out = encoder(feat)
+        lens = torch.Tensor([1000] * 10)
+        feat, feat_lens = fb(x, lens)
+        out, _ = encoder(feat, feat_lens)
         out2 = decoder(out)
         assert feat.shape[0] == x.shape[0]
         assert feat.shape[1] == 64
