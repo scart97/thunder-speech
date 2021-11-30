@@ -31,12 +31,13 @@ __all__ = [
     "CitrinetEncoder",
 ]
 
-from typing import List
+from typing import List, Tuple
 
 import torch
 from torch import nn
 from torch.nn.common_types import _size_1_t
 
+from thunder.blocks import Masked, MultiSequential
 from thunder.quartznet.blocks import (
     _get_act_dropout_layer,
     _get_conv_bn_layer,
@@ -150,14 +151,14 @@ class CitrinetBlock(nn.Module):
             )
         )
 
-        conv.append(SqueezeExcite(out_channels, reduction_ratio=8))
+        conv.append(Masked(SqueezeExcite(out_channels, reduction_ratio=8)))
 
-        self.mconv = nn.Sequential(*conv)
+        self.mconv = MultiSequential(*conv)
 
         if residual:
             stride_residual = stride if stride[0] == 1 else stride[0]
 
-            self.res = nn.Sequential(
+            self.res = MultiSequential(
                 *_get_conv_bn_layer(
                     in_channels,
                     out_channels,
@@ -169,9 +170,11 @@ class CitrinetBlock(nn.Module):
         else:
             self.res = None
 
-        self.mout = nn.Sequential(*_get_act_dropout_layer(drop_prob=dropout))
+        self.mout = MultiSequential(*_get_act_dropout_layer(drop_prob=dropout))
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, lens: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
             x : Tensor of shape (batch, features, time) where #features == inplanes
@@ -181,15 +184,16 @@ class CitrinetBlock(nn.Module):
         """
 
         # compute forward convolutions
-        out = self.mconv(x)
+        out, lens_out = self.mconv(x, lens)
 
         # compute the residuals
         if self.res is not None:
-            res_out = self.res(x)
+            res_out, _ = self.res(x, lens)
             out = out + res_out
 
         # compute the output
-        return self.mout(out)
+        out, lens_out = self.mout(out, lens_out)
+        return out, lens_out
 
 
 def stem(feat_in: int) -> CitrinetBlock:
@@ -259,7 +263,7 @@ def CitrinetEncoder(
     Returns:
         Pytorch model corresponding to the encoder.
     """
-    return nn.Sequential(
+    return MultiSequential(
         stem(feat_in),
         *body(filters, kernel_sizes, strides),
     )
