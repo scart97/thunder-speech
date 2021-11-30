@@ -220,7 +220,7 @@ def _get_conv_bn_layer(
 
 
 def _get_act_dropout_layer(drop_prob: float = 0.2):
-    return [Masked(nn.ReLU(True), nn.Dropout(p=drop_prob))]
+    return [Masked(nn.ReLU(True)), Masked(nn.Dropout(p=drop_prob))]
 
 
 class QuartznetBlock(nn.Module):
