@@ -6,9 +6,10 @@
 
 # Copyright (c) 2021 scart97
 
-__all__ = ["convolution_stft", "get_same_padding", "conv1d_decoder"]
+__all__ = ["convolution_stft", "normalize_tensor", "get_same_padding", "conv1d_decoder"]
 
 import math
+from typing import Optional
 
 import torch
 import torch.nn.functional as F
@@ -78,6 +79,42 @@ def convolution_stft(
     real_part = forward_transform[:, :cutoff, :]
     imag_part = forward_transform[:, cutoff:, :]
     return torch.stack((real_part, imag_part), dim=-1)
+
+
+def normalize_tensor(
+    input_values: torch.Tensor,
+    mask: Optional[torch.Tensor] = None,
+    div_guard: float = 1e-7,
+    dim: int = -1,
+) -> torch.Tensor:
+    """Normalize tensor values, optionally using some mask to define the valid region.
+
+    Args:
+        input_values : input tensor to be normalized
+        mask : Optional mask describing the valid elements.
+        div_guard : value used to prevent division by zero when normalizing.
+        dim : dimension used to calculate the mean and variance.
+
+    Returns:
+        Normalized tensor
+    """
+    # Vectorized implementation of (x - x.mean()) / x.std() considering only the valid mask
+    if mask is not None:
+        # Number of valid elements
+        num_elements = mask.sum(dim=dim, keepdim=True).detach()
+        # Mean is sum over number of elements
+        x_mean = input_values.sum(dim=dim, keepdim=True).detach() / num_elements
+        # std numerator: sum of squared differences to the mean
+        numerator = (input_values - x_mean).pow(2).sum(dim=dim, keepdim=True).detach()
+        x_std = (numerator / num_elements).sqrt()
+        # using the div_guard to prevent division by zero
+        normalized = (input_values - x_mean) / (x_std + div_guard)
+        # Cleaning elements outside of valid mask
+        return torch.masked_fill(normalized, ~mask.type(torch.bool), 0.0)
+
+    mean = input_values.mean(dim=dim, keepdim=True).detach()
+    std = (input_values.var(dim=dim, keepdim=True).detach() + div_guard).sqrt()
+    return (input_values - mean) / std
 
 
 def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
