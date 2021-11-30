@@ -5,7 +5,7 @@
 
 __all__ = ["BaseCTCModule", "load_pretrained"]
 
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import pytorch_lightning as pl
 import torch
@@ -58,9 +58,12 @@ class BaseCTCModule(pl.LightningModule):
         # Metrics
         self.validation_cer = CharErrorRate()
         self.validation_wer = WER()
-        self.example_input_array = torch.randn((10, 16000))
+        self.example_input_array = (
+            torch.randn((10, 16000)),
+            torch.randint(100, 16000, (10,)),
+        )
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor, lengths: Tensor) -> Tuple[Tensor, Optional[Tensor]]:
         """Process the audio tensor to create the predictions.
 
         Args:
@@ -69,9 +72,9 @@ class BaseCTCModule(pl.LightningModule):
         Returns:
             Tensor with the predictions.
         """
-        features = self.audio_transform(x)
-        encoded = self.encoder(features)
-        return self.decoder(encoded)
+        features, feature_lengths = self.audio_transform(x, lengths)
+        encoded, out_lengths = self.encoder(features, feature_lengths)
+        return self.decoder(encoded), out_lengths
 
     @torch.jit.export
     def predict(self, x: Tensor) -> List[str]:
@@ -83,7 +86,8 @@ class BaseCTCModule(pl.LightningModule):
         Returns:
             A list of strings, each one contains the corresponding transcription to the original batch element.
         """
-        pred = self(x)
+        lens = torch.tensor([x.shape[-1]], device=x.device)
+        pred, _ = self(x, lens)
         return self.text_transform.decode_prediction(pred.argmax(1))
 
     def training_step(
@@ -101,9 +105,9 @@ class BaseCTCModule(pl.LightningModule):
         audio, audio_lens, texts = batch
         y, y_lens = self.text_transform.encode(texts, device=self.device)
 
-        probabilities = self(audio)
+        probabilities, prob_lens = self(audio, audio_lens)
         loss = calculate_ctc(
-            probabilities, y, audio_lens, y_lens, self.text_transform.vocab.blank_idx
+            probabilities, y, prob_lens, y_lens, self.text_transform.vocab.blank_idx
         )
 
         self.log("loss/train_loss", loss)
@@ -124,9 +128,9 @@ class BaseCTCModule(pl.LightningModule):
         audio, audio_lens, texts = batch
         y, y_lens = self.text_transform.encode(texts, device=self.device)
 
-        probabilities = self(audio)
+        probabilities, prob_lens = self(audio, audio_lens)
         loss = calculate_ctc(
-            probabilities, y, audio_lens, y_lens, self.text_transform.vocab.blank_idx
+            probabilities, y, prob_lens, y_lens, self.text_transform.vocab.blank_idx
         )
 
         decoded_preds = self.text_transform.decode_prediction(probabilities.argmax(1))
