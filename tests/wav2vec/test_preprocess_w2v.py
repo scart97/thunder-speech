@@ -9,22 +9,49 @@ from transformers import Wav2Vec2FeatureExtractor
 from thunder.wav2vec.transform import Wav2Vec2Preprocess
 
 
-def test_feature_extractor():
+def _get_original_results(input_tensor: torch.Tensor, return_mask: bool = False):
     original_tfm = Wav2Vec2FeatureExtractor(
         feature_size=1,
         sampling_rate=16000,
         padding_value=0.0,
-        return_attention_mask=False,
+        return_attention_mask=return_mask,
         do_normalize=True,
     )
-
-    thunder_tfm = Wav2Vec2Preprocess()
-
-    input_tensor = torch.randn(1, 16000)
-
-    original_result = original_tfm(
-        input_tensor[0].numpy(), sampling_rate=16000, return_tensors="pt", padding=True
+    original_result = [tensor.numpy() for tensor in input_tensor]
+    return original_tfm(
+        original_result,
+        sampling_rate=16000,
+        padding=True,
+        return_tensors="pt",
     )
 
-    thunder_result = thunder_tfm(input_tensor)
+
+def test_feature_extractor():
+    thunder_tfm = Wav2Vec2Preprocess()
+
+    input_tensor = torch.randn(5, 16000)
+    original_result = _get_original_results(input_tensor, return_mask=False)
+    lens = torch.Tensor([16000] * 5)
+    thunder_result, _ = thunder_tfm(input_tensor, lens)
+    assert torch.allclose(original_result.input_values, thunder_result, atol=1e-3)
+
+
+def test_masked_feature_extractor():
+    thunder_tfm = Wav2Vec2Preprocess(mask_input=True)
+
+    input_tensor = torch.randn(3, 160000)
+    input_tensor[1, 100000:] = 0
+    input_tensor[2, 80000:] = 0
+    original_lengths = torch.tensor([160000, 100000, 80000])
+
+    original_result = _get_original_results(
+        [
+            input_tensor[0, :],
+            input_tensor[1, :100000],
+            input_tensor[2, :80000],
+        ],
+        return_mask=True,
+    )
+    thunder_result, _ = thunder_tfm(input_tensor, original_lengths)
+
     assert torch.allclose(original_result.input_values, thunder_result, atol=1e-3)
