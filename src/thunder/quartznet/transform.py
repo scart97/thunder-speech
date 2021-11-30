@@ -52,13 +52,19 @@ __all__ = [
 ]
 
 import math
-from typing import Optional
+from typing import Optional, Tuple
 
 import torch
 from torch import nn
 from torchaudio.functional import melscale_fbanks
 
-from thunder.blocks import convolution_stft, normalize_tensor
+from thunder.blocks import (
+    Masked,
+    MultiSequential,
+    convolution_stft,
+    lengths_to_mask,
+    normalize_tensor,
+)
 
 
 class FeatureBatchNormalizer(nn.Module):
@@ -67,7 +73,9 @@ class FeatureBatchNormalizer(nn.Module):
         super().__init__()
         self.div_guard = 1e-5
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, lengths: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
             x : Tensor of shape (batch, features, time)
@@ -75,8 +83,11 @@ class FeatureBatchNormalizer(nn.Module):
         # https://github.com/pytorch/pytorch/issues/45208
         # https://github.com/pytorch/pytorch/issues/44768
         with torch.no_grad():
-            mask = x.abs() > 0.0
-            return normalize_tensor(x, mask, div_guard=self.div_guard)
+            mask = lengths_to_mask(lengths, x.shape[-1])
+            return (
+                normalize_tensor(x, mask.unsqueeze(1), div_guard=self.div_guard),
+                lengths,
+            )
 
 
 class DitherAudio(nn.Module):
@@ -100,8 +111,7 @@ class DitherAudio(nn.Module):
             x : Tensor of shape (batch, time)
         """
         if self.training:
-            mask = x > 0.0
-            return x + mask * (self.dither * torch.randn_like(x))
+            return x + (self.dither * torch.randn_like(x))
         else:
             return x
 
@@ -167,8 +177,14 @@ class PowerSpectrum(nn.Module):
         # doesnt support fft, like mobile or onnx.
         self.stft_func = torch.stft
 
+    def get_sequence_length(self, lengths: torch.Tensor) -> torch.Tensor:
+        seq_len = torch.floor(lengths / self.hop_length) + 1
+        return seq_len.to(dtype=torch.long)
+
     @torch.no_grad()
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, lengths: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
             x : Tensor of shape (batch, time)
@@ -187,7 +203,7 @@ class PowerSpectrum(nn.Module):
         x = torch.sqrt(x.pow(2).sum(-1))
         # get power spectrum
         x = x.pow(2.0)
-        return x
+        return x, self.get_sequence_length(lengths)
 
 
 class MelScale(nn.Module):
@@ -233,9 +249,7 @@ class MelScale(nn.Module):
         # log features
         # We want to avoid taking the log of zero
         if self.log_scale:
-            mask = x.abs() > 0.0
             x = torch.log(x + 2 ** -24)
-            x[~mask] = 0.0
         return x
 
 
@@ -261,15 +275,14 @@ def FilterbankFeatures(
     Returns:
         Module that computes the features based on raw audio tensor.
     """
-    return nn.Sequential(
-        DitherAudio(dither=dither),
-        PreEmphasisFilter(preemph=preemph),
+    return MultiSequential(
+        Masked(DitherAudio(dither=dither), PreEmphasisFilter(preemph=preemph)),
         PowerSpectrum(
             n_window_size=n_window_size,
             n_window_stride=n_window_stride,
             n_fft=n_fft,
         ),
-        MelScale(sample_rate=sample_rate, n_fft=n_fft, nfilt=nfilt),
+        Masked(MelScale(sample_rate=sample_rate, n_fft=n_fft, nfilt=nfilt)),
         FeatureBatchNormalizer(),
     )
 
@@ -285,5 +298,5 @@ def patch_stft(filterbank: nn.Module) -> nn.Module:
     Returns:
         Layer with the stft operation patched.
     """
-    filterbank[2].stft_func = convolution_stft
+    filterbank[1].stft_func = convolution_stft
     return filterbank
