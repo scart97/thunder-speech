@@ -32,17 +32,20 @@ from thunder.quartznet.transform import (
 def test_normalize_preserve_shape():
     norm = FeatureBatchNormalizer()
     x = torch.randn(10, 40, 1337)
-    out = norm(x)
+    lens = torch.Tensor([1000] * 10)
+    out, out_lens = norm(x, lens)
 
     assert out.shape[0] == x.shape[0]
     assert out.shape[1] == x.shape[1]
     assert out.shape[2] == x.shape[2]
+    assert torch.allclose(lens, out_lens)
 
 
 def test_normalize_has_correct_mean_std():
     norm = FeatureBatchNormalizer()
     x = torch.randn(10, 40, 1337)
-    out = norm(x)
+    lens = torch.Tensor([1337] * 10)
+    out, _ = norm(x, lens)
     # Testing for each element in the batch
     for xb in out:
         assert torch.allclose(xb[:, :].mean(), torch.zeros(1), atol=0.1)
@@ -53,36 +56,46 @@ def test_normalize_has_correct_mean_std():
 def test_normalize_device_move():
     norm = FeatureBatchNormalizer()
     x = torch.randn(10, 40, 1337)
-    _test_device_move(norm, x)
+    lens = torch.Tensor([1000] * 10)
+    _test_device_move(norm, (x, lens))
 
 
 def test_normalize_trace():
     norm = FeatureBatchNormalizer()
     norm.eval()
     x = torch.randn(10, 40, 1337)
-    norm_trace = torch.jit.trace(norm, (x))
+    lens = torch.Tensor([1000] * 10)
+    norm_trace = torch.jit.trace(norm, (x, lens))
 
-    assert torch.allclose(norm(x), norm_trace(x))
+    out1, lens1 = norm(x, lens)
+    out2, lens2 = norm_trace(x, lens)
+    assert torch.allclose(out1, out2)
+    assert torch.allclose(lens1, lens2)
 
 
 def test_normalize_script():
     norm = FeatureBatchNormalizer()
     norm.eval()
     x = torch.randn(10, 40, 1337)
+    lens = torch.Tensor([1000] * 10)
     norm_script = torch.jit.script(norm)
 
-    assert torch.allclose(norm(x), norm_script(x))
+    out1, lens1 = norm(x, lens)
+    out2, lens2 = norm_script(x, lens)
+    assert torch.allclose(out1, out2)
+    assert torch.allclose(lens1, lens2)
 
 
 def test_normalize_onnx():
     norm = FeatureBatchNormalizer()
     norm.eval()
     x = torch.randn(10, 40, 1337)
+    lens = torch.Tensor([1000] * 10)
 
     with TemporaryDirectory() as export_path:
         torch.onnx.export(
             norm,
-            (x),
+            (x, lens),
             f"{export_path}/Normalize.onnx",
             verbose=True,
             opset_version=11,
@@ -250,10 +263,12 @@ powerspec_params = given(
 def test_powerspectrum_shape(**kwargs):
     spec = PowerSpectrum(**kwargs)
     x = torch.randn(10, 1337)
-    out = spec(x)
+    lens = torch.Tensor([1337] * 10)
+    out, out_lens = spec(x, lens)
     assert out.shape[0] == x.shape[0]
     assert out.shape[1] == int(1 + spec.n_fft // 2)
     assert out.shape[2] == int(1 + x.shape[1] // spec.hop_length)
+    assert (out_lens == out.shape[2]).all()
     assert len(out.shape) == 3
 
 
@@ -268,7 +283,8 @@ def test_powerspec_raises(**kwargs):
 def test_powerspectrum_device_move(**kwargs):
     spec = PowerSpectrum(**kwargs)
     x = torch.randn(10, 1337)
-    _test_device_move(spec, x)
+    lens = torch.Tensor([1337] * 10)
+    _test_device_move(spec, (x, lens))
 
 
 @mark_slow
@@ -277,9 +293,13 @@ def test_powerspectrum_trace(**kwargs):
     spec = PowerSpectrum(**kwargs)
     spec.eval()
     x = torch.randn(10, 1337)
-    spec_trace = torch.jit.trace(spec, (x))
+    lens = torch.Tensor([1337] * 10)
+    spec_trace = torch.jit.trace(spec, (x, lens))
 
-    assert torch.allclose(spec(x), spec_trace(x))
+    out1, lens1 = spec(x, lens)
+    out2, lens2 = spec_trace(x, lens)
+    assert torch.allclose(out1, out2)
+    assert torch.allclose(lens1, lens2)
 
 
 @powerspec_params
@@ -287,9 +307,13 @@ def test_powerspectrum_script(**kwargs):
     spec = PowerSpectrum(**kwargs)
     spec.eval()
     x = torch.randn(10, 1337)
+    lens = torch.Tensor([1337] * 10)
     spec_script = torch.jit.script(spec)
 
-    assert torch.allclose(spec(x), spec_script(x))
+    out1, lens1 = spec(x, lens)
+    out2, lens2 = spec_script(x, lens)
+    assert torch.allclose(out1, out2)
+    assert torch.allclose(lens1, lens2)
 
 
 @powerspec_params
@@ -305,11 +329,12 @@ def test_powerspectrum_onnx(**kwargs):
     spec.stft_func = convolution_stft
     spec.eval()
     x = torch.randn(10, 1337)
+    lens = torch.Tensor([1337] * 10)
 
     with TemporaryDirectory() as export_path:
         torch.onnx.export(
             spec,
-            (x),
+            (x, lens),
             f"{export_path}/Powerspectrum.onnx",
             opset_version=11,
             verbose=True,
@@ -404,7 +429,8 @@ filterbank_params = given(
 def test_filterbank_shape(**kwargs):
     fb = FilterbankFeatures(**kwargs)
     x = torch.randn(10, 1337)
-    out = fb(x)
+    lens = torch.Tensor([1000] * 10)
+    out, _ = fb(x, lens)
     assert out.shape[0] == x.shape[0]
 
 
@@ -412,10 +438,11 @@ def test_patch_stft_similar_output():
     fb = FilterbankFeatures()
     fb.eval()
     x = torch.randn(10, 1000)
-    out1 = fb(x)
+    lens = torch.Tensor([1000] * 10)
+    out1, _ = fb(x, lens)
     fb = patch_stft(fb)
-    torch.jit.script(fb)
-    out2 = fb(x)
+    scripted = torch.jit.script(fb)
+    out2, _ = scripted(x, lens)
     assert torch.allclose(out1, out2, atol=1e-3)
 
 
@@ -425,9 +452,10 @@ def test_patch_stft_similar_output():
 def test_filterbank_device_move(**kwargs):
     fb = FilterbankFeatures(**kwargs)
     x = torch.randn(10, 1337)
+    lens = torch.Tensor([1000] * 10)
     # Relaxed tolerance because of log operation
     # inside the Melscale
-    _test_device_move(fb, x, atol=1e-3)
+    _test_device_move(fb, (x, lens), atol=1e-3)
 
 
 @mark_slow
@@ -437,9 +465,13 @@ def test_filterbank_trace(**kwargs):
     fb = FilterbankFeatures(**kwargs)
     fb.eval()
     x = torch.randn(10, 1337)
-    fb_trace = torch.jit.trace(fb, (x))
+    lens = torch.Tensor([1000] * 10)
+    fb_trace = torch.jit.trace(fb, (x, lens))
 
-    assert torch.allclose(fb(x), fb_trace(x), atol=1e-3)
+    out1, lens1 = fb(x, lens)
+    out2, lens2 = fb_trace(x, lens)
+    assert torch.allclose(out1, out2, atol=1e-3)
+    assert torch.allclose(lens1, lens2)
 
 
 @mark_slow
@@ -449,9 +481,13 @@ def test_filterbank_script(**kwargs):
     fb = FilterbankFeatures(**kwargs)
     fb.eval()
     x = torch.randn(10, 1337)
+    lens = torch.Tensor([1000] * 10)
     fb_script = torch.jit.script(fb)
 
-    assert torch.allclose(fb(x), fb_script(x), atol=1e-3)
+    out1, lens1 = fb(x, lens)
+    out2, lens2 = fb_script(x, lens)
+    assert torch.allclose(out1, out2, atol=1e-3)
+    assert torch.allclose(lens1, lens2)
 
 
 @filterbank_params
@@ -461,11 +497,12 @@ def test_filterbank_onnx(**kwargs):
     fb = patch_stft(fb)
     fb.eval()
     x = torch.randn(10, 1337)
+    lens = torch.Tensor([1000] * 10)
 
     with TemporaryDirectory() as export_path:
         torch.onnx.export(
             fb,
-            (x),
+            (x, lens),
             f"{export_path}/filterbank.onnx",
             verbose=True,
             opset_version=11,
