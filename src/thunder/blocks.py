@@ -9,7 +9,7 @@
 __all__ = ["convolution_stft", "normalize_tensor", "get_same_padding", "conv1d_decoder"]
 
 import math
-from typing import Optional
+from typing import Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -79,6 +79,29 @@ def convolution_stft(
     real_part = forward_transform[:, :cutoff, :]
     imag_part = forward_transform[:, cutoff:, :]
     return torch.stack((real_part, imag_part), dim=-1)
+
+
+class MultiSequential(nn.Sequential):
+    """nn.Sequential equivalent with 2 inputs/outputs"""
+
+    def forward(
+        self, x1: torch.Tensor, x2: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        for module in self.children():
+            x1, x2 = module(x1, x2)
+        return x1, x2
+
+
+class Masked(nn.Module):
+    def __init__(self, *layers):
+        """Wrapper to mix normal modules with others that take 2 inputs"""
+        super().__init__()
+        self.layer = nn.Sequential(*layers)
+
+    def forward(
+        self, x: torch.Tensor, lens: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        return self.layer(x), lens
 
 
 def normalize_tensor(
