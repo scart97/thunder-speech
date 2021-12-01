@@ -27,7 +27,6 @@ def asr_collate(samples: List[Tuple[Tensor, str]]) -> Tuple[Tensor, Tensor, List
     padded_audios = pad_sequence([s[0].squeeze() for s in samples], batch_first=True)
 
     audio_lengths = Tensor([s[0].size(-1) for s in samples])
-    audio_lengths = audio_lengths / audio_lengths.max()  # Normalize by max length
 
     texts = [s[1] for s in samples]
 

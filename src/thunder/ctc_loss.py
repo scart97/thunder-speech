@@ -21,7 +21,7 @@ def calculate_ctc(
     Args:
         probabilities : Output of the model, before any softmax operation. Shape [batch, #vocab, time]
         y : Tensor containing the corresponding labels. Shape [batch]
-        prob_lens : Lengths of each element in the input, normalized so that the max length is 1.0. Shape [batch]
+        prob_lens : Lengths of each element in the input. Shape [batch]
         y_lens : Lenghts of each element in the output. Should NOT be normalized.
         blank_idx : Index of the blank token in the vocab.
 
@@ -31,14 +31,11 @@ def calculate_ctc(
     # Change from (batch, #vocab, time) to (time, batch, #vocab)
     probabilities = probabilities.permute(2, 0, 1)
     logprobs = log_softmax(probabilities, dim=2)
-    # Calculate the logprobs correct length based on the
-    # normalized original lengths
-    prob_lens = (prob_lens * logprobs.shape[0]).long()
 
     return ctc_loss(
         logprobs,
         y,
-        prob_lens,
+        prob_lens.long(),
         y_lens,
         blank=blank_idx,
         reduction="mean",
