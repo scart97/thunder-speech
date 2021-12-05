@@ -13,9 +13,9 @@ from torchaudio.datasets.utils import download_url
 
 from tests.utils import mark_slow, requirescuda
 from thunder.data.datamodule import ManifestDatamodule
+from thunder.huggingface.compatibility import prepare_scriptable_wav2vec
 from thunder.module import load_pretrained
 from thunder.utils import get_default_cache_folder
-from thunder.wav2vec.compatibility import prepare_scriptable_wav2vec
 
 
 @mark_slow

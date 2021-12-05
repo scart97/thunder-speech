@@ -6,7 +6,7 @@
 import torch
 from transformers import Wav2Vec2FeatureExtractor
 
-from thunder.wav2vec.transform import Wav2Vec2Preprocess
+from thunder.huggingface.transform import Wav2Vec2Preprocess
 
 
 def _get_original_results(input_tensor: torch.Tensor, return_mask: bool = False):
