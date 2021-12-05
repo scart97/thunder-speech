@@ -7,12 +7,12 @@ from functools import partial
 from typing import Callable, Dict, Type
 
 from thunder.citrinet.compatibility import CitrinetCheckpoint, load_citrinet_checkpoint
+from thunder.huggingface.compatibility import load_huggingface_checkpoint
 from thunder.quartznet.compatibility import (
     QuartznetCheckpoint,
     load_quartznet_checkpoint,
 )
 from thunder.utils import BaseCheckpoint, CheckpointResult
-from thunder.wav2vec.compatibility import load_huggingface_checkpoint
 
 CHECKPOINT_LOAD_FUNC_TYPE = Callable[..., CheckpointResult]
 
