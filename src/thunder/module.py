@@ -154,7 +154,6 @@ class BaseCTCModule(pl.LightningModule):
         self.log("metrics/wer", self.validation_wer, on_epoch=True)
         return loss
 
-    @property
     def estimated_steps_per_epoch(self) -> int:
         """Training steps per epoch inferred from datamodule and devices.
 
@@ -183,14 +182,13 @@ class BaseCTCModule(pl.LightningModule):
         effective_batch_size = self.trainer.accumulate_grad_batches * num_devices
         return dataset_size // effective_batch_size
 
-    @property
     def estimated_max_steps(self) -> int:
         """Estimate max number of steps during the full training.
 
         Modified directly from lightning-flash:
         https://github.com/PyTorchLightning/lightning-flash/blob/e73c420d66cb531892fd9032a8328b81e15e0d62/flash/core/model.py#L1002
         """
-        estimated_max_steps = self.estimated_steps_per_epoch * self.trainer.max_epochs
+        estimated_max_steps = self.estimated_steps_per_epoch() * self.trainer.max_epochs
         if self.trainer.max_steps and self.trainer.max_steps < estimated_max_steps:
             return self.trainer.max_steps
         return estimated_max_steps
@@ -204,11 +202,11 @@ class BaseCTCModule(pl.LightningModule):
 
         steps_arg = updated_kwargs.pop("steps_arg", None)
         if steps_arg:
-            updated_kwargs[steps_arg] = self.estimated_steps_per_epoch
+            updated_kwargs[steps_arg] = self.estimated_steps_per_epoch()
 
         total_steps_arg = updated_kwargs.pop("total_steps_arg", None)
         if total_steps_arg:
-            updated_kwargs[total_steps_arg] = self.estimated_max_steps
+            updated_kwargs[total_steps_arg] = self.estimated_max_steps()
         return updated_kwargs
 
     def configure_optimizers(self):
