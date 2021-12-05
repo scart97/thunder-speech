@@ -12,9 +12,9 @@ from torch import Tensor, nn
 from torchaudio.models.wav2vec2.utils import import_huggingface_model
 
 from thunder.blocks import lengths_to_mask, linear_decoder
+from thunder.huggingface.transform import Wav2Vec2Preprocess
 from thunder.text_processing.transform import BatchTextTransformer
 from thunder.utils import CheckpointResult
-from thunder.wav2vec.transform import Wav2Vec2Preprocess
 
 
 class _HuggingFaceEncoderAdapt(nn.Module):
