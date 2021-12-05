@@ -18,7 +18,7 @@ class FinetuneEncoderDecoder(BaseFinetuning):
         self,
         unfreeze_encoder_at_epoch: int = 1,
         encoder_initial_lr_div: float = 10,
-        train_bn: bool = True,
+        train_batchnorm: bool = True,
     ):
         """
         Finetune a encoder model based on a learning rate.
@@ -30,12 +30,12 @@ class FinetuneEncoderDecoder(BaseFinetuning):
             encoder_initial_lr_div:
                 Used to scale down the encoder learning rate compared to rest of model.
 
-            train_bn: Make Batch Normalization trainable at the beginning of train.
+            train_batchnorm: Make Batch Normalization trainable at the beginning of train.
         """
         super().__init__()
         self.unfreeze_encoder_at_epoch = unfreeze_encoder_at_epoch
         self.encoder_initial_lr_div = encoder_initial_lr_div
-        self.train_bn = train_bn
+        self.train_batchnorm = train_batchnorm
 
     def on_fit_start(self, trainer: pl.Trainer, pl_module: pl.LightningModule):
         """Check if the LightningModule has the necessary attribute before the train starts
@@ -60,7 +60,7 @@ class FinetuneEncoderDecoder(BaseFinetuning):
         Args:
             pl_module : Lightning Module
         """
-        self.freeze(pl_module.encoder, train_bn=self.train_bn)
+        self.freeze(pl_module.encoder, train_bn=self.train_batchnorm)
 
     def finetune_function(
         self,
@@ -82,5 +82,5 @@ class FinetuneEncoderDecoder(BaseFinetuning):
                 pl_module.encoder,
                 optimizer,
                 initial_denom_lr=self.encoder_initial_lr_div,
-                train_bn=not self.train_bn,
+                train_bn=not self.train_batchnorm,
             )

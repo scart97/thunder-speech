@@ -85,11 +85,11 @@ class MultiSequential(nn.Sequential):
     """nn.Sequential equivalent with 2 inputs/outputs"""
 
     def forward(
-        self, x1: torch.Tensor, x2: torch.Tensor
+        self, audio: torch.Tensor, audio_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         for module in self.children():
-            x1, x2 = module(x1, x2)
-        return x1, x2
+            audio, audio_lengths = module(audio, audio_lengths)
+        return audio, audio_lengths
 
 
 class Masked(nn.Module):
@@ -99,9 +99,9 @@ class Masked(nn.Module):
         self.layer = nn.Sequential(*layers)
 
     def forward(
-        self, x: torch.Tensor, lens: torch.Tensor
+        self, audio: torch.Tensor, audio_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
-        return self.layer(x), lens
+        return self.layer(audio), audio_lengths
 
 
 def normalize_tensor(
@@ -140,20 +140,20 @@ def normalize_tensor(
     return (input_values - mean) / std
 
 
-def lengths_to_mask(lens: torch.Tensor, max_len: int) -> torch.Tensor:
+def lengths_to_mask(lengths: torch.Tensor, max_length: int) -> torch.Tensor:
     """Convert from integer lengths of each element to mask representation
 
     Args:
-        lens : lengths of each element in the batch
-        max_len : maximum length expected. Can be greater than lens.max()
+        lengths : lengths of each element in the batch
+        max_length : maximum length expected. Can be greater than lengths.max()
 
     Returns:
         Corresponding boolean mask indicating the valid region of the tensor.
     """
-    lens = lens.type(torch.long)
-    mask = torch.arange(max_len, device=lens.device).expand(
-        lens.shape[0], max_len
-    ) < lens.unsqueeze(1)
+    lengths = lengths.type(torch.long)
+    mask = torch.arange(max_length, device=lengths.device).expand(
+        lengths.shape[0], max_length
+    ) < lengths.unsqueeze(1)
     return mask
 
 

@@ -25,11 +25,13 @@ class _HuggingFaceEncoderAdapt(nn.Module):
             self.original_encoder.freeze_feature_extractor()
         self.mask_input = mask_input
 
-    def forward(self, x: Tensor, audio_lengths: Tensor) -> Tuple[Tensor, Tensor]:
+    def forward(self, audio: Tensor, audio_lengths: Tensor) -> Tuple[Tensor, Tensor]:
         attention_mask: Optional[Tensor] = None
         if self.mask_input:
-            attention_mask = lengths_to_mask(audio_lengths, max_len=x.size(-1)).int()
-        out = self.original_encoder(x, attention_mask=attention_mask)
+            attention_mask = lengths_to_mask(
+                audio_lengths, max_length=audio.size(-1)
+            ).int()
+        out = self.original_encoder(audio, attention_mask=attention_mask)
         return (
             out.last_hidden_state,
             self.original_encoder._get_feat_extract_output_lengths(audio_lengths),

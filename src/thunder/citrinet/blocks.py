@@ -173,7 +173,7 @@ class CitrinetBlock(nn.Module):
         self.mout = MultiSequential(*_get_act_dropout_layer(drop_prob=dropout))
 
     def forward(
-        self, x: torch.Tensor, lens: torch.Tensor
+        self, x: torch.Tensor, lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
@@ -184,16 +184,16 @@ class CitrinetBlock(nn.Module):
         """
 
         # compute forward convolutions
-        out, lens_out = self.mconv(x, lens)
+        out, lengths_out = self.mconv(x, lengths)
 
         # compute the residuals
         if self.res is not None:
-            res_out, _ = self.res(x, lens)
+            res_out, _ = self.res(x, lengths)
             out = out + res_out
 
         # compute the output
-        out, lens_out = self.mout(out, lens_out)
-        return out, lens_out
+        out, lengths_out = self.mout(out, lengths_out)
+        return out, lengths_out
 
 
 def stem(feat_in: int) -> CitrinetBlock:

@@ -139,42 +139,42 @@ class MaskedConv1d(nn.Module):
         self.kernel_size = self.conv.kernel_size[0]
         self.stride = self.conv.stride[0]
 
-    def get_seq_len(self, lens: torch.Tensor) -> torch.Tensor:
+    def get_seq_len(self, lengths: torch.Tensor) -> torch.Tensor:
         """Get the lengths of the inputs after the convolution operation is applied.
         Args:
-            lens : Original lengths of the inputs
+            lengths : Original lengths of the inputs
         Returns:
             Resulting lengths after the convolution
         """
         return (
-            lens + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1
+            lengths + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1
         ) // self.stride + 1
 
-    def mask_fill(self, x: torch.Tensor, lens: torch.Tensor) -> torch.Tensor:
+    def mask_fill(self, x: torch.Tensor, lengths: torch.Tensor) -> torch.Tensor:
         """Mask the input based on it's respective lengths.
         Args:
             x : Signal to be processed, of shape (batch, features, time)
-            lens : Lenghts of each element in the batch of x, with shape (batch)
+            lengths : Lenghts of each element in the batch of x, with shape (batch)
         Returns:
             The masked signal
         """
-        mask = lengths_to_mask(lens, x.shape[-1])
+        mask = lengths_to_mask(lengths, x.shape[-1])
         return x.masked_fill(~mask.unsqueeze(1), 0)
 
     def forward(
-        self, x: torch.Tensor, lens: torch.Tensor
+        self, x: torch.Tensor, lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward method
         Args:
             x : Signal to be processed, of shape (batch, features, time)
-            lens : Lenghts of each element in the batch of x, with shape (batch)
+            lengths : Lenghts of each element in the batch of x, with shape (batch)
         Returns:
             Both the signal processed by the convolution and the resulting lengths
         """
         if self.use_mask:
-            x = self.mask_fill(x, lens)
+            x = self.mask_fill(x, lengths)
         out = self.conv(x)
-        return out, self.get_seq_len(lens)
+        return out, self.get_seq_len(lengths)
 
 
 def _get_conv_bn_layer(
@@ -310,7 +310,7 @@ class QuartznetBlock(nn.Module):
         self.mout = MultiSequential(*_get_act_dropout_layer(drop_prob=dropout))
 
     def forward(
-        self, x: torch.Tensor, lens: torch.Tensor
+        self, x: torch.Tensor, lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
@@ -321,16 +321,16 @@ class QuartznetBlock(nn.Module):
         """
 
         # compute forward convolutions
-        out, lens_out = self.mconv(x, lens)
+        out, lengths_out = self.mconv(x, lengths)
 
         # compute the residuals
         if self.res is not None:
-            res_out, _ = self.res(x, lens)
+            res_out, _ = self.res(x, lengths)
             out = out + res_out
 
         # compute the output
-        out, lens_out = self.mout(out, lens_out)
-        return out, lens_out
+        out, lengths_out = self.mout(out, lengths_out)
+        return out, lengths_out
 
 
 def stem(feat_in: int) -> QuartznetBlock:

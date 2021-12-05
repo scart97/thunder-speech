@@ -40,7 +40,7 @@ class Wav2Vec2Preprocess(nn.Module):
         attention_mask: Optional[torch.Tensor] = None
         if self.mask_input:
             attention_mask = lengths_to_mask(
-                audio_lengths, max_len=audio.size(-1)
+                audio_lengths, max_length=audio.size(-1)
             ).int()
 
         return (

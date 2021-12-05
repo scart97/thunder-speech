@@ -37,10 +37,10 @@ class BaseCTCModule(pl.LightningModule):
             decoder: Decoder part of the model
             audio_transform: Transforms raw audio into the features the encoder expects
             text_transform: Class that encodes and decodes all textual representation
-            optimizer_class: Optimizer to use during training. Defaults to torch.optim.AdamW.
-            optimizer_kwargs: Optional extra kwargs to the optimizer. Defaults to None.
-            lr_scheduler_class: Optional class to use a learning rate scheduler with the optimizer. Defaults to None.
-            lr_scheduler_kwargs: Optional extra kwargs to the learning rate scheduler. Defaults to None.
+            optimizer_class: Optimizer to use during training.
+            optimizer_kwargs: Optional extra kwargs to the optimizer.
+            lr_scheduler_class: Optional class to use a learning rate scheduler with the optimizer.
+            lr_scheduler_kwargs: Optional extra kwargs to the learning rate scheduler.
         """
         super().__init__()
 
@@ -86,8 +86,8 @@ class BaseCTCModule(pl.LightningModule):
         Returns:
             A list of strings, each one contains the corresponding transcription to the original batch element.
         """
-        lens = torch.tensor([x.shape[-1]], device=x.device)
-        pred, _ = self(x, lens)
+        audio_lengths = torch.tensor(x.shape[0] * [x.shape[-1]], device=x.device)
+        pred, _ = self(x, audio_lengths)
         return self.text_transform.decode_prediction(pred.argmax(1))
 
     def training_step(
@@ -102,12 +102,16 @@ class BaseCTCModule(pl.LightningModule):
         Returns:
             Training loss for that batch
         """
-        audio, audio_lens, texts = batch
-        y, y_lens = self.text_transform.encode(texts, device=self.device)
+        audio, audio_lengths, texts = batch
+        y, y_lengths = self.text_transform.encode(texts, device=self.device)
 
-        probabilities, prob_lens = self(audio, audio_lens)
+        probabilities, prob_lengths = self(audio, audio_lengths)
         loss = calculate_ctc(
-            probabilities, y, prob_lens, y_lens, self.text_transform.vocab.blank_idx
+            probabilities,
+            y,
+            prob_lengths,
+            y_lengths,
+            self.text_transform.vocab.blank_idx,
         )
 
         self.log("loss/train_loss", loss)
@@ -125,12 +129,16 @@ class BaseCTCModule(pl.LightningModule):
         Returns:
             Validation loss for that batch
         """
-        audio, audio_lens, texts = batch
-        y, y_lens = self.text_transform.encode(texts, device=self.device)
+        audio, audio_lengths, texts = batch
+        y, y_lengths = self.text_transform.encode(texts, device=self.device)
 
-        probabilities, prob_lens = self(audio, audio_lens)
+        probabilities, prob_lengths = self(audio, audio_lengths)
         loss = calculate_ctc(
-            probabilities, y, prob_lens, y_lens, self.text_transform.vocab.blank_idx
+            probabilities,
+            y,
+            prob_lengths,
+            y_lengths,
+            self.text_transform.vocab.blank_idx,
         )
 
         decoded_preds = self.text_transform.decode_prediction(probabilities.argmax(1))
