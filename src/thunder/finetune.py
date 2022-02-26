@@ -4,7 +4,7 @@ import torch
 from torch import nn
 
 from thunder.module import BaseCTCModule
-from thunder.registry import load_checkpoint_data
+from thunder.registry import load_pretrained
 from thunder.text_processing.transform import BatchTextTransformer
 
 
@@ -41,7 +41,7 @@ class FinetuneCTCModule(BaseCTCModule):
         decoder_kwargs = decoder_kwargs or {}
         text_kwargs = text_kwargs or {}
 
-        checkpoint_data = load_checkpoint_data(checkpoint_name, **checkpoint_kwargs)
+        checkpoint_data = load_pretrained(checkpoint_name, **checkpoint_kwargs)
         # Changing the decoder layer and text processing
         if decoder_class is None:
             text_transform = checkpoint_data.text_transform

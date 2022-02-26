@@ -12,7 +12,7 @@ from torchaudio.datasets.utils import download_url
 
 from tests.utils import mark_slow, requirescuda
 from thunder.data.datamodule import ManifestDatamodule
-from thunder.module import load_pretrained
+from thunder.registry import load_pretrained
 from thunder.utils import get_default_cache_folder
 
 

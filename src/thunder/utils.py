@@ -10,21 +10,16 @@ __all__ = [
     "chain_calls",
     "BaseCheckpoint",
     "download_checkpoint",
-    "CheckpointResult",
 ]
 
 import functools
 import os
-from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Callable, List, Union
 
 import torchaudio
 import wget
-from torch import nn
-
-from thunder.text_processing.transform import BatchTextTransformer
 
 
 def audio_len(item: Union[Path, str]) -> float:
@@ -136,12 +131,3 @@ def download_checkpoint(name: BaseCheckpoint, checkpoint_folder: str = None) -> 
         wget.download(url, out=str(checkpoint_path))
 
     return checkpoint_path
-
-
-@dataclass
-class CheckpointResult:
-    encoder: nn.Module
-    decoder: nn.Module
-    audio_transform: nn.Module
-    text_transform: BatchTextTransformer
-    encoder_final_dimension: int

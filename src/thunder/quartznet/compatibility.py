@@ -23,10 +23,11 @@ from torch import nn
 from torchaudio.datasets.utils import extract_archive
 
 from thunder.blocks import conv1d_decoder
+from thunder.module import BaseCTCModule
 from thunder.quartznet.blocks import QuartznetEncoder
 from thunder.quartznet.transform import FilterbankFeatures
 from thunder.text_processing.transform import BatchTextTransformer
-from thunder.utils import BaseCheckpoint, CheckpointResult, download_checkpoint
+from thunder.utils import BaseCheckpoint, download_checkpoint
 
 
 # fmt:off
@@ -146,7 +147,7 @@ def load_quartznet_weights(encoder: nn.Module, decoder: nn.Module, weights_path:
 
 def load_quartznet_checkpoint(
     checkpoint: Union[str, QuartznetCheckpoint], save_folder: str = None
-) -> CheckpointResult:
+) -> BaseCTCModule:
     """Load from the original nemo checkpoint.
 
     Args:
@@ -175,10 +176,11 @@ def load_quartznet_checkpoint(
 
         weights_path = extract_path / "model_weights.ckpt"
         load_quartznet_weights(encoder, decoder, str(weights_path))
-        return CheckpointResult(
+        module = BaseCTCModule(
             encoder,
             decoder,
             audio_transform,
             text_transform,
             encoder_final_dimension=1024,
         )
+        return module.eval()

@@ -1,25 +1,26 @@
 """Functionality to register the multiple checkpoints and provide a unified loading interface.
 """
 
-__all__ = ["register_checkpoint", "load_checkpoint_data"]
+__all__ = ["register_checkpoint_enum", "load_pretrained"]
 
 from functools import partial
 from typing import Callable, Dict, Type
 
 from thunder.citrinet.compatibility import CitrinetCheckpoint, load_citrinet_checkpoint
 from thunder.huggingface.compatibility import load_huggingface_checkpoint
+from thunder.module import BaseCTCModule
 from thunder.quartznet.compatibility import (
     QuartznetCheckpoint,
     load_quartznet_checkpoint,
 )
-from thunder.utils import BaseCheckpoint, CheckpointResult
+from thunder.utils import BaseCheckpoint
 
-CHECKPOINT_LOAD_FUNC_TYPE = Callable[..., CheckpointResult]
+CHECKPOINT_LOAD_FUNC_TYPE = Callable[..., BaseCTCModule]
 
 CHECKPOINT_REGISTRY: Dict[str, CHECKPOINT_LOAD_FUNC_TYPE] = {}
 
 
-def register_checkpoint(
+def register_checkpoint_enum(
     checkpoints: Type[BaseCheckpoint], load_function: CHECKPOINT_LOAD_FUNC_TYPE
 ):
     """Register all variations of some checkpoint enum with the corresponding loading function
@@ -34,11 +35,11 @@ def register_checkpoint(
         )
 
 
-register_checkpoint(QuartznetCheckpoint, load_quartznet_checkpoint)
-register_checkpoint(CitrinetCheckpoint, load_citrinet_checkpoint)
+register_checkpoint_enum(QuartznetCheckpoint, load_quartznet_checkpoint)
+register_checkpoint_enum(CitrinetCheckpoint, load_citrinet_checkpoint)
 
 
-def load_checkpoint_data(checkpoint_name: str, **load_kwargs) -> CheckpointResult:
+def load_pretrained(checkpoint_name: str, **load_kwargs) -> BaseCTCModule:
     """Load data from any registered checkpoint
 
     Args:

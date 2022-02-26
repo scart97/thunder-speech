@@ -13,8 +13,8 @@ from torchaudio.models.wav2vec2.utils import import_huggingface_model
 
 from thunder.blocks import lengths_to_mask, linear_decoder
 from thunder.huggingface.transform import Wav2Vec2Preprocess
+from thunder.module import BaseCTCModule
 from thunder.text_processing.transform import BatchTextTransformer
-from thunder.utils import CheckpointResult
 
 
 class _HuggingFaceEncoderAdapt(nn.Module):
@@ -38,7 +38,7 @@ class _HuggingFaceEncoderAdapt(nn.Module):
         )
 
 
-def load_huggingface_checkpoint(model_name: str, **model_kwargs) -> CheckpointResult:
+def load_huggingface_checkpoint(model_name: str, **model_kwargs) -> BaseCTCModule:
     model = AutoModelForCTC.from_pretrained(model_name, **model_kwargs)
     processor = Wav2Vec2Processor.from_pretrained(model_name)
     vocab = list(processor.tokenizer.get_vocab().keys())
@@ -56,7 +56,7 @@ def load_huggingface_checkpoint(model_name: str, **model_kwargs) -> CheckpointRe
     if hasattr(model, "lm_head"):
         decoder[1].load_state_dict(model.lm_head.state_dict())
 
-    return CheckpointResult(
+    module = BaseCTCModule(
         encoder=_HuggingFaceEncoderAdapt(
             model.base_model,
             mask_input=processor.feature_extractor.return_attention_mask,
@@ -68,6 +68,7 @@ def load_huggingface_checkpoint(model_name: str, **model_kwargs) -> CheckpointRe
         ),
         encoder_final_dimension=model.base_model.config.hidden_size,
     )
+    return module.eval()
 
 
 def prepare_scriptable_wav2vec(module, quantized: bool = False):

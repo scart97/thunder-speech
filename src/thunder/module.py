@@ -3,7 +3,7 @@
 
 # Copyright (c) 2021 scart97
 
-__all__ = ["BaseCTCModule", "load_pretrained"]
+__all__ = ["BaseCTCModule"]
 
 from typing import Any, Dict, List, Optional, Tuple, Type
 
@@ -15,7 +15,6 @@ from torchmetrics.text.cer import CharErrorRate
 from torchmetrics.text.wer import WER
 
 from thunder.ctc_loss import calculate_ctc
-from thunder.registry import load_checkpoint_data
 from thunder.text_processing.transform import BatchTextTransformer
 
 
@@ -30,6 +29,7 @@ class BaseCTCModule(pl.LightningModule):
         optimizer_kwargs: Dict = None,
         lr_scheduler_class: Any = None,
         lr_scheduler_kwargs: Dict = None,
+        encoder_final_dimension: int = None,
     ):
         """Base module for all systems that follow the same CTC training procedure.
 
@@ -42,6 +42,7 @@ class BaseCTCModule(pl.LightningModule):
             optimizer_kwargs: Optional extra kwargs to the optimizer.
             lr_scheduler_class: Optional class to use a learning rate scheduler with the optimizer.
             lr_scheduler_kwargs: Optional extra kwargs to the learning rate scheduler.
+            encoder_final_dimension: number of features in the encoder output.
         """
         super().__init__()
 
@@ -55,6 +56,8 @@ class BaseCTCModule(pl.LightningModule):
         self.lr_scheduler_class = lr_scheduler_class
         self.lr_scheduler_kwargs = lr_scheduler_kwargs or {}
         self.lr_scheduler_interval = self.lr_scheduler_kwargs.pop("interval", "step")
+
+        self.encoder_final_dimension = encoder_final_dimension
 
         # Metrics
         self.validation_cer = CharErrorRate()
@@ -226,24 +229,3 @@ class BaseCTCModule(pl.LightningModule):
                 "interval": self.lr_scheduler_interval,
             },
         }
-
-
-def load_pretrained(checkpoint_name: str, **load_kwargs) -> BaseCTCModule:
-    """Load from the original checkpoint into a LightningModule ready for training or inference.
-
-    Args:
-        checkpoint_name : Checkpoint to be downloaded locally and lodaded.
-        load_kwargs : Keyword arguments used by the checkpoint loading function.
-
-    Returns:
-        The module loaded from the checkpoint
-    """
-    checkpoint_data = load_checkpoint_data(checkpoint_name, **load_kwargs)
-    instantiated = BaseCTCModule(
-        checkpoint_data.encoder,
-        checkpoint_data.decoder,
-        checkpoint_data.audio_transform,
-        checkpoint_data.text_transform,
-    )
-    instantiated.eval()
-    return instantiated
