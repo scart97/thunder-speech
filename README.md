@@ -30,28 +30,50 @@ pip install thunder-speech
 ```
 
 
-### Import desired models
+### Load the model and train it
 
 ```py
-from thunder.quartznet.module import QuartznetModule,  QuartznetCheckpoint
+from thunder.registry import load_pretrained
+from thunder.quartznet.compatibility import QuartznetCheckpoint
 
 # Tab completion works to discover other QuartznetCheckpoint.*
-model = QuartznetModule.load_from_nemo(QuartznetCheckpoint.QuartzNet5x5LS_En)
+module = load_pretrained(QuartznetCheckpoint.QuartzNet5x5LS_En)
+# It also accepts the string identifier
+module = load_pretrained("QuartzNet5x5LS_En")
+# Or models from the huggingface hub
+module = load_pretrained("facebook/wav2vec2-large-960h")
 ```
-### Load audio and predict
+
+### Export to a pure pytorch model using torchscript
 
 ```py
-import torchaudio
-audio, sr = torchaudio.load("my_sample_file.wav")
+module.to_torchscript("model_ready_for_inference.pt")
 
-transcriptions = model.predict(audio)
-# transcriptions is a list of strings with the captions.
+# Optional step: also export audio loading pipeline
+from thunder.data.dataset import AudioFileLoader
+
+loader = AudioFileLoader(sample_rate=16000)
+scripted_loader = torch.jit.script(loader)
+scripted_loader.save("audio_loader.pt")
 ```
 
+### Run inference in production
+
+``` python
+import torch
+import torchaudio
+
+model = torch.jit.load("model_ready_for_inference.pt")
+loader = torch.jit.load("audio_loader.pt")
+# Open audio
+audio = loader("audio_file.wav")
+# transcriptions is a list of strings with the captions.
+transcriptions = model.predict(audio)
+```
 
 ## More quick tips
 
-If you want to know how to export the models using torchscript, access the raw probabilities and decode manually or fine-tune the models you can access the documentation [here](https://scart97.github.io/thunder-speech/quick%20reference%20guide/).
+If you want to know how to access the raw probabilities and decode manually or fine-tune the models you can access the documentation [here](https://scart97.github.io/thunder-speech/quick%20reference%20guide/).
 
 ## Contributing
 

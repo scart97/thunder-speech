@@ -1,50 +1,42 @@
 # Quick reference guide
 
-## How to export a Quartznet .nemo file to a pure pytorch model?
+## How to load a Quartznet/Citrinet .nemo file?
 
 ```py
-from thunder.quartznet.module import QuartznetModule
-from thunder.data.dataset import AudioFileLoader
+from thunder.quartznet.compatibility import load_quartznet_checkpoint
+from thunder.citrinet.compatibility import load_citrinet_checkpoint
+
+module = load_quartznet_checkpoint("/path/to/quartznet.nemo")
+module = load_citrinet_checkpoint("/path/to/citrinet.nemo")
+```
+
+## How to export models with special restrictions?
+
+Case 1: Using Quartznet or Citrinet on platforms that doesnt support FFT (android, onnx):
+
+```py
+from thunder.registry import load_pretrained
 from thunder.quartznet.transform import patch_stft
 import torch
 
-module = QuartznetModule.load_from_nemo("/path/to/checkpoint.nemo")
-# Uncomment the following line if exporting to onnx or mobile use
-# module.audio_transform = patch_stft(module.audio_transform)
+module = load_pretrained("QuartzNet5x5LS_En")
+module.audio_transform = patch_stft(module.audio_transform)
 module.to_torchscript("model_ready_for_inference.pt")
-
-# Optional step: also export audio loading pipeline
-loader = AudioFileLoader(sample_rate=16000)
-scripted_loader = torch.jit.script(loader)
-scripted_loader.save("audio_loader.pt")
 ```
 
-!!! note
-    If the model uses features based on stft (quartznet, citrinet) and you're exporting to onnx
-    or to use in mobile apps, there's one additional step before exporting that will replace the
-    `torch.stft` operator to a custom implementation that works in those environments.
-    Related issues:
-    [pytorch](https://github.com/pytorch/pytorch/issues/31317),
-    [torchaudio](https://github.com/pytorch/audio/issues/408),
-    [onnx](https://github.com/onnx/onnx/issues/1646)
+Case 2: Wav2vec 2.0 using torchscript
 
 
-## How to run inference on that exported file?
+```py
+from thunder.registry import load_pretrained
+from thunder.huggingface.compatibility import prepare_scriptable_wav2vec
 
-
-``` python
-import torch
-import torchaudio
-
-model = torch.jit.load("model_ready_for_inference.pt")
-loader = torch.jit.load("audio_loader.pt")
-# Open audio
-audio = loader("audio_file.wav")
-# transcriptions is a list of strings with the captions.
-transcriptions = model.predict(audio)
+module = load_pretrained("facebook/wav2vec2-large-960h")
+module = prepare_scriptable_wav2vec(module)
+module.to_torchscript("model_ready_for_inference.pt")
 ```
 
-## What if I want the probabilities instead of the captions?
+## What if I want the probabilities instead of the captions during inference?
 
 Instead of `model.predict(audio)`, use just `model(audio)`
 
@@ -68,7 +60,7 @@ transcriptions = model.text_transform.decode_prediction(probs.argmax(1))
 import pytorch_lightning as pl
 
 from thunder.data.datamodule import ManifestDatamodule
-from thunder.quartznet.module import QuartznetModule,  QuartznetCheckpoint
+from thunder.registry import load_pretrained
 from thunder.callbacks import FinetuneEncoderDecoder
 
 dm = ManifestDatamodule(
@@ -76,8 +68,8 @@ dm = ManifestDatamodule(
     val_manifest="/path/to/val_manifest.json",
     test_manifest="/path/to/test_manifest.json",
 )
-# Tab completion works to discover other QuartznetCheckpoint.*
-model = QuartznetModule.load_from_nemo(QuartznetCheckpoint.QuartzNet5x5LS_En)
+
+model = load_pretrained("QuartzNet5x5LS_En")
 
 trainer = pl.Trainer(
     gpus=-1, # Use all gpus
@@ -88,7 +80,7 @@ trainer = pl.Trainer(
 trainer.fit(model=model, datamodule=dm)
 ```
 
-## How to get the initial_vocab_tokens from my dataset?
+## How to get the tokens from my dataset?
 
 ```python
 from thunder.text_processing.tokenizer import char_tokenizer, get_most_frequent_tokens
@@ -98,5 +90,5 @@ my_datamodule.prepare_data()
 my_datamodule.setup(None)
 
 train_corpus = " ".join(my_datamodule.train_dataset.all_outputs())
-initial_vocab_tokens = get_most_frequent_tokens(train_corpus, char_tokenizer)
+tokens = get_most_frequent_tokens(train_corpus, char_tokenizer)
 ```
