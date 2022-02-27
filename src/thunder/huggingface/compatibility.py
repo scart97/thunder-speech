@@ -1,3 +1,6 @@
+"""Helper functions to load huggingface speech recognition models.
+"""
+
 try:
     from transformers import AutoModelForCTC, Wav2Vec2Processor
 except ModuleNotFoundError as transformers_not_installed:

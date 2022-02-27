@@ -1,3 +1,6 @@
+""" Module that implements easy finetuning of any model in the library.
+"""
+
 from typing import Any, Dict, List, Type
 
 import torch
@@ -25,16 +28,16 @@ class FinetuneCTCModule(BaseCTCModule):
         """Generic finetune module, load any combination of encoder/decoder and custom tokens
 
         Args:
-            checkpoint_name : Name of the base checkpoint to load
-            checkpoint_kwargs : Additional kwargs to the checkpoint loading function.
-            decoder_class : Optional class to override the loaded checkpoint.
-            decoder_kwargs : Additional kwargs to the decoder_class.
-            tokens : If passed a list of tokens, the decoder from the base checkpoint will be replaced by the one in decoder_class, and a new text transform will be build using those tokens.
-            text_kwargs : Additional kwargs to the text_tranform class, when tokens is not None.
-            optimizer_class : Optimizer to use during training.
-            optimizer_kwargs : Optional extra kwargs to the optimizer.
-            lr_scheduler_class : Optional class to use a learning rate scheduler with the optimizer.
-            lr_scheduler_kwargs : Optional extra kwargs to the learning rate scheduler.
+            checkpoint_name: Name of the base checkpoint to load
+            checkpoint_kwargs: Additional kwargs to the checkpoint loading function.
+            decoder_class: Optional class to override the loaded checkpoint.
+            decoder_kwargs: Additional kwargs to the decoder_class.
+            tokens: If passed a list of tokens, the decoder from the base checkpoint will be replaced by the one in decoder_class, and a new text transform will be build using those tokens.
+            text_kwargs: Additional kwargs to the text_tranform class, when tokens is not None.
+            optimizer_class: Optimizer to use during training.
+            optimizer_kwargs: Optional extra kwargs to the optimizer.
+            lr_scheduler_class: Optional class to use a learning rate scheduler with the optimizer.
+            lr_scheduler_kwargs: Optional extra kwargs to the learning rate scheduler.
         """
         self.save_hyperparameters()
         checkpoint_kwargs = checkpoint_kwargs or {}

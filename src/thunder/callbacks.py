@@ -41,12 +41,11 @@ class FinetuneEncoderDecoder(BaseFinetuning):
         """Check if the LightningModule has the necessary attribute before the train starts
 
         Args:
-            trainer : Lightning Trainer
-            pl_module : Lightning Module used during train
+            trainer: Lightning Trainer
+            pl_module: Lightning Module used during train
 
         Raises:
-            MisconfigurationException:
-                If LightningModule has no nn.Module `encoder` attribute.
+            Exception: If LightningModule has no nn.Module `encoder` attribute.
         """
         if hasattr(pl_module, "encoder") and isinstance(pl_module.encoder, nn.Module):
             return
@@ -58,7 +57,7 @@ class FinetuneEncoderDecoder(BaseFinetuning):
         """Freeze the encoder initially before the train starts.
 
         Args:
-            pl_module : Lightning Module
+            pl_module: Lightning Module
         """
         self.freeze(pl_module.encoder, train_bn=self.train_batchnorm)
 
@@ -72,10 +71,10 @@ class FinetuneEncoderDecoder(BaseFinetuning):
         """Unfreezes the encoder at the specified epoch
 
         Args:
-            pl_module : Lightning Module
-            epoch : epoch number
-            optimizer : optimizer used during training
-            opt_idx : optimizer index
+            pl_module: Lightning Module
+            epoch: epoch number
+            optimizer: optimizer used during training
+            opt_idx: optimizer index
         """
         if epoch == self.unfreeze_encoder_at_epoch:
             self.unfreeze_and_add_param_group(

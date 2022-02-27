@@ -26,8 +26,8 @@ def register_checkpoint_enum(
     """Register all variations of some checkpoint enum with the corresponding loading function
 
     Args:
-        checkpoints : Base checkpoint class
-        load_function : function to load the checkpoint,
+        checkpoints: Base checkpoint class
+        load_function: function to load the checkpoint,
             must receive one instance of `checkpoints` as first argument"""
     for checkpoint in checkpoints:
         CHECKPOINT_REGISTRY.update(
@@ -43,7 +43,7 @@ def load_pretrained(checkpoint_name: str, **load_kwargs) -> BaseCTCModule:
     """Load data from any registered checkpoint
 
     Args:
-        checkpoint_name : Base checkpoint name, like "QuartzNet5x5LS_En" or "facebook/wav2vec2-large-960h"
+        checkpoint_name: Base checkpoint name, like "QuartzNet5x5LS_En" or "facebook/wav2vec2-large-960h"
 
     Returns:
         Object containing the checkpoint data (encoder, decoder, transforms and additional data).

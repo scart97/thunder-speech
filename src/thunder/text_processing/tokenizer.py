@@ -99,7 +99,7 @@ def word_tokenizer(text: str) -> List[str]:
     """Tokenize input text splitting into words
 
     Args:
-        text : Input text
+        text: Input text
 
     Returns:
         Tokenized text
@@ -111,7 +111,7 @@ def char_tokenizer(text: str) -> List[str]:
     """Tokenize input text splitting into characters
 
     Args:
-        text : Input text
+        text: Input text
 
     Returns:
         Tokenized text
@@ -128,10 +128,10 @@ def get_most_frequent_tokens(
     """Helper function to get the most frequent tokens from a text corpus.
 
     Args:
-        corpus : Text corpus to be used, this is a long string containing all of your text
-        tokenize_function : Same tokenizer function that will be used during training
-        minimum_frequency : Remove any token with frequency less than that. Defaults to 1.
-        max_number_of_tokens : Optionally limit to the K most frequent tokens. Defaults to None.
+        corpus: Text corpus to be used, this is a long string containing all of your text
+        tokenize_function: Same tokenizer function that will be used during training
+        minimum_frequency: Remove any token with frequency less than that. Defaults to 1.
+        max_number_of_tokens: Optionally limit to the K most frequent tokens. Defaults to None.
 
     Returns:
         All of the unique, most frequent tokens, ordered by frequency.

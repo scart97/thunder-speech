@@ -23,11 +23,11 @@ def calculate_ctc(
     labels.
 
     Args:
-        probabilities : Output of the model, before any softmax operation. Shape [batch, #vocab, time]
-        y : Tensor containing the corresponding labels. Shape [batch]
-        prob_lengths : Lengths of each element in the input. Shape [batch]
-        y_lengths : Lenghts of each element in the output. Should NOT be normalized.
-        blank_idx : Index of the blank token in the vocab.
+        probabilities: Output of the model, before any softmax operation. Shape [batch, #vocab, time]
+        y: Tensor containing the corresponding labels. Shape [batch]
+        prob_lengths: Lengths of each element in the input. Shape [batch]
+        y_lengths: Lenghts of each element in the output. Should NOT be normalized.
+        blank_idx: Index of the blank token in the vocab.
 
     Returns:
         Loss tensor that can be backpropagated.

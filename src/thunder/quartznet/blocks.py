@@ -109,15 +109,15 @@ class MaskedConv1d(nn.Module):
         This module correspond to a 1d convolution with input masking. Arguments to create are the
         same as nn.Conv1d, but with the addition of use_mask for special behaviour.
         Args:
-            in_channels : Same as nn.Conv1d
-            out_channels : Same as nn.Conv1d
-            kernel_size : Same as nn.Conv1d
-            stride : Same as nn.Conv1d
-            padding : Same as nn.Conv1d
-            dilation : Same as nn.Conv1d
-            groups : Same as nn.Conv1d
-            bias : Same as nn.Conv1d
-            use_mask : Controls the masking of input before the convolution during the forward.
+            in_channels: Same as nn.Conv1d
+            out_channels: Same as nn.Conv1d
+            kernel_size: Same as nn.Conv1d
+            stride: Same as nn.Conv1d
+            padding: Same as nn.Conv1d
+            dilation: Same as nn.Conv1d
+            groups: Same as nn.Conv1d
+            bias: Same as nn.Conv1d
+            use_mask: Controls the masking of input before the convolution during the forward.
         """
         super().__init__()
 
@@ -142,19 +142,24 @@ class MaskedConv1d(nn.Module):
     def get_seq_len(self, lengths: torch.Tensor) -> torch.Tensor:
         """Get the lengths of the inputs after the convolution operation is applied.
         Args:
-            lengths : Original lengths of the inputs
+            lengths: Original lengths of the inputs
         Returns:
             Resulting lengths after the convolution
         """
         return (
-            lengths + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1
-        ) // self.stride + 1
+            torch.div(
+                lengths + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1,
+                self.stride,
+                rounding_mode="floor",
+            )
+            + 1
+        )
 
     def mask_fill(self, x: torch.Tensor, lengths: torch.Tensor) -> torch.Tensor:
         """Mask the input based on it's respective lengths.
         Args:
-            x : Signal to be processed, of shape (batch, features, time)
-            lengths : Lenghts of each element in the batch of x, with shape (batch)
+            x: Signal to be processed, of shape (batch, features, time)
+            lengths: Lenghts of each element in the batch of x, with shape (batch)
         Returns:
             The masked signal
         """
@@ -166,8 +171,8 @@ class MaskedConv1d(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward method
         Args:
-            x : Signal to be processed, of shape (batch, features, time)
-            lengths : Lenghts of each element in the batch of x, with shape (batch)
+            x: Signal to be processed, of shape (batch, features, time)
+            lengths: Lenghts of each element in the batch of x, with shape (batch)
         Returns:
             Both the signal processed by the convolution and the resulting lengths
         """
@@ -241,15 +246,15 @@ class QuartznetBlock(nn.Module):
         dense residual used on Jasper is not supported here, and masked convolutions were also removed.
 
         Args:
-            in_channels : Number of input channels
-            out_channels : Number of output channels
-            repeat : Repetitions inside block.
-            kernel_size : Kernel size.
-            stride : Stride of each repetition.
-            dilation : Dilation of each repetition.
-            dropout : Dropout used before each activation.
-            residual : Controls the use of residual connection.
-            separable : Controls the use of separable convolutions.
+            in_channels: Number of input channels
+            out_channels: Number of output channels
+            repeat: Repetitions inside block.
+            kernel_size: Kernel size.
+            stride: Stride of each repetition.
+            dilation: Dilation of each repetition.
+            dropout: Dropout used before each activation.
+            residual: Controls the use of residual connection.
+            separable: Controls the use of separable convolutions.
         """
         super().__init__()
 
@@ -314,7 +319,7 @@ class QuartznetBlock(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
-            x : Tensor of shape (batch, features, time) where #features == inplanes
+            x: Tensor of shape (batch, features, time) where #features == inplanes
 
         Returns:
             Result of applying the block on the input, and corresponding output lengths
@@ -337,7 +342,7 @@ def stem(feat_in: int) -> QuartznetBlock:
     """Creates the Quartznet stem. That is the first block of the model, that process the input directly.
 
     Args:
-        feat_in : Number of input features
+        feat_in: Number of input features
 
     Returns:
         Quartznet stem block
@@ -359,9 +364,9 @@ def body(
     """Creates the body of the Quartznet model. That is the middle part.
 
     Args:
-        filters : List of filters inside each block in the body.
-        kernel_size : Corresponding list of kernel sizes for each block. Should have the same length as the first argument.
-        repeat_blocks : Number of repetitions of each block inside the body.
+        filters: List of filters inside each block in the body.
+        kernel_size: Corresponding list of kernel sizes for each block. Should have the same length as the first argument.
+        repeat_blocks: Number of repetitions of each block inside the body.
 
     Returns:
         List of layers that form the body of the network.

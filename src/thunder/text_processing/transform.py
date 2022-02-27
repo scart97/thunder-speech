@@ -3,6 +3,11 @@
 
 # Copyright (c) 2021 scart97
 
+"""
+Process batched text
+"""
+
+
 __all__ = ["BatchTextTransformer"]
 
 from typing import List, Optional
@@ -29,13 +34,14 @@ class BatchTextTransformer(nn.Module):
         """That class is the glue code that uses all of the text processing
         functions to encode/decode an entire batch of text at once.
 
+
         Args:
-            tokens : Basic list of tokens that will be part of the vocabulary.
-            blank_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
-            pad_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
-            unknown_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
-            start_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
-            end_token : Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            tokens: Basic list of tokens that will be part of the vocabulary.
+            blank_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            pad_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            unknown_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            start_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            end_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
             sentencepiece_model: Path to sentencepiece .model file, if applicable.
         """
         super().__init__()
@@ -73,7 +79,7 @@ class BatchTextTransformer(nn.Module):
     ) -> List[str]:
         """
         Args:
-            predictions : Tensor of shape (batch, time)
+            predictions: Tensor of shape (batch, time)
             remove_repeated: controls if repeated elements without a blank between them will be removed while decoding
 
         Returns:
@@ -104,7 +110,7 @@ class BatchTextTransformer(nn.Module):
         and `tokenizer.model` outputs from sentencepiece.
 
         Args:
-            output_dir : Output directory of the sentencepiece training, that contains the required files.
+            output_dir: Output directory of the sentencepiece training, that contains the required files.
 
         Returns:
             Instance of `BatchTextTransformer` with the corresponding data loaded.

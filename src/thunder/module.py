@@ -3,16 +3,20 @@
 
 # Copyright (c) 2021 scart97
 
+"""
+Base module to train ctc models
+"""
+
 __all__ = ["BaseCTCModule"]
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 from torchmetrics.text.cer import CharErrorRate
-from torchmetrics.text.wer import WER
+from torchmetrics.text.wer import WordErrorRate
 
 from thunder.ctc_loss import calculate_ctc
 from thunder.text_processing.transform import BatchTextTransformer
@@ -61,7 +65,7 @@ class BaseCTCModule(pl.LightningModule):
 
         # Metrics
         self.validation_cer = CharErrorRate()
-        self.validation_wer = WER()
+        self.validation_wer = WordErrorRate()
         self.example_input_array = (
             torch.randn((10, 16000)),
             torch.randint(100, 16000, (10,)),
@@ -71,7 +75,7 @@ class BaseCTCModule(pl.LightningModule):
         """Process the audio tensor to create the predictions.
 
         Args:
-            x : Audio tensor of shape [batch_size, time]
+            x: Audio tensor of shape [batch_size, time]
 
         Returns:
             Tensor with the predictions.
@@ -85,7 +89,7 @@ class BaseCTCModule(pl.LightningModule):
         """Use this function during inference to predict.
 
         Args:
-            x : Audio tensor of shape [batch_size, time]
+            x: Audio tensor of shape [batch_size, time]
 
         Returns:
             A list of strings, each one contains the corresponding transcription to the original batch element.
@@ -100,8 +104,8 @@ class BaseCTCModule(pl.LightningModule):
         """Training step. Check the original lightning docs for more information.
 
         Args:
-            batch : Tuple containing the batched audios, normalized lengths and the corresponding text labels.
-            batch_idx : Batch index
+            batch: Tuple containing the batched audios, normalized lengths and the corresponding text labels.
+            batch_idx: Batch index
 
         Returns:
             Training loss for that batch
@@ -127,8 +131,8 @@ class BaseCTCModule(pl.LightningModule):
         """Validation step. Check the original lightning docs for more information.
 
         Args:
-            batch : Tuple containing the batched audios, normalized lengths and the corresponding text labels.
-            batch_idx : Batch index
+            batch: Tuple containing the batched audios, normalized lengths and the corresponding text labels.
+            batch_idx: Batch index
 
         Returns:
             Validation loss for that batch
@@ -212,7 +216,7 @@ class BaseCTCModule(pl.LightningModule):
             updated_kwargs[total_steps_arg] = self.estimated_max_steps()
         return updated_kwargs
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Union[torch.optim.Optimizer, Dict[str, Any]]:
         optim_kwargs = self._update_special_optimizer_args(self.optimizer_kwargs)
         optimizer = self.optimizer_class(
             filter(lambda p: p.requires_grad, self.parameters()), **optim_kwargs

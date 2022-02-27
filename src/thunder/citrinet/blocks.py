@@ -70,7 +70,7 @@ class SqueezeExcite(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
-            x : Tensor of shape [batch, channels, time]
+            x: Tensor of shape [batch, channels, time]
         Returns:
             Tensor of shape [batch, channels, time]
         """
@@ -101,15 +101,15 @@ class CitrinetBlock(nn.Module):
         dense residual used on Jasper is not supported here.
 
         Args:
-            in_channels : Number of input channels
-            out_channels : Number of output channels
-            repeat : Repetitions inside block.
-            kernel_size : Kernel size.
-            stride : Stride of each repetition.
-            dilation : Dilation of each repetition.
-            dropout : Dropout used before each activation.
-            residual : Controls the use of residual connection.
-            separable : Controls the use of separable convolutions.
+            in_channels: Number of input channels
+            out_channels: Number of output channels
+            repeat: Repetitions inside block.
+            kernel_size: Kernel size.
+            stride: Stride of each repetition.
+            dilation: Dilation of each repetition.
+            dropout: Dropout used before each activation.
+            residual: Controls the use of residual connection.
+            separable: Controls the use of separable convolutions.
         """
         super().__init__()
 
@@ -177,7 +177,7 @@ class CitrinetBlock(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
-            x : Tensor of shape (batch, features, time) where #features == inplanes
+            x: Tensor of shape (batch, features, time) where #features == inplanes
 
         Returns:
             Result of applying the block on the input, and corresponding output lengths
@@ -200,7 +200,7 @@ def stem(feat_in: int) -> CitrinetBlock:
     """Creates the Citrinet stem. That is the first block of the model, that process the input directly.
 
     Args:
-        feat_in : Number of input features
+        feat_in: Number of input features
 
     Returns:
         Citrinet stem block
@@ -223,8 +223,8 @@ def body(
     """Creates the body of the Citrinet model. That is the middle part.
 
     Args:
-        filters : List of filters inside each block in the body.
-        kernel_size : Corresponding list of kernel sizes for each block. Should have the same length as the first argument.
+        filters: List of filters inside each block in the body.
+        kernel_size: Corresponding list of kernel sizes for each block. Should have the same length as the first argument.
         strides: Corresponding list of strides for each block. Should have the same length as the first argument.
 
     Returns:
@@ -259,7 +259,7 @@ def CitrinetEncoder(
         filters: List of filter sizes used to create the encoder blocks.
         kernel_sizes: List of kernel sizes corresponding to each filter size.
         strides: List of stride corresponding to each filter size.
-        feat_in : Number of input features to the model.
+        feat_in: Number of input features to the model.
     Returns:
         Pytorch model corresponding to the encoder.
     """

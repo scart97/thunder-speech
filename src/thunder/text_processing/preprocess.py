@@ -15,7 +15,7 @@ def lower_text(text: str) -> str:
     """Transform all the text to lowercase.
 
     Args:
-        text : Input text
+        text: Input text
 
     Returns:
         Output text
@@ -29,7 +29,7 @@ def normalize_text(text: str) -> str:
     ascii symbols.
 
     Args:
-        text : Input text
+        text: Input text
 
     Returns:
         Output text
@@ -45,8 +45,8 @@ def expand_numbers(text: str, language: str = "en") -> str:
     It also detects if the number is ordinal automatically.
 
     Args:
-        text : Input text
-        language : Language used to expand the numbers. Defaults to "en".
+        text: Input text
+        language: Language used to expand the numbers. Defaults to "en".
 
     Returns:
         Output text

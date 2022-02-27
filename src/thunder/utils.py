@@ -3,6 +3,11 @@
 
 # Copyright (c) 2021 scart97
 
+"""
+Utility functions
+"""
+
+
 __all__ = [
     "audio_len",
     "get_default_cache_folder",
@@ -26,7 +31,7 @@ def audio_len(item: Union[Path, str]) -> float:
     """Returns the length of the audio file
 
     Args:
-        item : Audio path
+        item: Audio path
 
     Returns:
         Lenght in seconds of the audio
@@ -50,8 +55,8 @@ def get_files(directory: Union[str, Path], extension: str) -> List[Path]:
     """Find all files in directory with extension.
 
     Args:
-        directory : Directory to recursively find the files
-        extension : File extension to search for
+        directory: Directory to recursively find the files
+        extension: File extension to search for
 
     Returns:
         List of all the files that match the extension
@@ -90,12 +95,14 @@ def chain_calls(*funcs: List[Callable]) -> Callable:
 
 
 class BaseCheckpoint(str, Enum):
+    """Base class that represents a pretrained model checkpoint."""
+
     @classmethod
-    def from_string(cls, name):
+    def from_string(cls, name: str) -> "BaseCheckpoint":
         """Creates enum value from string. Helper to use with argparse/hydra
 
         Args:
-            name : Name of the checkpoint
+            name: Name of the checkpoint
 
         Raises:
             ValueError: Name provided is not a valid checkpoint

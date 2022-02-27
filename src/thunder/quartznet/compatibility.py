@@ -34,7 +34,7 @@ from thunder.utils import BaseCheckpoint, download_checkpoint
 class QuartznetCheckpoint(BaseCheckpoint):
     """Trained model weight checkpoints.
     Used by [`download_checkpoint`][thunder.utils.download_checkpoint] and
-    [`QuartznetModule.load_from_nemo`][thunder.quartznet.module.QuartznetModule.load_from_nemo].
+    [`load_quartznet_checkpoint`][thunder.quartznet.compatibility.load_quartznet_checkpoint].
 
     Note:
         Possible values are `QuartzNet15x5Base_En`,`QuartzNet15x5Base_Zh`,`QuartzNet5x5LS_En`, `QuartzNet15x5NR_En`,
@@ -66,7 +66,7 @@ def load_components_from_quartznet_config(
     checkpoint.
 
     Args:
-        config_path : Path to the .yaml file, usually called model_config.yaml
+        config_path: Path to the .yaml file, usually called model_config.yaml
 
     Returns:
         A tuple containing, in this order, the encoder, the audio transform and the text transform
@@ -117,7 +117,7 @@ def load_quartznet_weights(encoder: nn.Module, decoder: nn.Module, weights_path:
     Args:
         encoder: Encoder module to load the weights into
         decoder: Decoder module to load the weights into
-        weights_path : Path to the pytorch weights checkpoint
+        weights_path: Path to the pytorch weights checkpoint
     """
     weights = torch.load(weights_path)
 
@@ -151,8 +151,8 @@ def load_quartznet_checkpoint(
     """Load from the original nemo checkpoint.
 
     Args:
-        checkpoint : Path to local .nemo file or checkpoint to be downloaded locally and lodaded.
-        save_folder : Path to save the checkpoint when downloading it. Ignored if you pass a .nemo file as the first argument.
+        checkpoint: Path to local .nemo file or checkpoint to be downloaded locally and lodaded.
+        save_folder: Path to save the checkpoint when downloading it. Ignored if you pass a .nemo file as the first argument.
 
     Returns:
         The model loaded from the checkpoint

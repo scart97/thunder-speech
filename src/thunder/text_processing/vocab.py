@@ -3,6 +3,11 @@
 
 # Copyright (c) 2021 scart97
 
+"""
+Classes that represent the vocabulary used by the model.
+"""
+
+
 __all__ = ["Vocabulary"]
 
 from typing import List, Optional
@@ -26,12 +31,12 @@ class Vocabulary(nn.Module):
         reverse mapping of numbers back to tokens.
 
         Args:
-            tokens : Basic list of tokens that will be part of the vocabulary. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-tokens-from-my-dataset)
+            tokens: Basic list of tokens that will be part of the vocabulary. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-tokens-from-my-dataset)
             blank_token: Token that will represent the ctc blank.
-            pad_token : Token that will represent padding, might also act as the ctc blank.
-            unknown_token : Token that will represent unknown elements. Notice that this is different than the blank used by ctc.
-            start_token : Token that will represent the beginning of the sequence.
-            end_token : Token that will represent the end of the sequence.
+            pad_token: Token that will represent padding, might also act as the ctc blank.
+            unknown_token: Token that will represent unknown elements. Notice that this is different than the blank used by ctc.
+            start_token: Token that will represent the beginning of the sequence.
+            end_token: Token that will represent the end of the sequence.
         """
         super().__init__()
         self.unknown_token = unknown_token
@@ -65,7 +70,7 @@ class Vocabulary(nn.Module):
         """Function to transform a list of tokens into the corresponding numeric representation.
 
         Args:
-            tokens : A single list of tokens to be transformed
+            tokens: A single list of tokens to be transformed
 
         Returns:
             The corresponding numeric representation
@@ -84,7 +89,7 @@ class Vocabulary(nn.Module):
         tokens.
 
         Args:
-            indices : Numeric representation. Usually is the result of the model, after a greedy decoding
+            indices: Numeric representation. Usually is the result of the model, after a greedy decoding
 
         Returns:
             Corresponding tokens
@@ -96,7 +101,7 @@ class Vocabulary(nn.Module):
         tokenized text.
 
         Args:
-            tokens : Tokenized text
+            tokens: Tokenized text
 
         Returns:
             Text with the special tokens added.
@@ -112,7 +117,7 @@ class Vocabulary(nn.Module):
         """Function to remove the special tokens from the prediction.
 
         Args:
-            text : Decoded text
+            text: Decoded text
 
         Returns:
             Text with the special tokens removed.

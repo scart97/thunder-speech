@@ -30,7 +30,7 @@ from thunder.utils import BaseCheckpoint, download_checkpoint
 class CitrinetCheckpoint(BaseCheckpoint):
     """Trained model weight checkpoints.
     Used by [`download_checkpoint`][thunder.utils.download_checkpoint] and
-    [`CitrinetModule.load_from_nemo`][thunder.citrinet.module.CitrinetModule.load_from_nemo].
+    [`load_citrinet_checkpoint`][thunder.citrinet.compatibility.load_citrinet_checkpoint].
 
     Note:
         Possible values are `stt_en_citrinet_256`,`stt_en_citrinet_512`,`stt_en_citrinet_1024`, `stt_es_citrinet_512`
@@ -49,7 +49,7 @@ def load_components_from_citrinet_config(
     checkpoint.
 
     Args:
-        config_path : Path to the .yaml file, usually called model_config.yaml
+        config_path: Path to the .yaml file, usually called model_config.yaml
 
     Returns:
         A tuple containing, in this order, the encoder, the audio transform and the text transform
@@ -100,7 +100,7 @@ def fix_vocab(vocab_tokens: List[str]) -> List[str]:
     with the _ prefix
 
     Args:
-        vocab_tokens : List of tokens in the vocabulary
+        vocab_tokens: List of tokens in the vocabulary
 
     Returns:
         New list of tokens with the new prefix
@@ -120,8 +120,8 @@ def load_citrinet_checkpoint(
     """Load from the original nemo checkpoint.
 
     Args:
-        checkpoint : Path to local .nemo file or checkpoint to be downloaded locally and lodaded.
-        save_folder : Path to save the checkpoint when downloading it. Ignored if you pass a .nemo file as the first argument.
+        checkpoint: Path to local .nemo file or checkpoint to be downloaded locally and lodaded.
+        save_folder: Path to save the checkpoint when downloading it. Ignored if you pass a .nemo file as the first argument.
 
     Returns:
         The model loaded from the checkpoint

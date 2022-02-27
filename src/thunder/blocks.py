@@ -6,7 +6,17 @@
 
 # Copyright (c) 2021 scart97
 
-__all__ = ["convolution_stft", "normalize_tensor", "get_same_padding", "conv1d_decoder"]
+__all__ = [
+    "convolution_stft",
+    "MultiSequential",
+    "Masked",
+    "normalize_tensor",
+    "lengths_to_mask",
+    "get_same_padding",
+    "conv1d_decoder",
+    "SwapLastDimension",
+    "linear_decoder",
+]
 
 import math
 from typing import Optional, Tuple
@@ -93,8 +103,9 @@ class MultiSequential(nn.Sequential):
 
 
 class Masked(nn.Module):
+    """Wrapper to mix normal modules with others that take 2 inputs"""
+
     def __init__(self, *layers):
-        """Wrapper to mix normal modules with others that take 2 inputs"""
         super().__init__()
         self.layer = nn.Sequential(*layers)
 
@@ -113,10 +124,10 @@ def normalize_tensor(
     """Normalize tensor values, optionally using some mask to define the valid region.
 
     Args:
-        input_values : input tensor to be normalized
-        mask : Optional mask describing the valid elements.
-        div_guard : value used to prevent division by zero when normalizing.
-        dim : dimension used to calculate the mean and variance.
+        input_values: input tensor to be normalized
+        mask: Optional mask describing the valid elements.
+        div_guard: value used to prevent division by zero when normalizing.
+        dim: dimension used to calculate the mean and variance.
 
     Returns:
         Normalized tensor
@@ -144,8 +155,8 @@ def lengths_to_mask(lengths: torch.Tensor, max_length: int) -> torch.Tensor:
     """Convert from integer lengths of each element to mask representation
 
     Args:
-        lengths : lengths of each element in the batch
-        max_length : maximum length expected. Can be greater than lengths.max()
+        lengths: lengths of each element in the batch
+        max_length: maximum length expected. Can be greater than lengths.max()
 
     Returns:
         Corresponding boolean mask indicating the valid region of the tensor.
@@ -166,9 +177,9 @@ def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
         input shape.
 
     Args:
-        kernel_size : convolution kernel size. Only tested to be correct with odd values.
-        stride : convolution stride
-        dilation : convolution dilation
+        kernel_size: convolution kernel size. Only tested to be correct with odd values.
+        stride: convolution stride
+        dilation: convolution dilation
 
     Raises:
         ValueError: Only stride or dilation may be greater than 1
@@ -187,8 +198,8 @@ def conv1d_decoder(decoder_input_channels: int, num_classes: int) -> nn.Module:
     """Decoder that uses one conv1d layer
 
     Args:
-        num_classes : Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
-        decoder_input_channels : Number of input channels of the decoder. That is the number of channels of the features created by the encoder.
+        num_classes: Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
+        decoder_input_channels: Number of input channels of the decoder. That is the number of channels of the features created by the encoder.
 
     Returns:
         Pytorch model of the decoder
@@ -217,8 +228,8 @@ def linear_decoder(
 
     Args:
         decoder_dropout: Amount of dropout to be used in the decoder
-        decoder_input_channels : Number of input channels of the decoder. That is the number of channels of the features created by the encoder.
-        num_classes : Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
+        decoder_input_channels: Number of input channels of the decoder. That is the number of channels of the features created by the encoder.
+        num_classes: Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
 
     Returns:
         Module that represents the decoder.

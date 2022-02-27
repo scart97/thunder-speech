@@ -18,7 +18,7 @@ def asr_collate(samples: List[Tuple[Tensor, str]]) -> Tuple[Tensor, Tensor, List
     """Function that collect samples and adds padding.
 
     Args:
-        samples : Samples produced by dataloader
+        samples: Samples produced by dataloader
 
     Returns:
         Tuple containing padded audios, audio lengths (normalized to 0.0 <-> 1.0 range) and the list of corresponding transcriptions in that order.

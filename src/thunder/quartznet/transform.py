@@ -78,7 +78,7 @@ class FeatureBatchNormalizer(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
-            x : Tensor of shape (batch, features, time)
+            x: Tensor of shape (batch, features, time)
         """
         # https://github.com/pytorch/pytorch/issues/45208
         # https://github.com/pytorch/pytorch/issues/44768
@@ -99,7 +99,7 @@ class DitherAudio(nn.Module):
             form of noise used to randomize quantization error.
 
         Args:
-            dither : Amount of dither to add.
+            dither: Amount of dither to add.
         """
         super().__init__()
         self.dither = dither
@@ -108,7 +108,7 @@ class DitherAudio(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
-            x : Tensor of shape (batch, time)
+            x: Tensor of shape (batch, time)
         """
         if self.training:
             return x + (self.dither * torch.randn_like(x))
@@ -126,7 +126,7 @@ class PreEmphasisFilter(nn.Module):
         `y[n] = y[n] - preemph * y[n-1]`
 
         Args:
-            preemph : Filter control factor.
+            preemph: Filter control factor.
         """
         super().__init__()
         self.preemph = preemph
@@ -135,7 +135,7 @@ class PreEmphasisFilter(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
-            x : Tensor of shape (batch, time)
+            x: Tensor of shape (batch, time)
         """
         return torch.cat(
             (x[:, 0].unsqueeze(1), x[:, 1:] - self.preemph * x[:, :-1]), dim=1
@@ -153,9 +153,9 @@ class PowerSpectrum(nn.Module):
         method as used in NEMO.
 
         Args:
-            n_window_size : Number of elements in the window size.
-            n_window_stride : Number of elements in the window stride.
-            n_fft : Number of fourier features.
+            n_window_size: Number of elements in the window size.
+            n_window_stride: Number of elements in the window stride.
+            n_fft: Number of fourier features.
 
         Raises:
             ValueError: Raised when incompatible parameters are passed.
@@ -187,7 +187,7 @@ class PowerSpectrum(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
-            x : Tensor of shape (batch, time)
+            x: Tensor of shape (batch, time)
         """
         x = self.stft_func(
             x,
@@ -215,10 +215,10 @@ class MelScale(nn.Module):
         Also converts to log scale.
 
         Args:
-            sample_rate : Sampling rate of the signal
-            n_fft : Number of fourier features
-            nfilt : Number of output mel filters to use
-            log_scale : Controls if the output should also be applied a log scale.
+            sample_rate: Sampling rate of the signal
+            n_fft: Number of fourier features
+            nfilt: Number of output mel filters to use
+            log_scale: Controls if the output should also be applied a log scale.
         """
         super().__init__()
 
@@ -242,7 +242,7 @@ class MelScale(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
-            x : Tensor of shape (batch, features, time)
+            x: Tensor of shape (batch, features, time)
         """
         # dot with filterbank energies
         x = torch.matmul(self.fb.to(x.dtype), x)
@@ -293,7 +293,7 @@ def patch_stft(filterbank: nn.Module) -> nn.Module:
     directly on arm cpu's, inside mobile applications.
 
     Args:
-        filterbank : the FilterbankFeatures layer to be patched
+        filterbank: the FilterbankFeatures layer to be patched
 
     Returns:
         Layer with the stft operation patched.

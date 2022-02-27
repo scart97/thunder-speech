@@ -20,7 +20,7 @@ class Wav2Vec2Preprocess(nn.Module):
         """Wav2Vec model preprocessing. It only consists of normalizing the audio.
 
         Args:
-            div_guard : Guard value to prevent division by zero.
+            div_guard: Guard value to prevent division by zero.
         """
         super().__init__()
         self.div_guard = div_guard
@@ -32,7 +32,7 @@ class Wav2Vec2Preprocess(nn.Module):
         """Applies the normalization
 
         Args:
-            audio : Audio tensor of shape [batch_size, time]
+            audio: Audio tensor of shape [batch_size, time]
 
         Returns:
             Normalized audio tensor with same shape as input
