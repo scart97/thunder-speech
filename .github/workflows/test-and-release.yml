@@ -1,32 +1,27 @@
-
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+# https://mestrak.com/blog/semantic-release-with-python-poetry-github-actions-20nn
 
-name: Test pull request
-
+name: CI/CD
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
-  build:
+  Test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.8
     - name: Install Python Poetry
       uses: abatilo/actions-poetry@v2.1.2
       with:
         poetry-version: 1.1.6
     - name: View poetry version
       run: poetry --version
-    - name: Install library
+    - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install libsndfile1
@@ -41,3 +36,18 @@ jobs:
         env_vars: PYTHON
         name: codecov-thunder
         fail_ci_if_error: true
+
+  # https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/github-actions.html
+  Release:
+    needs: Test
+    runs-on: ubuntu-latest
+    concurrency: release
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Python Semantic Release
+      uses: relekang/python-semantic-release@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        pypi_token: ${{ secrets.PYPI_TOKEN }}
