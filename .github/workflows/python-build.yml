@@ -26,7 +26,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install libsndfile1
-        pip install -e .[dev,testing,transformers]
+        pip install -e .[dev,testing]
     - name: Test with pytest
       run: |
         HYPOTHESIS_PROFILE="ci" RUN_SLOW=1 pytest -sv --cov-report=xml

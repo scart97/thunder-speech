@@ -1,18 +1,12 @@
 """Helper functions to load huggingface speech recognition models.
 """
 
-try:
-    from transformers import AutoModelForCTC, Wav2Vec2Processor
-except ModuleNotFoundError as transformers_not_installed:
-    raise ImportError(
-        "To use any huggingface model please install the transformers extension, by calling `pip install thunder-speech[transformers]`"
-    ) from transformers_not_installed
-
-from typing import Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import torch
 from torch import Tensor, nn
 from torchaudio.models.wav2vec2.utils import import_huggingface_model
+from transformers import AutoModelForCTC, Wav2Vec2Processor
 
 from thunder.blocks import lengths_to_mask, linear_decoder
 from thunder.huggingface.transform import Wav2Vec2Preprocess
@@ -41,7 +35,18 @@ class _HuggingFaceEncoderAdapt(nn.Module):
         )
 
 
-def load_huggingface_checkpoint(model_name: str, **model_kwargs) -> BaseCTCModule:
+def load_huggingface_checkpoint(
+    model_name: str, **model_kwargs: Dict[str, Any]
+) -> BaseCTCModule:
+    """Load huggingface model and convert to thunder [`BaseCTCModule`][thunder.module.BaseCTCModule]
+
+    Args:
+        model_name: huggingface identifier of the model, like "facebook/wav2vec2-large-960h"
+        model_kwargs: extra keyword arguments to be passed to `AutoModelForCTC.from_pretrained`
+
+    Returns:
+        Thunder module containing the huggingface model.
+    """
     model = AutoModelForCTC.from_pretrained(model_name, **model_kwargs)
     processor = Wav2Vec2Processor.from_pretrained(model_name)
     vocab = list(processor.tokenizer.get_vocab().keys())
@@ -74,7 +79,18 @@ def load_huggingface_checkpoint(model_name: str, **model_kwargs) -> BaseCTCModul
     return module.eval()
 
 
-def prepare_scriptable_wav2vec(module, quantized: bool = False):
+def prepare_scriptable_wav2vec(
+    module: BaseCTCModule, quantized: bool = False
+) -> BaseCTCModule:
+    """Converts thunder module containing a wav2vec2 model to be scriptable.
+
+    Args:
+        module: Module containing wav2vec2
+        quantized: If true, also performs quantization of the model
+
+    Returns:
+        Modified module ready to call torch.jit.script(module) or module.to_torchscript()
+    """
     imported = import_huggingface_model(module.encoder.original_encoder)
     if quantized:
         imported.encoder.transformer.pos_conv_embed.__prepare_scriptable__()

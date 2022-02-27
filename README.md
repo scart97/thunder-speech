@@ -29,12 +29,6 @@ Install the library from PyPI:
 pip install thunder-speech
 ```
 
-Optionally, if you want to train wav2vec 2.0:
-
-```
-pip install thunder-speech[transformers]
-```
-
 
 ### Import desired models
 
