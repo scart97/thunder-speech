@@ -3,6 +3,10 @@
 
 # Copyright (c) 2021 scart97
 
+"""
+Implementation of data preprocessing transform compatible with the huggingface wav2vec2 one
+"""
+
 from typing import Optional, Tuple
 
 import torch
@@ -17,7 +21,7 @@ class Wav2Vec2Preprocess(nn.Module):
         div_guard: float = 1e-7,
         mask_input: bool = False,
     ):
-        """Wav2Vec model preprocessing. It only consists of normalizing the audio.
+        """Wav2Vec model preprocessing. It consists of normalizing the audio and optional mask.
 
         Args:
             div_guard: Guard value to prevent division by zero.
@@ -35,7 +39,7 @@ class Wav2Vec2Preprocess(nn.Module):
             audio: Audio tensor of shape [batch_size, time]
 
         Returns:
-            Normalized audio tensor with same shape as input
+            Normalized audio tensor with same shape as input. Optionally the valid mask
         """
         attention_mask: Optional[torch.Tensor] = None
         if self.mask_input:
