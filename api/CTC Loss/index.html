@@ -8,19 +8,19 @@
       
       
       
-      <link rel="icon" href="/assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.2.2">
     
     
       
-        <title>Thunder</title>
+        <title>CTC Loss - Thunder</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.e8d9bf0c.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e8d9bf0c.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.e6a45f82.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.e6a45f82.min.css">
         
       
     
@@ -34,11 +34,11 @@
       
     
     
-      <link rel="stylesheet" href="/assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="/css/mkdocstrings.css">
+      <link rel="stylesheet" href="../../css/mkdocstrings.css">
     
-    <script>__md_scope=new URL("/",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -61,6 +61,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#thunder.ctc_loss" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -71,7 +76,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="Thunder" class="md-header__button md-logo" aria-label="Thunder" data-md-component="logo">
+    <a href="../.." title="Thunder" class="md-header__button md-logo" aria-label="Thunder" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -90,7 +95,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              CTC Loss
             
           </span>
         </div>
@@ -169,7 +174,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="Thunder" class="md-nav__button md-logo" aria-label="Thunder" data-md-component="logo">
+    <a href="../.." title="Thunder" class="md-nav__button md-logo" aria-label="Thunder" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -200,7 +205,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         Home
       </a>
     </li>
@@ -215,7 +220,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Custom%20Data/" class="md-nav__link">
+      <a href="../../Custom%20Data/" class="md-nav__link">
         Writing a custom data pipeline
       </a>
     </li>
@@ -230,7 +235,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/Ultimate%20guide/" class="md-nav__link">
+      <a href="../../Ultimate%20guide/" class="md-nav__link">
         The ultimate guide to speech recognition
       </a>
     </li>
@@ -245,7 +250,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/quick%20reference%20guide/" class="md-nav__link">
+      <a href="../../quick%20reference%20guide/" class="md-nav__link">
         Quick reference guide
       </a>
     </li>
@@ -258,12 +263,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
       
       
       
@@ -284,11 +291,55 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="/api/CTC%20Loss/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          CTC Loss
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         CTC Loss
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.ctc_loss" class="md-nav__link">
+    thunder.ctc_loss
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.ctc_loss.calculate_ctc" class="md-nav__link">
+    calculate_ctc()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -300,7 +351,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/blocks/" class="md-nav__link">
+      <a href="../blocks/" class="md-nav__link">
         Blocks
       </a>
     </li>
@@ -314,7 +365,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/callbacks/" class="md-nav__link">
+      <a href="../callbacks/" class="md-nav__link">
         Callbacks
       </a>
     </li>
@@ -328,7 +379,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/finetune/" class="md-nav__link">
+      <a href="../finetune/" class="md-nav__link">
         Finetune
       </a>
     </li>
@@ -342,7 +393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/module/" class="md-nav__link">
+      <a href="../module/" class="md-nav__link">
         Module
       </a>
     </li>
@@ -356,7 +407,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/registry/" class="md-nav__link">
+      <a href="../registry/" class="md-nav__link">
         Registry
       </a>
     </li>
@@ -370,7 +421,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/utils/" class="md-nav__link">
+      <a href="../utils/" class="md-nav__link">
         Utils
       </a>
     </li>
@@ -410,7 +461,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Citrinet/blocks/" class="md-nav__link">
+      <a href="../Citrinet/blocks/" class="md-nav__link">
         Blocks
       </a>
     </li>
@@ -424,7 +475,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Citrinet/compatibility/" class="md-nav__link">
+      <a href="../Citrinet/compatibility/" class="md-nav__link">
         Compatibility
       </a>
     </li>
@@ -471,7 +522,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Data/dataloader%20utils/" class="md-nav__link">
+      <a href="../Data/dataloader%20utils/" class="md-nav__link">
         Dataloader utils
       </a>
     </li>
@@ -485,7 +536,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Data/datamodule/" class="md-nav__link">
+      <a href="../Data/datamodule/" class="md-nav__link">
         Datamodule
       </a>
     </li>
@@ -499,7 +550,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Data/dataset/" class="md-nav__link">
+      <a href="../Data/dataset/" class="md-nav__link">
         Dataset
       </a>
     </li>
@@ -546,7 +597,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Huggingface/compatibility/" class="md-nav__link">
+      <a href="../Huggingface/compatibility/" class="md-nav__link">
         Compatibility
       </a>
     </li>
@@ -560,7 +611,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Huggingface/transform/" class="md-nav__link">
+      <a href="../Huggingface/transform/" class="md-nav__link">
         Transform
       </a>
     </li>
@@ -607,7 +658,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Quartznet/blocks/" class="md-nav__link">
+      <a href="../Quartznet/blocks/" class="md-nav__link">
         Blocks
       </a>
     </li>
@@ -621,7 +672,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Quartznet/compatibility/" class="md-nav__link">
+      <a href="../Quartznet/compatibility/" class="md-nav__link">
         Compatibility
       </a>
     </li>
@@ -635,7 +686,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Quartznet/transform/" class="md-nav__link">
+      <a href="../Quartznet/transform/" class="md-nav__link">
         Transform
       </a>
     </li>
@@ -682,7 +733,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Text%20Processing/preprocess/" class="md-nav__link">
+      <a href="../Text%20Processing/preprocess/" class="md-nav__link">
         Preprocess
       </a>
     </li>
@@ -696,7 +747,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Text%20Processing/tokenize/" class="md-nav__link">
+      <a href="../Text%20Processing/tokenize/" class="md-nav__link">
         Tokenize
       </a>
     </li>
@@ -710,7 +761,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Text%20Processing/transform/" class="md-nav__link">
+      <a href="../Text%20Processing/transform/" class="md-nav__link">
         Transform
       </a>
     </li>
@@ -724,7 +775,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/Text%20Processing/vocab/" class="md-nav__link">
+      <a href="../Text%20Processing/vocab/" class="md-nav__link">
         Vocab
       </a>
     </li>
@@ -752,12 +803,265 @@
               </div>
             
             
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.ctc_loss" class="md-nav__link">
+    thunder.ctc_loss
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thunder.ctc_loss.calculate_ctc" class="md-nav__link">
+    calculate_ctc()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
           
           <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
               
-  <h1>404 - Not found</h1>
+                
 
+
+  <h1>CTC Loss</h1>
+
+<div class="doc doc-object doc-module">
+
+<a id="thunder.ctc_loss"></a>
+    <div class="doc doc-contents first">
+
+      <p>Functionality to calculate the ctc loss.</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="thunder.ctc_loss.calculate_ctc" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">calculate_ctc</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">prob_lengths</span><span class="p">,</span> <span class="n">y_lengths</span><span class="p">,</span> <span class="n">blank_idx</span><span class="p">)</span></code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Calculates the ctc loss based on model probabilities (also called emissions) and
+labels.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th><b>PARAMETER</b></th>
+        <th><b>DESCRIPTION</b></th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>probabilities</code></td>
+          <td class="doc-param-details">
+            <p>Output of the model, before any softmax operation. Shape [batch, #vocab, time]</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="torch.Tensor">Tensor</span></code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>y</code></td>
+          <td class="doc-param-details">
+            <p>Tensor containing the corresponding labels. Shape [batch]</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="torch.Tensor">Tensor</span></code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>prob_lengths</code></td>
+          <td class="doc-param-details">
+            <p>Lengths of each element in the input. Shape [batch]</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="torch.Tensor">Tensor</span></code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>y_lengths</code></td>
+          <td class="doc-param-details">
+            <p>Lenghts of each element in the output. Should NOT be normalized.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="torch.Tensor">Tensor</span></code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>blank_idx</code></td>
+          <td class="doc-param-details">
+            <p>Index of the blank token in the vocab.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code>int</code>
+                </span>
+            </p>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <table>
+    <thead>
+      <tr>
+        <th><b>RETURNS</b></th>
+        <th><b>DESCRIPTION</b></th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+              <span class="doc-returns-annotation">
+                  <code><span title="torch.Tensor">Tensor</span></code>
+              </span>
+          </td>
+          <td class="doc-returns-details">
+            <p>Loss tensor that can be backpropagated.</p>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>thunder/ctc_loss.py</code></summary>
+          <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">calculate_ctc</span><span class="p">(</span>
+    <span class="n">probabilities</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">prob_lengths</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">y_lengths</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">blank_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Calculates the ctc loss based on model probabilities (also called emissions) and</span>
+<span class="sd">    labels.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        probabilities: Output of the model, before any softmax operation. Shape [batch, #vocab, time]</span>
+<span class="sd">        y: Tensor containing the corresponding labels. Shape [batch]</span>
+<span class="sd">        prob_lengths: Lengths of each element in the input. Shape [batch]</span>
+<span class="sd">        y_lengths: Lenghts of each element in the output. Should NOT be normalized.</span>
+<span class="sd">        blank_idx: Index of the blank token in the vocab.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Loss tensor that can be backpropagated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Change from (batch, #vocab, time) to (time, batch, #vocab)</span>
+    <span class="n">probabilities</span> <span class="o">=</span> <span class="n">probabilities</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">logprobs</span> <span class="o">=</span> <span class="n">log_softmax</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ctc_loss</span><span class="p">(</span>
+        <span class="n">logprobs</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">,</span>
+        <span class="n">prob_lengths</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
+        <span class="n">y_lengths</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="n">blank_idx</span><span class="p">,</span>
+        <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+        <span class="n">zero_infinity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+              
             </article>
           </div>
         </div>
@@ -765,6 +1069,41 @@
       </main>
       
         <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../../quick%20reference%20guide/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Quick reference guide" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Quick reference guide
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../blocks/" class="md-footer__link md-footer__link--next" aria-label="Next: Blocks" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Blocks
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -786,10 +1125,10 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "/", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "/assets/javascripts/workers/search.bd0b6b67.min.js"}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.bd0b6b67.min.js"}</script>
     
     
-      <script src="/assets/javascripts/bundle.9f3ca3d1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.9f3ca3d1.min.js"></script>
       
     
   </body>

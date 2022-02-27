@@ -13,7 +13,7 @@
     
     
       
-        <title>Callbacks - Thunder</title>
+        <title>Finetune - Thunder</title>
       
     
     
@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#thunder.callbacks" class="md-skip">
+        <a href="#thunder.finetune" class="md-skip">
           Skip to content
         </a>
       
@@ -95,7 +95,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Callbacks
+              Finetune
             
           </span>
         </div>
@@ -319,6 +319,20 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="../callbacks/" class="md-nav__link">
+        Callbacks
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
     
   
   
@@ -329,12 +343,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Callbacks
+          Finetune
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Callbacks
+        Finetune
       </a>
       
         
@@ -351,44 +365,23 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#thunder.callbacks" class="md-nav__link">
-    thunder.callbacks
+  <a href="#thunder.finetune" class="md-nav__link">
+    thunder.finetune
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder" class="md-nav__link">
-    FinetuneEncoderDecoder
+  <a href="#thunder.finetune.FinetuneCTCModule" class="md-nav__link">
+    FinetuneCTCModule
   </a>
   
-    <nav class="md-nav" aria-label="FinetuneEncoderDecoder">
+    <nav class="md-nav" aria-label="FinetuneCTCModule">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder.__init__" class="md-nav__link">
+  <a href="#thunder.finetune.FinetuneCTCModule.__init__" class="md-nav__link">
     __init__()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder.finetune_function" class="md-nav__link">
-    finetune_function()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder.freeze_before_training" class="md-nav__link">
-    freeze_before_training()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder.on_fit_start" class="md-nav__link">
-    on_fit_start()
   </a>
   
 </li>
@@ -402,20 +395,6 @@
   
 </nav>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../finetune/" class="md-nav__link">
-        Finetune
-      </a>
     </li>
   
 
@@ -855,44 +834,23 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#thunder.callbacks" class="md-nav__link">
-    thunder.callbacks
+  <a href="#thunder.finetune" class="md-nav__link">
+    thunder.finetune
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder" class="md-nav__link">
-    FinetuneEncoderDecoder
+  <a href="#thunder.finetune.FinetuneCTCModule" class="md-nav__link">
+    FinetuneCTCModule
   </a>
   
-    <nav class="md-nav" aria-label="FinetuneEncoderDecoder">
+    <nav class="md-nav" aria-label="FinetuneCTCModule">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder.__init__" class="md-nav__link">
+  <a href="#thunder.finetune.FinetuneCTCModule.__init__" class="md-nav__link">
     __init__()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder.finetune_function" class="md-nav__link">
-    finetune_function()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder.freeze_before_training" class="md-nav__link">
-    freeze_before_training()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#thunder.callbacks.FinetuneEncoderDecoder.on_fit_start" class="md-nav__link">
-    on_fit_start()
   </a>
   
 </li>
@@ -916,14 +874,14 @@
                 
 
 
-  <h1>Callbacks</h1>
+  <h1>Finetune</h1>
 
 <div class="doc doc-object doc-module">
 
-<a id="thunder.callbacks"></a>
+<a id="thunder.finetune"></a>
     <div class="doc doc-contents first">
 
-      <p>Helper callback functionality, not essential to research</p>
+      <p>Module that implements easy finetuning of any model in the library.</p>
 
 
 
@@ -939,8 +897,8 @@
 
 
 
-<h2 id="thunder.callbacks.FinetuneEncoderDecoder" class="doc doc-heading">
-          <code>FinetuneEncoderDecoder</code>
+<h2 id="thunder.finetune.FinetuneCTCModule" class="doc doc-heading">
+          <code>FinetuneCTCModule</code>
 
 
 
@@ -949,17 +907,14 @@
 
     <div class="doc doc-contents ">
         <p class="doc doc-class-bases">
-          Bases: <code><span title="pytorch_lightning.callbacks.finetuning.BaseFinetuning">BaseFinetuning</span></code></p>
+          Bases: <code><a title="thunder.module.BaseCTCModule" href="../module/#thunder.module.BaseCTCModule">BaseCTCModule</a></code></p>
 
 
 
 
           <details class="quote">
-            <summary>Source code in <code>thunder/callbacks.py</code></summary>
-            <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
+            <summary>Source code in <code>thunder/finetune.py</code></summary>
+            <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">19</span>
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
@@ -1015,86 +970,63 @@
 <span class="normal">72</span>
 <span class="normal">73</span>
 <span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">FinetuneEncoderDecoder</span><span class="p">(</span><span class="n">BaseFinetuning</span><span class="p">):</span>
+<span class="normal">75</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">FinetuneCTCModule</span><span class="p">(</span><span class="n">BaseCTCModule</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">unfreeze_encoder_at_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">encoder_initial_lr_div</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="n">train_batchnorm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">checkpoint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">checkpoint_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">decoder_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">decoder_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">text_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">optimizer_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">,</span>
+        <span class="n">optimizer_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lr_scheduler_class</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lr_scheduler_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finetune a encoder model based on a learning rate.</span>
+        <span class="sd">&quot;&quot;&quot;Generic finetune module, load any combination of encoder/decoder and custom tokens</span>
 
 <span class="sd">        Args:</span>
-
-<span class="sd">            unfreeze_encoder_at_epoch: Epoch at which the encoder will be unfreezed.</span>
-
-<span class="sd">            encoder_initial_lr_div:</span>
-<span class="sd">                Used to scale down the encoder learning rate compared to rest of model.</span>
-
-<span class="sd">            train_batchnorm: Make Batch Normalization trainable at the beginning of train.</span>
+<span class="sd">            checkpoint_name: Name of the base checkpoint to load</span>
+<span class="sd">            checkpoint_kwargs: Additional kwargs to the checkpoint loading function.</span>
+<span class="sd">            decoder_class: Optional class to override the loaded checkpoint.</span>
+<span class="sd">            decoder_kwargs: Additional kwargs to the decoder_class.</span>
+<span class="sd">            tokens: If passed a list of tokens, the decoder from the base checkpoint will be replaced by the one in decoder_class, and a new text transform will be build using those tokens.</span>
+<span class="sd">            text_kwargs: Additional kwargs to the text_tranform class, when tokens is not None.</span>
+<span class="sd">            optimizer_class: Optimizer to use during training.</span>
+<span class="sd">            optimizer_kwargs: Optional extra kwargs to the optimizer.</span>
+<span class="sd">            lr_scheduler_class: Optional class to use a learning rate scheduler with the optimizer.</span>
+<span class="sd">            lr_scheduler_kwargs: Optional extra kwargs to the learning rate scheduler.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">unfreeze_encoder_at_epoch</span> <span class="o">=</span> <span class="n">unfreeze_encoder_at_epoch</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">encoder_initial_lr_div</span> <span class="o">=</span> <span class="n">encoder_initial_lr_div</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_batchnorm</span> <span class="o">=</span> <span class="n">train_batchnorm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">()</span>
+        <span class="n">checkpoint_kwargs</span> <span class="o">=</span> <span class="n">checkpoint_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">decoder_kwargs</span> <span class="o">=</span> <span class="n">decoder_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">text_kwargs</span> <span class="o">=</span> <span class="n">text_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="nf">on_fit_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainer</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">,</span> <span class="n">pl_module</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Check if the LightningModule has the necessary attribute before the train starts</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            trainer: Lightning Trainer</span>
-<span class="sd">            pl_module: Lightning Module used during train</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            Exception: If LightningModule has no nn.Module `encoder` attribute.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pl_module</span><span class="p">,</span> <span class="s2">&quot;encoder&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pl_module</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-            <span class="k">return</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="s2">&quot;The LightningModule should have a nn.Module `encoder` attribute&quot;</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">freeze_before_training</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pl_module</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Freeze the encoder initially before the train starts.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            pl_module: Lightning Module</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">freeze</span><span class="p">(</span><span class="n">pl_module</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span> <span class="n">train_bn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_batchnorm</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">finetune_function</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">pl_module</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">,</span>
-        <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">optimizer</span><span class="p">:</span> <span class="n">Optimizer</span><span class="p">,</span>
-        <span class="n">opt_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Unfreezes the encoder at the specified epoch</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            pl_module: Lightning Module</span>
-<span class="sd">            epoch: epoch number</span>
-<span class="sd">            optimizer: optimizer used during training</span>
-<span class="sd">            opt_idx: optimizer index</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">unfreeze_encoder_at_epoch</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unfreeze_and_add_param_group</span><span class="p">(</span>
-                <span class="n">pl_module</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span>
-                <span class="n">optimizer</span><span class="p">,</span>
-                <span class="n">initial_denom_lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder_initial_lr_div</span><span class="p">,</span>
-                <span class="n">train_bn</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_batchnorm</span><span class="p">,</span>
+        <span class="n">checkpoint_data</span> <span class="o">=</span> <span class="n">load_pretrained</span><span class="p">(</span><span class="n">checkpoint_name</span><span class="p">,</span> <span class="o">**</span><span class="n">checkpoint_kwargs</span><span class="p">)</span>
+        <span class="c1"># Changing the decoder layer and text processing</span>
+        <span class="k">if</span> <span class="n">decoder_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">text_transform</span> <span class="o">=</span> <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">text_transform</span>
+            <span class="n">decoder</span> <span class="o">=</span> <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">decoder</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Expecting vocabulary to not be empty&quot;</span>
+            <span class="n">text_transform</span> <span class="o">=</span> <span class="n">BatchTextTransformer</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="o">**</span><span class="n">text_kwargs</span><span class="p">)</span>
+            <span class="n">decoder</span> <span class="o">=</span> <span class="n">decoder_class</span><span class="p">(</span>
+                <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">encoder_final_dimension</span><span class="p">,</span>
+                <span class="n">text_transform</span><span class="o">.</span><span class="n">num_tokens</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">decoder_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">encoder</span><span class="o">=</span><span class="n">checkpoint_data</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span>
+            <span class="n">decoder</span><span class="o">=</span><span class="n">decoder</span><span class="p">,</span>
+            <span class="n">audio_transform</span><span class="o">=</span><span class="n">checkpoint_data</span><span class="o">.</span><span class="n">audio_transform</span><span class="p">,</span>
+            <span class="n">text_transform</span><span class="o">=</span><span class="n">text_transform</span><span class="p">,</span>
+            <span class="n">optimizer_class</span><span class="o">=</span><span class="n">optimizer_class</span><span class="p">,</span>
+            <span class="n">optimizer_kwargs</span><span class="o">=</span><span class="n">optimizer_kwargs</span><span class="p">,</span>
+            <span class="n">lr_scheduler_class</span><span class="o">=</span><span class="n">lr_scheduler_class</span><span class="p">,</span>
+            <span class="n">lr_scheduler_kwargs</span><span class="o">=</span><span class="n">lr_scheduler_kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
           </details>
@@ -1110,15 +1042,12 @@
 
 
 
-
-
-
   <div class="doc doc-object doc-function">
 
 
 
-<h3 id="thunder.callbacks.FinetuneEncoderDecoder.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unfreeze_encoder_at_epoch</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">encoder_initial_lr_div</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">train_batchnorm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+<h3 id="thunder.finetune.FinetuneCTCModule.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">,</span> <span class="n">checkpoint_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">decoder_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">decoder_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optimizer_class</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">,</span> <span class="n">optimizer_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lr_scheduler_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lr_scheduler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 
 </h3>
@@ -1126,7 +1055,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Finetune a encoder model based on a learning rate.</p>
+      <p>Generic finetune module, load any combination of encoder/decoder and custom tokens</p>
 
   <table>
     <thead>
@@ -1137,49 +1066,157 @@
     </thead>
     <tbody>
         <tr>
-          <td><code>unfreeze_encoder_at_epoch</code></td>
+          <td><code>checkpoint_name</code></td>
           <td class="doc-param-details">
-            <p>Epoch at which the encoder will be unfreezed.</p>
+            <p>Name of the base checkpoint to load</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>1</code>
+                    <code>str</code>
                 </span>
             </p>
           </td>
         </tr>
         <tr>
-          <td><code>encoder_initial_lr_div</code></td>
+          <td><code>checkpoint_kwargs</code></td>
           <td class="doc-param-details">
-            <p>Used to scale down the encoder learning rate compared to rest of model.</p>
+            <p>Additional kwargs to the checkpoint loading function.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>float</code>
+                    <code><span title="typing.Dict">Dict</span>[str, <span title="typing.Any">Any</span>]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
-                    <code>10</code>
+                    <code>None</code>
                 </span>
             </p>
           </td>
         </tr>
         <tr>
-          <td><code>train_batchnorm</code></td>
+          <td><code>decoder_class</code></td>
           <td class="doc-param-details">
-            <p>Make Batch Normalization trainable at the beginning of train.</p>
+            <p>Optional class to override the loaded checkpoint.</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>bool</code>
+                    <code><span title="typing.Type">Type</span>[<span title="torch.nn">nn</span>.<span title="torch.nn.Module">Module</span>]</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
-                    <code>True</code>
+                    <code>None</code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>decoder_kwargs</code></td>
+          <td class="doc-param-details">
+            <p>Additional kwargs to the decoder_class.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="typing.Dict">Dict</span>[str, <span title="typing.Any">Any</span>]</code>
+                </span>
+                <span class="doc-param-default">
+                  <b>DEFAULT:</b> 
+                    <code>None</code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>tokens</code></td>
+          <td class="doc-param-details">
+            <p>If passed a list of tokens, the decoder from the base checkpoint will be replaced by the one in decoder_class, and a new text transform will be build using those tokens.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="typing.List">List</span>[str]</code>
+                </span>
+                <span class="doc-param-default">
+                  <b>DEFAULT:</b> 
+                    <code>None</code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>text_kwargs</code></td>
+          <td class="doc-param-details">
+            <p>Additional kwargs to the text_tranform class, when tokens is not None.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="typing.Dict">Dict</span>[str, <span title="typing.Any">Any</span>]</code>
+                </span>
+                <span class="doc-param-default">
+                  <b>DEFAULT:</b> 
+                    <code>None</code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>optimizer_class</code></td>
+          <td class="doc-param-details">
+            <p>Optimizer to use during training.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="typing.Type">Type</span>[torch.<span title="torch.optim">optim</span>.<span title="torch.optim.Optimizer">Optimizer</span>]</code>
+                </span>
+                <span class="doc-param-default">
+                  <b>DEFAULT:</b> 
+                    <code>torch.optim.AdamW</code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>optimizer_kwargs</code></td>
+          <td class="doc-param-details">
+            <p>Optional extra kwargs to the optimizer.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="typing.Dict">Dict</span>[str, <span title="typing.Any">Any</span>]</code>
+                </span>
+                <span class="doc-param-default">
+                  <b>DEFAULT:</b> 
+                    <code>None</code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>lr_scheduler_class</code></td>
+          <td class="doc-param-details">
+            <p>Optional class to use a learning rate scheduler with the optimizer.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="typing.Any">Any</span></code>
+                </span>
+                <span class="doc-param-default">
+                  <b>DEFAULT:</b> 
+                    <code>None</code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>lr_scheduler_kwargs</code></td>
+          <td class="doc-param-details">
+            <p>Optional extra kwargs to the learning rate scheduler.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="typing.Dict">Dict</span>[str, <span title="typing.Any">Any</span>]</code>
+                </span>
+                <span class="doc-param-default">
+                  <b>DEFAULT:</b> 
+                    <code>None</code>
                 </span>
             </p>
           </td>
@@ -1188,11 +1225,8 @@
   </table>
 
         <details class="quote">
-          <summary>Source code in <code>thunder/callbacks.py</code></summary>
-          <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
+          <summary>Source code in <code>thunder/finetune.py</code></summary>
+          <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
@@ -1210,301 +1244,9 @@
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
-<span class="normal">38</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">unfreeze_encoder_at_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="n">encoder_initial_lr_div</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="n">train_batchnorm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Finetune a encoder model based on a learning rate.</span>
-
-<span class="sd">    Args:</span>
-
-<span class="sd">        unfreeze_encoder_at_epoch: Epoch at which the encoder will be unfreezed.</span>
-
-<span class="sd">        encoder_initial_lr_div:</span>
-<span class="sd">            Used to scale down the encoder learning rate compared to rest of model.</span>
-
-<span class="sd">        train_batchnorm: Make Batch Normalization trainable at the beginning of train.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">unfreeze_encoder_at_epoch</span> <span class="o">=</span> <span class="n">unfreeze_encoder_at_epoch</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">encoder_initial_lr_div</span> <span class="o">=</span> <span class="n">encoder_initial_lr_div</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">train_batchnorm</span> <span class="o">=</span> <span class="n">train_batchnorm</span>
-</code></pre></div>
-</td></tr></table>
-        </details>
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-function">
-
-
-
-<h3 id="thunder.callbacks.FinetuneEncoderDecoder.finetune_function" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">finetune_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pl_module</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">opt_idx</span><span class="p">)</span></code>
-
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-      <p>Unfreezes the encoder at the specified epoch</p>
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>pl_module</code></td>
-          <td class="doc-param-details">
-            <p>Lightning Module</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="pytorch_lightning">pl</span>.<span title="pytorch_lightning.LightningModule">LightningModule</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>epoch</code></td>
-          <td class="doc-param-details">
-            <p>epoch number</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>optimizer</code></td>
-          <td class="doc-param-details">
-            <p>optimizer used during training</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="torch.optim.Optimizer">Optimizer</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>opt_idx</code></td>
-          <td class="doc-param-details">
-            <p>optimizer index</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-        <details class="quote">
-          <summary>Source code in <code>thunder/callbacks.py</code></summary>
-          <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">finetune_function</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">pl_module</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">,</span>
-    <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Optimizer</span><span class="p">,</span>
-    <span class="n">opt_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Unfreezes the encoder at the specified epoch</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        pl_module: Lightning Module</span>
-<span class="sd">        epoch: epoch number</span>
-<span class="sd">        optimizer: optimizer used during training</span>
-<span class="sd">        opt_idx: optimizer index</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">epoch</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">unfreeze_encoder_at_epoch</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">unfreeze_and_add_param_group</span><span class="p">(</span>
-            <span class="n">pl_module</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span>
-            <span class="n">optimizer</span><span class="p">,</span>
-            <span class="n">initial_denom_lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder_initial_lr_div</span><span class="p">,</span>
-            <span class="n">train_bn</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_batchnorm</span><span class="p">,</span>
-        <span class="p">)</span>
-</code></pre></div>
-</td></tr></table>
-        </details>
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-function">
-
-
-
-<h3 id="thunder.callbacks.FinetuneEncoderDecoder.freeze_before_training" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">freeze_before_training</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pl_module</span><span class="p">)</span></code>
-
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-      <p>Freeze the encoder initially before the train starts.</p>
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>pl_module</code></td>
-          <td class="doc-param-details">
-            <p>Lightning Module</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="pytorch_lightning">pl</span>.<span title="pytorch_lightning.LightningModule">LightningModule</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-        <details class="quote">
-          <summary>Source code in <code>thunder/callbacks.py</code></summary>
-          <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">freeze_before_training</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pl_module</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Freeze the encoder initially before the train starts.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        pl_module: Lightning Module</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">freeze</span><span class="p">(</span><span class="n">pl_module</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span> <span class="n">train_bn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_batchnorm</span><span class="p">)</span>
-</code></pre></div>
-</td></tr></table>
-        </details>
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-function">
-
-
-
-<h3 id="thunder.callbacks.FinetuneEncoderDecoder.on_fit_start" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">on_fit_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainer</span><span class="p">,</span> <span class="n">pl_module</span><span class="p">)</span></code>
-
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-      <p>Check if the LightningModule has the necessary attribute before the train starts</p>
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>trainer</code></td>
-          <td class="doc-param-details">
-            <p>Lightning Trainer</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="pytorch_lightning">pl</span>.<span title="pytorch_lightning.Trainer">Trainer</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>pl_module</code></td>
-          <td class="doc-param-details">
-            <p>Lightning Module used during train</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="pytorch_lightning">pl</span>.<span title="pytorch_lightning.LightningModule">LightningModule</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>RAISES</b></th>
-        <th><b>DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-            <span class="doc-raises-annotation">
-                <code>Exception</code>
-            </span>
-          </td>
-          <td class="doc-raises-details">
-            <p>If LightningModule has no nn.Module <code>encoder</code> attribute.</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-        <details class="quote">
-          <summary>Source code in <code>thunder/callbacks.py</code></summary>
-          <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">40</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
@@ -1518,20 +1260,82 @@
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">on_fit_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainer</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">Trainer</span><span class="p">,</span> <span class="n">pl_module</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Check if the LightningModule has the necessary attribute before the train starts</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">checkpoint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">checkpoint_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">decoder_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">decoder_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">text_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">optimizer_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">,</span>
+    <span class="n">optimizer_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lr_scheduler_class</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lr_scheduler_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generic finetune module, load any combination of encoder/decoder and custom tokens</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        trainer: Lightning Trainer</span>
-<span class="sd">        pl_module: Lightning Module used during train</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        Exception: If LightningModule has no nn.Module `encoder` attribute.</span>
+<span class="sd">        checkpoint_name: Name of the base checkpoint to load</span>
+<span class="sd">        checkpoint_kwargs: Additional kwargs to the checkpoint loading function.</span>
+<span class="sd">        decoder_class: Optional class to override the loaded checkpoint.</span>
+<span class="sd">        decoder_kwargs: Additional kwargs to the decoder_class.</span>
+<span class="sd">        tokens: If passed a list of tokens, the decoder from the base checkpoint will be replaced by the one in decoder_class, and a new text transform will be build using those tokens.</span>
+<span class="sd">        text_kwargs: Additional kwargs to the text_tranform class, when tokens is not None.</span>
+<span class="sd">        optimizer_class: Optimizer to use during training.</span>
+<span class="sd">        optimizer_kwargs: Optional extra kwargs to the optimizer.</span>
+<span class="sd">        lr_scheduler_class: Optional class to use a learning rate scheduler with the optimizer.</span>
+<span class="sd">        lr_scheduler_kwargs: Optional extra kwargs to the learning rate scheduler.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pl_module</span><span class="p">,</span> <span class="s2">&quot;encoder&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pl_module</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-        <span class="k">return</span>
-    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-        <span class="s2">&quot;The LightningModule should have a nn.Module `encoder` attribute&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">()</span>
+    <span class="n">checkpoint_kwargs</span> <span class="o">=</span> <span class="n">checkpoint_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">decoder_kwargs</span> <span class="o">=</span> <span class="n">decoder_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">text_kwargs</span> <span class="o">=</span> <span class="n">text_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+
+    <span class="n">checkpoint_data</span> <span class="o">=</span> <span class="n">load_pretrained</span><span class="p">(</span><span class="n">checkpoint_name</span><span class="p">,</span> <span class="o">**</span><span class="n">checkpoint_kwargs</span><span class="p">)</span>
+    <span class="c1"># Changing the decoder layer and text processing</span>
+    <span class="k">if</span> <span class="n">decoder_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">text_transform</span> <span class="o">=</span> <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">text_transform</span>
+        <span class="n">decoder</span> <span class="o">=</span> <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">decoder</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Expecting vocabulary to not be empty&quot;</span>
+        <span class="n">text_transform</span> <span class="o">=</span> <span class="n">BatchTextTransformer</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="o">**</span><span class="n">text_kwargs</span><span class="p">)</span>
+        <span class="n">decoder</span> <span class="o">=</span> <span class="n">decoder_class</span><span class="p">(</span>
+            <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">encoder_final_dimension</span><span class="p">,</span>
+            <span class="n">text_transform</span><span class="o">.</span><span class="n">num_tokens</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">decoder_kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">encoder</span><span class="o">=</span><span class="n">checkpoint_data</span><span class="o">.</span><span class="n">encoder</span><span class="p">,</span>
+        <span class="n">decoder</span><span class="o">=</span><span class="n">decoder</span><span class="p">,</span>
+        <span class="n">audio_transform</span><span class="o">=</span><span class="n">checkpoint_data</span><span class="o">.</span><span class="n">audio_transform</span><span class="p">,</span>
+        <span class="n">text_transform</span><span class="o">=</span><span class="n">text_transform</span><span class="p">,</span>
+        <span class="n">optimizer_class</span><span class="o">=</span><span class="n">optimizer_class</span><span class="p">,</span>
+        <span class="n">optimizer_kwargs</span><span class="o">=</span><span class="n">optimizer_kwargs</span><span class="p">,</span>
+        <span class="n">lr_scheduler_class</span><span class="o">=</span><span class="n">lr_scheduler_class</span><span class="p">,</span>
+        <span class="n">lr_scheduler_kwargs</span><span class="o">=</span><span class="n">lr_scheduler_kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
@@ -1573,7 +1377,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../blocks/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Blocks" rel="prev">
+        <a href="../callbacks/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Callbacks" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1582,20 +1386,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Blocks
+              Callbacks
             </div>
           </div>
         </a>
       
       
         
-        <a href="../finetune/" class="md-footer__link md-footer__link--next" aria-label="Next: Finetune" rel="next">
+        <a href="../module/" class="md-footer__link md-footer__link--next" aria-label="Next: Module" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Finetune
+              Module
             </div>
           </div>
           <div class="md-footer__button md-icon">
