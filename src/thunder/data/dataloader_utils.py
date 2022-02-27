@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
 __all__ = ["asr_collate"]
 
@@ -18,7 +18,7 @@ def asr_collate(samples: List[Tuple[Tensor, str]]) -> Tuple[Tensor, Tensor, List
     """Function that collect samples and adds padding.
 
     Args:
-        samples : Samples produced by dataloader
+        samples: Samples produced by dataloader
 
     Returns:
         Tuple containing padded audios, audio lengths (normalized to 0.0 <-> 1.0 range) and the list of corresponding transcriptions in that order.
@@ -27,7 +27,6 @@ def asr_collate(samples: List[Tuple[Tensor, str]]) -> Tuple[Tensor, Tensor, List
     padded_audios = pad_sequence([s[0].squeeze() for s in samples], batch_first=True)
 
     audio_lengths = Tensor([s[0].size(-1) for s in samples])
-    audio_lengths = audio_lengths / audio_lengths.max()  # Normalize by max length
 
     texts = [s[1] for s in samples]
 

@@ -93,8 +93,9 @@ def test_CitrinetBlock_combinations(**kwargs):
     except ValueError:
         return
     x = torch.randn(10, kwargs["in_channels"], 1337)
+    lens = torch.randint(10, 1337, (10,))
 
-    out = block(x)
+    out, _ = block(x, lens)
 
     assert out.shape[0] == x.shape[0]
     assert out.shape[1] == kwargs["out_channels"]
@@ -108,8 +109,8 @@ def test_CitrinetBlock_update(**kwargs):
     except ValueError:
         return
     x = torch.randn(10, kwargs["in_channels"], 1337)
-
-    _test_parameters_update(block, (x))
+    lens = torch.randint(10, 1337, (10,))
+    _test_parameters_update(block, (x, lens))
 
 
 @mark_slow
@@ -121,8 +122,8 @@ def test_CitrinetBlock_independence(**kwargs):
     except ValueError:
         return
     x = torch.randn(10, kwargs["in_channels"], 1337)
-
-    _test_batch_independence(block, (x))
+    lens = torch.randint(10, 1337, (10,))
+    _test_batch_independence(block, (x, lens))
 
 
 @mark_slow
@@ -135,8 +136,8 @@ def test_CitrinetBlock_device_move(**kwargs):
     except ValueError:
         return
     x = torch.randn(10, kwargs["in_channels"], 1337)
-
-    _test_device_move(block, (x))
+    lens = torch.randint(10, 1337, (10,))
+    _test_device_move(block, (x, lens))
 
 
 @mark_slow
@@ -150,12 +151,13 @@ def test_CitrinetBlock_trace(**kwargs):
         return
 
     x = torch.randn(10, kwargs["in_channels"], 1337)
+    lens = torch.randint(10, 1337, (10,))
+    block_trace = torch.jit.trace(block, (x, lens))
 
-    block_trace = torch.jit.trace(block, (x))
-
-    out1 = block(x)
-    out2 = block_trace(x)
+    out1, lens1 = block(x, lens)
+    out2, lens2 = block_trace(x, lens)
     assert torch.allclose(out1, out2)
+    assert torch.allclose(lens1, lens2)
 
 
 @mark_slow
@@ -169,12 +171,13 @@ def test_CitrinetBlock_script(**kwargs):
         return
 
     x = torch.randn(10, kwargs["in_channels"], 1337)
-
+    lens = torch.randint(10, 1337, (10,))
     block_script = torch.jit.script(block)
 
-    out1 = block(x)
-    out2 = block_script(x)
+    out1, lens1 = block(x, lens)
+    out2, lens2 = block_script(x, lens)
     assert torch.allclose(out1, out2)
+    assert torch.allclose(lens1, lens2)
 
 
 @mark_slow
@@ -186,11 +189,11 @@ def test_CitrinetBlock_onnx(**kwargs):
     except ValueError:
         return
     x = torch.randn(10, kwargs["in_channels"], 1337)
-
+    lens = torch.randint(10, 1337, (10,))
     with TemporaryDirectory() as export_path:
         torch.onnx.export(
             block,
-            (x),
+            (x, lens),
             f"{export_path}/CitrinetBlock.onnx",
             verbose=True,
             opset_version=11,

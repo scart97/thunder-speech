@@ -1,7 +1,11 @@
+"""
+Utility functions
+"""
+
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
 __all__ = [
     "audio_len",
@@ -10,16 +14,13 @@ __all__ = [
     "chain_calls",
     "BaseCheckpoint",
     "download_checkpoint",
-    "default_list",
 ]
 
 import functools
 import os
-from copy import copy
-from dataclasses import field
 from enum import Enum
 from pathlib import Path
-from typing import Callable, List, TypeVar, Union
+from typing import Callable, List, Union
 
 import torchaudio
 import wget
@@ -29,7 +30,7 @@ def audio_len(item: Union[Path, str]) -> float:
     """Returns the length of the audio file
 
     Args:
-        item : Audio path
+        item: Audio path
 
     Returns:
         Lenght in seconds of the audio
@@ -53,8 +54,8 @@ def get_files(directory: Union[str, Path], extension: str) -> List[Path]:
     """Find all files in directory with extension.
 
     Args:
-        directory : Directory to recursively find the files
-        extension : File extension to search for
+        directory: Directory to recursively find the files
+        extension: File extension to search for
 
     Returns:
         List of all the files that match the extension
@@ -93,12 +94,14 @@ def chain_calls(*funcs: List[Callable]) -> Callable:
 
 
 class BaseCheckpoint(str, Enum):
+    """Base class that represents a pretrained model checkpoint."""
+
     @classmethod
-    def from_string(cls, name):
+    def from_string(cls, name: str) -> "BaseCheckpoint":
         """Creates enum value from string. Helper to use with argparse/hydra
 
         Args:
-            name : Name of the checkpoint
+            name: Name of the checkpoint
 
         Raises:
             ValueError: Name provided is not a valid checkpoint
@@ -134,18 +137,3 @@ def download_checkpoint(name: BaseCheckpoint, checkpoint_folder: str = None) -> 
         wget.download(url, out=str(checkpoint_path))
 
     return checkpoint_path
-
-
-T = TypeVar("T")
-
-
-def default_list(elements: List[T]) -> List[T]:
-    """Function to create default values on dataclasses that are lists
-
-    Args:
-        elements : List of elements to be the default
-
-    Returns:
-        field compatible with the way dataclasses handle mutable defaults
-    """
-    return field(default_factory=lambda: copy(elements))

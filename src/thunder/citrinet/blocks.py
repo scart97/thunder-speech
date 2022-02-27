@@ -18,7 +18,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
 # Original file: https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/parts/quartznet.py
 
@@ -28,16 +28,16 @@ __all__ = [
     "CitrinetBlock",
     "stem",
     "body",
-    "Citrinet_encoder",
+    "CitrinetEncoder",
 ]
 
-from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
 import torch
 from torch import nn
 from torch.nn.common_types import _size_1_t
 
+from thunder.blocks import Masked, MultiSequential
 from thunder.quartznet.blocks import (
     _get_act_dropout_layer,
     _get_conv_bn_layer,
@@ -70,7 +70,7 @@ class SqueezeExcite(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
-            x : Tensor of shape [batch, channels, time]
+            x: Tensor of shape [batch, channels, time]
         Returns:
             Tensor of shape [batch, channels, time]
         """
@@ -101,15 +101,15 @@ class CitrinetBlock(nn.Module):
         dense residual used on Jasper is not supported here.
 
         Args:
-            in_channels : Number of input channels
-            out_channels : Number of output channels
-            repeat : Repetitions inside block.
-            kernel_size : Kernel size.
-            stride : Stride of each repetition.
-            dilation : Dilation of each repetition.
-            dropout : Dropout used before each activation.
-            residual : Controls the use of residual connection.
-            separable : Controls the use of separable convolutions.
+            in_channels: Number of input channels
+            out_channels: Number of output channels
+            repeat: Repetitions inside block.
+            kernel_size: Kernel size.
+            stride: Stride of each repetition.
+            dilation: Dilation of each repetition.
+            dropout: Dropout used before each activation.
+            residual: Controls the use of residual connection.
+            separable: Controls the use of separable convolutions.
         """
         super().__init__()
 
@@ -151,14 +151,14 @@ class CitrinetBlock(nn.Module):
             )
         )
 
-        conv.append(SqueezeExcite(out_channels, reduction_ratio=8))
+        conv.append(Masked(SqueezeExcite(out_channels, reduction_ratio=8)))
 
-        self.mconv = nn.Sequential(*conv)
+        self.mconv = MultiSequential(*conv)
 
         if residual:
             stride_residual = stride if stride[0] == 1 else stride[0]
 
-            self.res = nn.Sequential(
+            self.res = MultiSequential(
                 *_get_conv_bn_layer(
                     in_channels,
                     out_channels,
@@ -170,34 +170,37 @@ class CitrinetBlock(nn.Module):
         else:
             self.res = None
 
-        self.mout = nn.Sequential(*_get_act_dropout_layer(drop_prob=dropout))
+        self.mout = MultiSequential(*_get_act_dropout_layer(drop_prob=dropout))
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, lengths: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
-            x : Tensor of shape (batch, features, time) where #features == inplanes
+            x: Tensor of shape (batch, features, time) where #features == inplanes
 
         Returns:
             Result of applying the block on the input, and corresponding output lengths
         """
 
         # compute forward convolutions
-        out = self.mconv(x)
+        out, lengths_out = self.mconv(x, lengths)
 
         # compute the residuals
         if self.res is not None:
-            res_out = self.res(x)
+            res_out, _ = self.res(x, lengths)
             out = out + res_out
 
         # compute the output
-        return self.mout(out)
+        out, lengths_out = self.mout(out, lengths_out)
+        return out, lengths_out
 
 
 def stem(feat_in: int) -> CitrinetBlock:
     """Creates the Citrinet stem. That is the first block of the model, that process the input directly.
 
     Args:
-        feat_in : Number of input features
+        feat_in: Number of input features
 
     Returns:
         Citrinet stem block
@@ -220,8 +223,8 @@ def body(
     """Creates the body of the Citrinet model. That is the middle part.
 
     Args:
-        filters : List of filters inside each block in the body.
-        kernel_size : Corresponding list of kernel sizes for each block. Should have the same length as the first argument.
+        filters: List of filters inside each block in the body.
+        kernel_size: Corresponding list of kernel sizes for each block. Should have the same length as the first argument.
         strides: Corresponding list of strides for each block. Should have the same length as the first argument.
 
     Returns:
@@ -247,32 +250,20 @@ def body(
     return layers
 
 
-@dataclass
-class EncoderConfig:
-    """Configuration to create [`Citrinet_encoder`][thunder.citrinet.blocks.Citrinet_encoder]
-
-    Attributes:
-        filters: List of filter sizes used to create the encoder blocks. required.
-        kernel_sizes: List of kernel sizes corresponding to each filter size. required.
-        strides: List of stride corresponding to each filter size. required.
-        feat_in : Number of input features to the model. defaults to 80.
-    """
-
-    filters: List[int]
-    kernel_sizes: List[int]
-    strides: List[int]
-    feat_in: int = 80
-
-
-def Citrinet_encoder(cfg: EncoderConfig) -> nn.Module:
+def CitrinetEncoder(
+    filters: List[int], kernel_sizes: List[int], strides: List[int], feat_in: int = 80
+) -> nn.Module:
     """Basic Citrinet encoder setup.
 
     Args:
-        cfg: required config to create instance
+        filters: List of filter sizes used to create the encoder blocks.
+        kernel_sizes: List of kernel sizes corresponding to each filter size.
+        strides: List of stride corresponding to each filter size.
+        feat_in: Number of input features to the model.
     Returns:
         Pytorch model corresponding to the encoder.
     """
-    return nn.Sequential(
-        stem(cfg.feat_in),
-        *body(cfg.filters, cfg.kernel_sizes, cfg.strides),
+    return MultiSequential(
+        stem(feat_in),
+        *body(filters, kernel_sizes, strides),
     )

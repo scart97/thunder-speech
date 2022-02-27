@@ -1,7 +1,11 @@
+"""
+Implements pytorch lightning's Datamodule for audio datasets.
+"""
+
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
 __all__ = ["BaseDataModule", "ManifestDatamodule"]
 
@@ -29,7 +33,7 @@ class BaseDataModule(LightningDataModule):
         This should be implemented by subclasses.
 
         Args:
-            split : One of "train", "valid" or "test".
+            split: One of "train", "valid" or "test".
 
         Returns:
             The corresponding dataset.
@@ -94,6 +98,17 @@ class ManifestDatamodule(BaseDataModule):
         batch_size: int = 10,
         num_workers: int = 8,
     ):
+        """Datamodule compatible with the NEMO manifest data format.
+
+        Args:
+            train_manifest: Training manifest file
+            val_manifest: Validation manifest file
+            test_manifest: Test manifest file
+            force_mono: Check [`ManifestSpeechDataset`][thunder.data.dataset.ManifestSpeechDataset]
+            sample_rate: Check [`ManifestSpeechDataset`][thunder.data.dataset.ManifestSpeechDataset]
+            batch_size: Batch size used by dataloader
+            num_workers: Number of workers used by dataloader
+        """
         super().__init__(
             batch_size=batch_size,
             num_workers=num_workers,

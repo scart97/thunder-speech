@@ -1,11 +1,14 @@
+"""
+Process batched text
+"""
+
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
-__all__ = ["BatchTextTransformer", "TextTransformConfig"]
+__all__ = ["BatchTextTransformer"]
 
-from dataclasses import dataclass
 from typing import List, Optional
 
 import torch
@@ -13,70 +16,44 @@ from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 
 from thunder.text_processing.tokenizer import BPETokenizer, char_tokenizer
-from thunder.text_processing.vocab import SimpleVocab, Vocab
-
-
-@dataclass
-class TextTransformConfig:
-    """Configuration to create [`BatchTextTransformer`][thunder.text_processing.transform.BatchTextTransformer]
-
-    Attributes:
-        initial_vocab_tokens: List of tokens to create the vocabulary, special tokens should not be included here. required.
-        simple_vocab: Controls if the used vocabulary will only have the blank token or more additional special tokens. defaults to `False`.
-        sentencepiece_model: Path to sentencepiece .model file, if applicable.
-    """
-
-    initial_vocab_tokens: List[str]
-    simple_vocab: bool = False
-    sentencepiece_model: Optional[str] = None
-
-    @classmethod
-    def from_sentencepiece(cls, output_dir: str) -> "TextTransformConfig":
-        """Load the data from a folder that contains the `tokenizer.vocab`
-        and `tokenizer.model` outputs from sentencepiece.
-
-        Args:
-            output_dir : Output directory of the sentencepiece training, that contains the required files.
-
-        Returns:
-            Instance of `TextTransformConfig` with the corresponding data loaded.
-        """
-        special_tokens = ["<s>", "</s>", "<pad>", "<unk>"]
-        vocab = []
-
-        with open(f"{output_dir}/tokenizer.vocab", "r") as f:
-            # Read tokens from each line and parse for vocab
-            for line in f:
-                piece = line.split("\t")[0]
-                if piece in special_tokens:
-                    # skip special tokens
-                    continue
-                vocab.append(piece)
-
-        return cls(
-            initial_vocab_tokens=vocab,
-            sentencepiece_model=f"{output_dir}/tokenizer.model",
-        )
+from thunder.text_processing.vocab import Vocabulary
 
 
 class BatchTextTransformer(nn.Module):
-    def __init__(self, cfg: TextTransformConfig):
+    def __init__(
+        self,
+        tokens: List[str],
+        blank_token: str = "<blank>",
+        pad_token: str = None,
+        unknown_token: str = None,
+        start_token: str = None,
+        end_token: str = None,
+        sentencepiece_model: Optional[str] = None,
+    ):
         """That class is the glue code that uses all of the text processing
         functions to encode/decode an entire batch of text at once.
 
+
         Args:
-            cfg: required config to create instance
+            tokens: Basic list of tokens that will be part of the vocabulary.
+            blank_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            pad_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            unknown_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            start_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            end_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
+            sentencepiece_model: Path to sentencepiece .model file, if applicable.
         """
         super().__init__()
-        self.vocab = (
-            SimpleVocab(cfg.initial_vocab_tokens)
-            if cfg.simple_vocab
-            else Vocab(cfg.initial_vocab_tokens)
+        self.vocab = Vocabulary(
+            tokens,
+            blank_token,
+            pad_token,
+            unknown_token,
+            start_token,
+            end_token,
         )
         self.tokenizer = (
-            BPETokenizer(cfg.sentencepiece_model)
-            if cfg.sentencepiece_model
-            else char_tokenizer
+            BPETokenizer(sentencepiece_model) if sentencepiece_model else char_tokenizer
         )
 
     def encode(self, items: List[str], return_length: bool = True, device=None):
@@ -101,7 +78,7 @@ class BatchTextTransformer(nn.Module):
     ) -> List[str]:
         """
         Args:
-            predictions : Tensor of shape (batch, time)
+            predictions: Tensor of shape (batch, time)
             remove_repeated: controls if repeated elements without a blank between them will be removed while decoding
 
         Returns:
@@ -119,7 +96,41 @@ class BatchTextTransformer(nn.Module):
             out = "".join(out)
             # _ is a special char only present on sentencepiece
             out = out.replace("▁", " ")
+            # | is a special char used by huggingface as space
+            out = out.replace("|", " ")
             out = self.vocab.remove_special_tokens(out)
             out_list.append(out)
 
         return out_list
+
+    @classmethod
+    def from_sentencepiece(cls, output_dir: str) -> "BatchTextTransformer":
+        """Load the data from a folder that contains the `tokenizer.vocab`
+        and `tokenizer.model` outputs from sentencepiece.
+
+        Args:
+            output_dir: Output directory of the sentencepiece training, that contains the required files.
+
+        Returns:
+            Instance of `BatchTextTransformer` with the corresponding data loaded.
+        """
+        special_tokens = ["<s>", "</s>", "<pad>", "<unk>"]
+        vocab = []
+
+        with open(f"{output_dir}/tokenizer.vocab", "r") as f:
+            # Read tokens from each line and parse for vocab
+            for line in f:
+                piece = line.split("\t")[0]
+                if piece in special_tokens:
+                    # skip special tokens
+                    continue
+                vocab.append(piece)
+
+        return cls(
+            tokens=vocab,
+            sentencepiece_model=f"{output_dir}/tokenizer.model",
+        )
+
+    @property
+    def num_tokens(self):
+        return len(self.vocab.itos)

@@ -4,24 +4,33 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
-__all__ = ["CitrinetCheckpoint", "read_params_from_config_citrinet", "fix_vocab"]
+__all__ = ["CitrinetCheckpoint", "load_components_from_citrinet_config", "fix_vocab"]
 
 
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from tempfile import TemporaryDirectory
+from typing import List, Tuple, Union
 
 from omegaconf import OmegaConf
+from torch import nn
+from torchaudio.datasets.utils import extract_archive
 
-from thunder.utils import BaseCheckpoint
+from thunder.blocks import conv1d_decoder
+from thunder.citrinet.blocks import CitrinetEncoder
+from thunder.module import BaseCTCModule
+from thunder.quartznet.compatibility import load_quartznet_weights
+from thunder.quartznet.transform import FilterbankFeatures
+from thunder.text_processing.transform import BatchTextTransformer
+from thunder.utils import BaseCheckpoint, download_checkpoint
 
 
 # fmt:off
 class CitrinetCheckpoint(BaseCheckpoint):
     """Trained model weight checkpoints.
     Used by [`download_checkpoint`][thunder.utils.download_checkpoint] and
-    [`CitrinetModule.load_from_nemo`][thunder.citrinet.module.CitrinetModule.load_from_nemo].
+    [`load_citrinet_checkpoint`][thunder.citrinet.compatibility.load_citrinet_checkpoint].
 
     Note:
         Possible values are `stt_en_citrinet_256`,`stt_en_citrinet_512`,`stt_en_citrinet_1024`, `stt_es_citrinet_512`
@@ -33,17 +42,17 @@ class CitrinetCheckpoint(BaseCheckpoint):
 # fmt:on
 
 
-def read_params_from_config_citrinet(
-    config_path: Union[str, Path]
-) -> Tuple[Dict, List[str], Dict]:
+def load_components_from_citrinet_config(
+    config_path: Union[str, Path], sentencepiece_path: Union[str, Path]
+) -> Tuple[nn.Module, nn.Module, BatchTextTransformer]:
     """Read the important parameters from the config stored inside the .nemo
     checkpoint.
 
     Args:
-        config_path : Path to the .yaml file, usually called model_config.yaml
+        config_path: Path to the .yaml file, usually called model_config.yaml
 
     Returns:
-        A tuple containing, in this order, the encoder hyperparameters, the vocabulary, and the preprocessing hyperparameters
+        A tuple containing, in this order, the encoder, the audio transform and the text transform
     """
     conf = OmegaConf.load(config_path)
     encoder_params = conf["encoder"]
@@ -72,10 +81,17 @@ def read_params_from_config_citrinet(
 
     labels = conf["labels"] if "labels" in conf else conf["decoder"]["vocabulary"]
 
+    encoder = CitrinetEncoder(**encoder_cfg)
+    text_transform = BatchTextTransformer(
+        tokens=fix_vocab(labels),
+        sentencepiece_model=sentencepiece_path,
+    )
+    audio_transform = FilterbankFeatures(**preprocess_cfg)
+
     return (
-        encoder_cfg,
-        OmegaConf.to_container(labels),
-        preprocess_cfg,
+        encoder,
+        audio_transform,
+        text_transform,
     )
 
 
@@ -84,7 +100,7 @@ def fix_vocab(vocab_tokens: List[str]) -> List[str]:
     with the _ prefix
 
     Args:
-        vocab_tokens : List of tokens in the vocabulary
+        vocab_tokens: List of tokens in the vocabulary
 
     Returns:
         New list of tokens with the new prefix
@@ -96,3 +112,45 @@ def fix_vocab(vocab_tokens: List[str]) -> List[str]:
         else:
             out_tokens.append("▁" + token)
     return out_tokens
+
+
+def load_citrinet_checkpoint(
+    checkpoint: Union[str, CitrinetCheckpoint], save_folder: str = None
+) -> BaseCTCModule:
+    """Load from the original nemo checkpoint.
+
+    Args:
+        checkpoint: Path to local .nemo file or checkpoint to be downloaded locally and lodaded.
+        save_folder: Path to save the checkpoint when downloading it. Ignored if you pass a .nemo file as the first argument.
+
+    Returns:
+        The model loaded from the checkpoint
+    """
+    if isinstance(checkpoint, CitrinetCheckpoint):
+        nemo_filepath = download_checkpoint(checkpoint, save_folder)
+    else:
+        nemo_filepath = checkpoint
+
+    with TemporaryDirectory() as extract_folder:
+        extract_archive(str(nemo_filepath), extract_folder)
+        extract_path = Path(extract_folder)
+        config_path = extract_path / "model_config.yaml"
+        sentencepiece_path = str(extract_path / "tokenizer.model")
+        (
+            encoder,
+            audio_transform,
+            text_transform,
+        ) = load_components_from_citrinet_config(config_path, sentencepiece_path)
+
+        decoder = conv1d_decoder(640, num_classes=text_transform.num_tokens)
+
+        weights_path = extract_path / "model_weights.ckpt"
+        load_quartznet_weights(encoder, decoder, str(weights_path))
+        module = BaseCTCModule(
+            encoder,
+            decoder,
+            audio_transform,
+            text_transform,
+            encoder_final_dimension=640,
+        )
+        return module.eval()

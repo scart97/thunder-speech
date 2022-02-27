@@ -1,7 +1,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
+
+"""
+Speech recognition datasets
+"""
 
 __all__ = ["BaseSpeechDataset", "ManifestSpeechDataset"]
 
@@ -23,8 +27,8 @@ class AudioFileLoader(nn.Module):
         that during inference time there's no code dependency.
 
         Args:
-            force_mono : If true, convert all the loaded samples to mono.
-            sample_rate : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
+            force_mono: If true, convert all the loaded samples to mono.
+            sample_rate: Sample rate used by the dataset. All of the samples that have different rate will be resampled.
         """
         super().__init__()
         self.force_mono = force_mono
@@ -35,7 +39,7 @@ class AudioFileLoader(nn.Module):
         """Uses the data returned by get_item to open the audio
 
         Args:
-            item : Data returned by get_item(index)
+            item: Data returned by get_item(index)
 
         Returns:
             Tuple containing the audio tensor with shape (channels, time), and the corresponding sample rate.
@@ -50,8 +54,8 @@ class AudioFileLoader(nn.Module):
         sample rate.
 
         Args:
-            audio : Audio tensor
-            sample_rate : Sample rate
+            audio: Audio tensor
+            sample_rate: Sample rate
 
         Returns:
             Audio tensor after the transforms.
@@ -68,7 +72,7 @@ class AudioFileLoader(nn.Module):
 
         if self.sample_rate != sample_rate:
             audio = resample(
-                audio, orig_freq=float(sample_rate), new_freq=float(self.sample_rate)
+                audio, orig_freq=int(sample_rate), new_freq=int(self.sample_rate)
             )
         return audio
 
@@ -76,7 +80,7 @@ class AudioFileLoader(nn.Module):
         """Opens audio item and do basic preprocessing
 
         Args:
-            item : Path to the audio to be opened
+            item: Path to the audio to be opened
 
         Returns:
             Audio tensor after preprocessing
@@ -93,9 +97,9 @@ class BaseSpeechDataset(Dataset):
         speech dataset, in a way that can be easily customized by subclassing.
 
         Args:
-            items : Source of items in the dataset, sorted by audio duration. This can be a list of files, a pandas dataframe or any other iterable structure where you record your data.
-            force_mono : If true, convert all the loaded samples to mono.
-            sample_rate : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
+            items: Source of items in the dataset, sorted by audio duration. This can be a list of files, a pandas dataframe or any other iterable structure where you record your data.
+            force_mono: If true, convert all the loaded samples to mono.
+            sample_rate: Sample rate used by the dataset. All of the samples that have different rate will be resampled.
         """
         super().__init__()
         self.items = items
@@ -135,7 +139,7 @@ class BaseSpeechDataset(Dataset):
         """Get the item source specified by the index.
 
         Args:
-            index : Indicates what item it needs to return information about.
+            index: Indicates what item it needs to return information about.
 
         Returns:
             Whatever data necessary to open the audio and text corresponding to this index.
@@ -146,7 +150,7 @@ class BaseSpeechDataset(Dataset):
         """Uses the data returned by get_item to open the audio
 
         Args:
-            item : Data returned by get_item(index)
+            item: Data returned by get_item(index)
 
         Returns:
             Tuple containing the audio tensor with shape (channels, time), and the corresponding sample rate.
@@ -160,8 +164,8 @@ class BaseSpeechDataset(Dataset):
         sample rate.
 
         Args:
-            audio : Audio tensor
-            sample_rate : Sample rate
+            audio: Audio tensor
+            sample_rate: Sample rate
 
         Returns:
             Audio tensor after the transforms.
@@ -172,7 +176,7 @@ class BaseSpeechDataset(Dataset):
         """Opens the transcription based on the data returned by get_item(index)
 
         Args:
-            item : The data returned by get_item.
+            item: The data returned by get_item.
 
         Returns:
             The transcription corresponding to the item.
@@ -183,7 +187,7 @@ class BaseSpeechDataset(Dataset):
         """Add here preprocessing steps to remove some common problems in the text.
 
         Args:
-            text : Label text
+            text: Label text
 
         Returns:
             Label text after processing
@@ -196,9 +200,9 @@ class ManifestSpeechDataset(BaseSpeechDataset):
         """Dataset that loads from nemo manifest files.
 
         Args:
-            file : Nemo manifest file.
-            force_mono : If true, convert all the loaded samples to mono.
-            sample_rate : Sample rate used by the dataset. All of the samples that have different rate will be resampled.
+            file: Nemo manifest file.
+            force_mono: If true, convert all the loaded samples to mono.
+            sample_rate: Sample rate used by the dataset. All of the samples that have different rate will be resampled.
         """
         file = Path(file)
         # Reading from the manifest file
@@ -206,7 +210,9 @@ class ManifestSpeechDataset(BaseSpeechDataset):
         super().__init__(items, force_mono=force_mono, sample_rate=sample_rate)
 
     def open_audio(self, item: dict) -> Tuple[Tensor, int]:
-        return self.loader.open_audio(item["audio_filepath"])
+        # path = "/home/scart/datasets_raw/" + item["audio_filepath"]
+        path = item["audio_filepath"]
+        return self.loader.open_audio(path)
 
     def open_text(self, item: dict) -> str:
         return item["text"]

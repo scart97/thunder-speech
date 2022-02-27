@@ -1,7 +1,11 @@
+"""
+Text preprocessing functionality
+"""
+
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
 __all__ = ["lower_text", "normalize_text", "expand_numbers"]
 
@@ -15,7 +19,7 @@ def lower_text(text: str) -> str:
     """Transform all the text to lowercase.
 
     Args:
-        text : Input text
+        text: Input text
 
     Returns:
         Output text
@@ -29,7 +33,7 @@ def normalize_text(text: str) -> str:
     ascii symbols.
 
     Args:
-        text : Input text
+        text: Input text
 
     Returns:
         Output text
@@ -45,8 +49,8 @@ def expand_numbers(text: str, language: str = "en") -> str:
     It also detects if the number is ordinal automatically.
 
     Args:
-        text : Input text
-        language : Language used to expand the numbers. Defaults to "en".
+        text: Input text
+        language: Language used to expand the numbers. Defaults to "en".
 
     Returns:
         Output text

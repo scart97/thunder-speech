@@ -1,162 +1,94 @@
+"""
+Classes that represent the vocabulary used by the model.
+"""
+
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
-__all__ = ["SimpleVocab", "Vocab"]
+__all__ = ["Vocabulary"]
 
-from typing import List
+from typing import List, Optional
 
 import torch
+from torch import nn
 
 
-@torch.jit.script
-class SimpleVocab:
+class Vocabulary(nn.Module):
     def __init__(
         self,
-        initial_vocab_tokens: List[str],
+        tokens: List[str],
         blank_token: str = "<blank>",
-    ):
-        """Class that represents a vocabulary, with the related methods
-        to numericalize a sequence of tokens into numbers, and do the
-        reverse mapping of numbers back to tokens.
-        This is a simplified vocabulary that only has the ctc blank as
-        special token.
-
-        Args:
-            initial_vocab_tokens : Basic list of tokens that will be part of the vocabulary. DO NOT INCLUDE SPECIAL TOKENS THERE. Even the blank is automatically added by the class. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
-            blank_token : Token that will represent the special ctc blank.
-        """
-        # There's no problem if the blank_idx == pad_idx
-        self.blank_token = blank_token
-
-        self.itos = initial_vocab_tokens + [blank_token]
-        self.stoi = {token: i for i, token in enumerate(self.itos)}
-        self.blank_idx = self.itos.index(self.blank_token)
-        self.pad_idx = self.blank_idx
-
-    def __len__(self):
-        return len(self.itos)
-
-    def numericalize(self, tokens: List[str]) -> torch.Tensor:
-        """Function to transform a list of tokens into the corresponding numeric representation.
-
-        Args:
-            tokens : A single list of tokens to be transformed
-
-        Returns:
-            The corresponding numeric representation
-        """
-        # When in nemo style vocab, there's no unknown token
-        # So we filter out all of the tokens not in the vocab
-        filtered: List[str] = []
-        for t in tokens:
-            if t in self.itos:
-                filtered.append(t)
-        # https://github.com/pytorch/pytorch/issues/27504 - alternative to the loop
-        # filtered = [t for t in tokens if t in self.itos]
-        return torch.tensor([self.stoi.get(it) for it in filtered], dtype=torch.long)
-
-    def decode_into_text(self, indices: torch.Tensor) -> List[str]:
-        """Function to transform back a list of numbers into the corresponding
-        tokens.
-
-        Args:
-            indices : Numeric representation. Usually is the result of the model, after a greedy decoding
-
-        Returns:
-            Corresponding tokens
-        """
-        return [self.itos[it] for it in indices]
-
-    def add_special_tokens(self, tokens: List[str]) -> List[str]:
-        """Function to add the special start and end tokens to some
-        tokenized text.
-
-        Args:
-            tokens : Tokenized text
-
-        Returns:
-            Text with the special tokens added.
-        """
-        return tokens
-
-    def remove_special_tokens(self, text: str) -> str:
-        """Function to remove the special tokens from the prediction.
-
-        Args:
-            text : Decoded text
-
-        Returns:
-            Text with the special tokens removed.
-        """
-        return text.replace(self.blank_token, "")
-
-
-@torch.jit.script
-class Vocab:
-    def __init__(
-        self,
-        initial_vocab_tokens: List[str],
-        pad_token: str = "<pad>",
-        unknown_token: str = "<unk>",
-        start_token: str = "<bos>",
-        end_token: str = "<eos>",
+        pad_token: Optional[str] = None,
+        unknown_token: Optional[str] = None,
+        start_token: Optional[str] = None,
+        end_token: Optional[str] = None,
     ):
         """Class that represents a vocabulary, with the related methods
         to numericalize a sequence of tokens into numbers, and do the
         reverse mapping of numbers back to tokens.
 
         Args:
-            initial_vocab_tokens : Basic list of tokens that will be part of the vocabulary. DO NOT INCLUDE SPECIAL TOKENS THERE. Even the blank is automatically added by the class. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-initial_vocab_tokens-from-my-dataset)
-            pad_token : Token that will represent padding, and also act as the ctc blank.
-            unknown_token : Token that will represent unknown elements. Notice that this is different than the blank used by ctc.
-            start_token : Token that will represent the beginning of the sequence.
-            end_token : Token that will represent the end of the sequence.
+            tokens: Basic list of tokens that will be part of the vocabulary. Check [`docs`](https://scart97.github.io/thunder-speech/quick%20reference%20guide/#how-to-get-the-tokens-from-my-dataset)
+            blank_token: Token that will represent the ctc blank.
+            pad_token: Token that will represent padding, might also act as the ctc blank.
+            unknown_token: Token that will represent unknown elements. Notice that this is different than the blank used by ctc.
+            start_token: Token that will represent the beginning of the sequence.
+            end_token: Token that will represent the end of the sequence.
         """
-        self.pad_token = pad_token
+        super().__init__()
         self.unknown_token = unknown_token
         self.start_token = start_token
         self.end_token = end_token
-        # There's no problem if the blank_idx == pad_idx
-        self.blank_token = self.pad_token
+        self.blank_token = blank_token
+        self.pad_token = pad_token or blank_token
 
-        self.itos = initial_vocab_tokens + [
-            pad_token,
-            unknown_token,
-            start_token,
-            end_token,
-        ]
+        self.itos = tokens
+        self._maybe_add_token(blank_token)
+        self._maybe_add_token(pad_token)
+        self._maybe_add_token(unknown_token)
+        self._maybe_add_token(start_token)
+        self._maybe_add_token(end_token)
+
         self.stoi = {token: i for i, token in enumerate(self.itos)}
 
-        self.pad_idx = self.itos.index(self.pad_token)
-        self.unknown_idx = self.itos.index(self.unknown_token)
-        self.start_idx = self.itos.index(self.start_token)
-        self.end_idx = self.itos.index(self.end_token)
         self.blank_idx = self.itos.index(self.blank_token)
+        self.pad_idx = self.itos.index(self.pad_token)
+        self._unk_idx = -1
+        if self.unknown_token is not None:
+            self._unk_idx = self.itos.index(self.unknown_token)
 
-    def __len__(self):
-        return len(self.itos)
+    def _maybe_add_token(self, token: Optional[str]):
+        # Only adds tokens if they are not optional
+        # and are not included in the vocabulary already
+        if token and (token not in self.itos):
+            self.itos = self.itos + [token]
 
     def numericalize(self, tokens: List[str]) -> torch.Tensor:
         """Function to transform a list of tokens into the corresponding numeric representation.
 
         Args:
-            tokens : A single list of tokens to be transformed
+            tokens: A single list of tokens to be transformed
 
         Returns:
             The corresponding numeric representation
         """
+        if self.unknown_token is None:
+            # When in there's no unknown token
+            # we filter out all of the tokens not in the vocab
+            tokens = [t for t in tokens if t in self.itos]
         return torch.tensor(
-            [self.stoi.get(it, self.unknown_idx) for it in tokens], dtype=torch.long
+            [self.stoi.get(it, self._unk_idx) for it in tokens], dtype=torch.long
         )
 
+    @torch.jit.export
     def decode_into_text(self, indices: torch.Tensor) -> List[str]:
         """Function to transform back a list of numbers into the corresponding
         tokens.
 
         Args:
-            indices : Numeric representation. Usually is the result of the model, after a greedy decoding
+            indices: Numeric representation. Usually is the result of the model, after a greedy decoding
 
         Returns:
             Corresponding tokens
@@ -168,24 +100,31 @@ class Vocab:
         tokenized text.
 
         Args:
-            tokens : Tokenized text
+            tokens: Tokenized text
 
         Returns:
             Text with the special tokens added.
         """
-        return [self.start_token] + tokens + [self.end_token]
+        if self.start_token is not None:
+            tokens = [self.start_token] + tokens
+        if self.end_token is not None:
+            tokens = tokens + [self.end_token]
+        return tokens
 
+    @torch.jit.export
     def remove_special_tokens(self, text: str) -> str:
         """Function to remove the special tokens from the prediction.
 
         Args:
-            text : Decoded text
+            text: Decoded text
 
         Returns:
             Text with the special tokens removed.
         """
         text = text.replace(self.blank_token, "")
         text = text.replace(self.pad_token, "")
-        text = text.replace(self.start_token, "")
-        text = text.replace(self.end_token, "")
+        if self.start_token is not None:
+            text = text.replace(self.start_token, "")
+        if self.end_token is not None:
+            text = text.replace(self.end_token, "")
         return text

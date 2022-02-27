@@ -4,11 +4,22 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
-__all__ = ["convolution_stft", "get_same_padding", "conv1d_decoder"]
+__all__ = [
+    "convolution_stft",
+    "MultiSequential",
+    "Masked",
+    "normalize_tensor",
+    "lengths_to_mask",
+    "get_same_padding",
+    "conv1d_decoder",
+    "SwapLastDimension",
+    "linear_decoder",
+]
 
 import math
+from typing import Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -45,9 +56,9 @@ def convolution_stft(
     fourier_basis = _fourier_matrix(n_fft, device=input_data.device)
 
     cutoff = int((n_fft / 2 + 1))
-    fourier_basis = torch.vstack(
+    fourier_basis = torch.stack(
         [torch.real(fourier_basis[:cutoff, :]), torch.imag(fourier_basis[:cutoff, :])]
-    )
+    ).reshape(-1, n_fft)
     forward_basis = fourier_basis[:, None, :].float()
 
     window_pad = (n_fft - win_length) // 2
@@ -80,6 +91,83 @@ def convolution_stft(
     return torch.stack((real_part, imag_part), dim=-1)
 
 
+class MultiSequential(nn.Sequential):
+    """nn.Sequential equivalent with 2 inputs/outputs"""
+
+    def forward(
+        self, audio: torch.Tensor, audio_lengths: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        for module in self.children():
+            audio, audio_lengths = module(audio, audio_lengths)
+        return audio, audio_lengths
+
+
+class Masked(nn.Module):
+    """Wrapper to mix normal modules with others that take 2 inputs"""
+
+    def __init__(self, *layers):
+        super().__init__()
+        self.layer = nn.Sequential(*layers)
+
+    def forward(
+        self, audio: torch.Tensor, audio_lengths: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        return self.layer(audio), audio_lengths
+
+
+def normalize_tensor(
+    input_values: torch.Tensor,
+    mask: Optional[torch.Tensor] = None,
+    div_guard: float = 1e-7,
+    dim: int = -1,
+) -> torch.Tensor:
+    """Normalize tensor values, optionally using some mask to define the valid region.
+
+    Args:
+        input_values: input tensor to be normalized
+        mask: Optional mask describing the valid elements.
+        div_guard: value used to prevent division by zero when normalizing.
+        dim: dimension used to calculate the mean and variance.
+
+    Returns:
+        Normalized tensor
+    """
+    # Vectorized implementation of (x - x.mean()) / x.std() considering only the valid mask
+    if mask is not None:
+        # Number of valid elements
+        num_elements = mask.sum(dim=dim, keepdim=True).detach()
+        # Mean is sum over number of elements
+        x_mean = input_values.sum(dim=dim, keepdim=True).detach() / num_elements
+        # std numerator: sum of squared differences to the mean
+        numerator = (input_values - x_mean).pow(2).sum(dim=dim, keepdim=True).detach()
+        x_std = (numerator / num_elements).sqrt()
+        # using the div_guard to prevent division by zero
+        normalized = (input_values - x_mean) / (x_std + div_guard)
+        # Cleaning elements outside of valid mask
+        return torch.masked_fill(normalized, ~mask.type(torch.bool), 0.0)
+
+    mean = input_values.mean(dim=dim, keepdim=True).detach()
+    std = (input_values.var(dim=dim, keepdim=True).detach() + div_guard).sqrt()
+    return (input_values - mean) / std
+
+
+def lengths_to_mask(lengths: torch.Tensor, max_length: int) -> torch.Tensor:
+    """Convert from integer lengths of each element to mask representation
+
+    Args:
+        lengths: lengths of each element in the batch
+        max_length: maximum length expected. Can be greater than lengths.max()
+
+    Returns:
+        Corresponding boolean mask indicating the valid region of the tensor.
+    """
+    lengths = lengths.type(torch.long)
+    mask = torch.arange(max_length, device=lengths.device).expand(
+        lengths.shape[0], max_length
+    ) < lengths.unsqueeze(1)
+    return mask
+
+
 def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
     """Calculates the padding size to obtain same padding.
         Same padding means that the output will have the
@@ -89,9 +177,9 @@ def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
         input shape.
 
     Args:
-        kernel_size : convolution kernel size. Only tested to be correct with odd values.
-        stride : convolution stride
-        dilation : convolution dilation
+        kernel_size: convolution kernel size. Only tested to be correct with odd values.
+        stride: convolution stride
+        dilation: convolution dilation
 
     Raises:
         ValueError: Only stride or dilation may be greater than 1
@@ -110,8 +198,8 @@ def conv1d_decoder(decoder_input_channels: int, num_classes: int) -> nn.Module:
     """Decoder that uses one conv1d layer
 
     Args:
-        num_classes : Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
-        decoder_input_channels : Number of input channels of the decoder. That is the number of channels of the features created by the encoder.
+        num_classes: Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
+        decoder_input_channels: Number of input channels of the decoder. That is the number of channels of the features created by the encoder.
 
     Returns:
         Pytorch model of the decoder
@@ -140,8 +228,8 @@ def linear_decoder(
 
     Args:
         decoder_dropout: Amount of dropout to be used in the decoder
-        decoder_input_channels : Number of input channels of the decoder. That is the number of channels of the features created by the encoder.
-        num_classes : Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
+        decoder_input_channels: Number of input channels of the decoder. That is the number of channels of the features created by the encoder.
+        num_classes: Number of output classes of the model. It's the size of the vocabulary, excluding the blank symbol.
 
     Returns:
         Module that represents the decoder.

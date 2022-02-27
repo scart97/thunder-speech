@@ -1,7 +1,11 @@
+"""
+Text tokenization including character, word or sentencepiece
+"""
+
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
 __all__ = [
     "BPETokenizer",
@@ -99,7 +103,7 @@ def word_tokenizer(text: str) -> List[str]:
     """Tokenize input text splitting into words
 
     Args:
-        text : Input text
+        text: Input text
 
     Returns:
         Tokenized text
@@ -111,7 +115,7 @@ def char_tokenizer(text: str) -> List[str]:
     """Tokenize input text splitting into characters
 
     Args:
-        text : Input text
+        text: Input text
 
     Returns:
         Tokenized text
@@ -128,10 +132,10 @@ def get_most_frequent_tokens(
     """Helper function to get the most frequent tokens from a text corpus.
 
     Args:
-        corpus : Text corpus to be used, this is a long string containing all of your text
-        tokenize_function : Same tokenizer function that will be used during training
-        minimum_frequency : Remove any token with frequency less than that. Defaults to 1.
-        max_number_of_tokens : Optionally limit to the K most frequent tokens. Defaults to None.
+        corpus: Text corpus to be used, this is a long string containing all of your text
+        tokenize_function: Same tokenizer function that will be used during training
+        minimum_frequency: Remove any token with frequency less than that. Defaults to 1.
+        max_number_of_tokens: Optionally limit to the K most frequent tokens. Defaults to None.
 
     Returns:
         All of the unique, most frequent tokens, ordered by frequency.

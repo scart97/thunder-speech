@@ -20,7 +20,12 @@ def test_convolution_stft():
         x, n_fft=1024, hop_length=512, win_length=256, window=window_tensor
     )
     out_original = torch.stft(
-        x, n_fft=1024, hop_length=512, win_length=256, window=window_tensor
+        x,
+        n_fft=1024,
+        hop_length=512,
+        win_length=256,
+        window=window_tensor,
+        return_complex=False,
     )
     assert torch.allclose(stft, out_original, atol=1e-2)
 

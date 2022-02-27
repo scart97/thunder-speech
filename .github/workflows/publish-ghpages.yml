@@ -19,7 +19,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libsndfile1
-          pip install -e .[dev,testing,transformers]
+          python -m pip install --upgrade pip
+          pip install -e .[dev,testing]
       - name: Build docs
         run: mkdocs build
       - name: Deploy docs
