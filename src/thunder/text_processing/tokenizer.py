@@ -1,7 +1,11 @@
+"""
+Text tokenization including character, word or sentencepiece
+"""
+
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
 __all__ = [
     "BPETokenizer",

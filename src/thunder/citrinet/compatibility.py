@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) 2021 scart97
+# Copyright (c) 2021-2022 scart97
 
 __all__ = ["CitrinetCheckpoint", "load_components_from_citrinet_config", "fix_vocab"]
 

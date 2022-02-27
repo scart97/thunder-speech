@@ -1,6 +1,11 @@
 """ Module that implements easy finetuning of any model in the library.
 """
 
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Copyright (c) 2021-2022 scart97
+
 from typing import Any, Dict, List, Type
 
 import torch
