@@ -26,6 +26,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install libsndfile1
+        pip install --upgrade pip
         pip install -e .[dev,testing]
     - name: Test with pytest
       run: |

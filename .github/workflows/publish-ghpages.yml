@@ -19,6 +19,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libsndfile1
+          python -m pip install --upgrade pip
           pip install -e .[dev,testing]
       - name: Build docs
         run: mkdocs build
