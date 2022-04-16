@@ -14,7 +14,8 @@ import os
 import pytest
 
 from hypothesis import settings
-from torchaudio.datasets.utils import download_url, extract_archive
+from torch.hub import download_url_to_file
+from torchaudio.datasets.utils import extract_archive
 
 from thunder.text_processing.preprocess import normalize_text
 from thunder.utils import audio_len, get_default_cache_folder, get_files
@@ -22,19 +23,32 @@ from thunder.utils import audio_len, get_default_cache_folder, get_files
 # Increase deadline on CI, where the machine might be slower
 # 3 seconds
 settings.register_profile("ci", deadline=3000)
-settings.load_profile(os.getenv(u"HYPOTHESIS_PROFILE", "default"))
+settings.load_profile(os.getenv("HYPOTHESIS_PROFILE", "default"))
 
 
 @pytest.fixture(scope="session")
 def sample_data():
     path = get_default_cache_folder()
-    download_url(
-        "https://github.com/scart97/lapsbm-backup/archive/refs/tags/lapsbm-ci.tar.gz",
-        download_folder=path,
-        resume=True,
-    )
-    extract_archive(path / "lapsbm-backup-lapsbm-ci.tar.gz", path)
-    return path / "lapsbm-backup-lapsbm-ci"
+    out_path = path / "lapsbm-backup-lapsbm-ci"
+    if not out_path.exists():
+        download_url_to_file(
+            "https://github.com/scart97/lapsbm-backup/archive/refs/tags/lapsbm-ci.tar.gz",
+            str(path / "lapsbm-backup-lapsbm-ci.tar.gz"),
+        )
+        extract_archive(path / "lapsbm-backup-lapsbm-ci.tar.gz", path)
+    return out_path
+
+
+@pytest.fixture(scope="session")
+def sample_audio():
+    path = get_default_cache_folder()
+    out_path = path / "f0001_us_f0001_00001.wav"
+    if not out_path.exists():
+        download_url_to_file(
+            "https://github.com/fastaudio/10_Speakers_Sample/raw/76f365de2f4d282ec44450d68f5b88de37b8b7ad/train/f0001_us_f0001_00001.wav",
+            str(out_path),
+        )
+    return out_path
 
 
 @pytest.fixture(scope="session")
