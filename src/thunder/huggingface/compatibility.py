@@ -23,8 +23,8 @@ class _HuggingFaceEncoderAdapt(nn.Module):
     def __init__(self, encoder, mask_input: bool = False):
         super().__init__()
         self.original_encoder = encoder
-        if hasattr(self.original_encoder, "freeze_feature_extractor"):
-            self.original_encoder.freeze_feature_extractor()
+        if hasattr(self.original_encoder, "freeze_feature_encoder"):
+            self.original_encoder.freeze_feature_encoder()
         self.mask_input = mask_input
 
     def forward(self, audio: Tensor, audio_lengths: Tensor) -> Tuple[Tensor, Tensor]:
