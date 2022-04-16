@@ -82,14 +82,14 @@ The first step to contribute is to do an editable installation of the library:
 ```
 git clone https://github.com/scart97/thunder-speech.git
 cd thunder-speech
-pip install -e .[dev,testing]
+poetry install
 pre-commit install
 ```
 
 Then, make sure that everything is working. You can run the test suit, that is based on pytest:
 
 ```
-RUN_SLOW=1 pytest
+RUN_SLOW=1 poetry run pytest
 ```
 
 Here the `RUN_SLOW` flag is used to run all the tests, including the ones that might download checkpoints or do small training runs and are marked as slow. If you don't have a CUDA capable gpu, some tests will be unconditionally skipped.
@@ -108,9 +108,3 @@ Also, the idea that default parameters should be great.
 The overall organization of code and decoupling follows the pytorch-lightning ideals, with self-contained modules that try to reduce the boilerplate necessary.
 
 Finally, the transformers library inspired the simple model implementations, with a clear separation in folders containing the specific code that you need to understand each architecture and preprocessing, and their strong test suit.
-
-
-## Note
-
-This project has been set up using PyScaffold 3.3. For details and usage
-information on PyScaffold see https://pyscaffold.org/.

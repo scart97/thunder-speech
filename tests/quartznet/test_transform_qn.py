@@ -317,6 +317,7 @@ def test_powerspectrum_script(**kwargs):
 
 
 @powerspec_params
+@pytest.mark.skip
 def test_powerspectrum_onnx(**kwargs):
     # ONNX doesn't support fft or stft computation
     # There's suggestions to hack it using conv1d
@@ -492,6 +493,7 @@ def test_filterbank_script(**kwargs):
 
 @filterbank_params
 @settings(deadline=None, max_examples=5)
+@pytest.mark.skip
 def test_filterbank_onnx(**kwargs):
     fb = FilterbankFeatures(**kwargs)
     fb = patch_stft(fb)

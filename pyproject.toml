@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "thunder-speech"
+version = "3.0.0"
+description = "A Hackable speech recognition library"
+authors = ["scart97 <scart.lucas@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+keywords = ["python", "pytorch", "speech recognition"]
+include = [
+    "README.md",
+    "LICENSE.txt"
+]
+packages = [
+    {include = "thunder", from = "src"}
+]
+homepage = "https://scart97.github.io/thunder-speech/"
+repository = "https://github.com/scart97/thunder-speech"
+documentation = "https://scart97.github.io/thunder-speech/"
+
+
+[tool.poetry.dependencies]
+python = "^3.7"
+importlib-metadata = "^4.11.1"
+torch = "^1.11"
+torchaudio = "^0.11"
+pytorch-lightning = "^1.6"
+transformers = ">=4.11,<5.0"
+hydra-core = "^1.1.1"
+num2words = "^0.5.10"
+torchmetrics = "^0.8"
+editdistance = "^0.6.0"
+wget = "^3.2"
+sentencepiece = "^0.1.96"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0.1"
+pytest-cov = "^3.0.0"
+hypothesis = "^6.38.0"
+mkdocs = "^1.2.3"
+mkdocs-material = "^8.2.2"
+mkdocstrings = {extras = ["python"], version = "^0.18.0"}
+pre-commit = "^2.17.0"
+black = "^22.1.0"
+
+[tool.semantic_release]
+version_toml = "pyproject.toml:tool.poetry.version"
+branch = "master"
+upload_to_pypi = true
+upload_to_release = true
+build_command = "pip install poetry && poetry build"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--cov src --cov-report term-missing --verbose"
+testpaths = [
+    "tests",
+]
+norecursedirs = [
+    "dist",
+    "build"
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

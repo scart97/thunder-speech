@@ -3,20 +3,20 @@ exclude: '^docs/conf.py'
 repos:
   # Format Code
   - repo: https://github.com/ambv/black
-    rev: 21.5b2
+    rev: 22.3.0
     hooks:
       - id: black
 
   # Sort imports
   - repo: https://github.com/PyCQA/isort
-    rev: 5.8.0
+    rev: 5.10.1
     hooks:
     - id: isort
       args: ["--profile", "black"]
 
   # Formatting, Whitespace, etc
-  - repo: git://github.com/pre-commit/pre-commit-hooks
-    rev: v2.2.3
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
     hooks:
     - id: trailing-whitespace
     - id: check-added-large-files
@@ -30,5 +30,8 @@ repos:
     - id: requirements-txt-fixer
     - id: mixed-line-ending
       args: ['--fix=no']
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
     - id: flake8
       args: ['--ignore=E203,E501,F811,E712,W503']

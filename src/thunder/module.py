@@ -13,13 +13,13 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.utilities.exceptions import MisconfigurationException
 from torch import Tensor, nn
 from torchmetrics.text.cer import CharErrorRate
 from torchmetrics.text.wer import WordErrorRate
 
 from thunder.ctc_loss import calculate_ctc
 from thunder.text_processing.transform import BatchTextTransformer
+from thunder.utils import SchedulerBuilderType
 
 
 class BaseCTCModule(pl.LightningModule):
@@ -31,7 +31,7 @@ class BaseCTCModule(pl.LightningModule):
         text_transform: BatchTextTransformer,
         optimizer_class: Type[torch.optim.Optimizer] = torch.optim.AdamW,
         optimizer_kwargs: Dict = None,
-        lr_scheduler_class: Any = None,
+        lr_scheduler_class: SchedulerBuilderType = None,
         lr_scheduler_kwargs: Dict = None,
         encoder_final_dimension: int = None,
     ):
@@ -161,70 +161,23 @@ class BaseCTCModule(pl.LightningModule):
         self.log("metrics/wer", self.validation_wer, on_epoch=True)
         return loss
 
-    def estimated_steps_per_epoch(self) -> int:
-        """Training steps per epoch inferred from datamodule and devices.
-
-        Modified directly from lightning-flash:
-        https://github.com/PyTorchLightning/lightning-flash/blob/e73c420d66cb531892fd9032a8328b81e15e0d62/flash/core/model.py#L984
-        """
-        if not getattr(self, "trainer", None):
-            raise MisconfigurationException(
-                "The LightningModule isn't attached to the trainer yet."
-            )
-        if (
-            isinstance(self.trainer.limit_train_batches, int)
-            and self.trainer.limit_train_batches != 0
-        ):
-            dataset_size = self.trainer.limit_train_batches
-        elif isinstance(self.trainer.limit_train_batches, float):
-            # limit_train_batches is a percentage of batches
-            dataset_size = len(self.train_dataloader())
-            dataset_size = int(dataset_size * self.trainer.limit_train_batches)
-        else:
-            dataset_size = len(self.train_dataloader())
-
-        num_devices = max(1, self.trainer.num_gpus, self.trainer.num_processes)
-        if self.trainer.tpu_cores:
-            num_devices = max(num_devices, self.trainer.tpu_cores)
-        effective_batch_size = self.trainer.accumulate_grad_batches * num_devices
-        return dataset_size // effective_batch_size
-
-    def estimated_max_steps(self) -> int:
-        """Estimate max number of steps during the full training.
-
-        Modified directly from lightning-flash:
-        https://github.com/PyTorchLightning/lightning-flash/blob/e73c420d66cb531892fd9032a8328b81e15e0d62/flash/core/model.py#L1002
-        """
-        estimated_max_steps = self.estimated_steps_per_epoch() * self.trainer.max_epochs
-        if self.trainer.max_steps and self.trainer.max_steps < estimated_max_steps:
-            return self.trainer.max_steps
-        return estimated_max_steps
-
-    def _update_special_optimizer_args(self, original_kwargs: Dict) -> Dict:
+    def _update_special_optimizer_arg(self, original_kwargs: Dict) -> Dict:
         updated_kwargs = original_kwargs.copy()
-
-        epochs_arg = updated_kwargs.pop("epochs_arg", None)
-        if epochs_arg:
-            updated_kwargs[epochs_arg] = self.trainer.max_epochs
-
-        steps_arg = updated_kwargs.pop("steps_arg", None)
-        if steps_arg:
-            updated_kwargs[steps_arg] = self.estimated_steps_per_epoch()
 
         total_steps_arg = updated_kwargs.pop("total_steps_arg", None)
         if total_steps_arg:
-            updated_kwargs[total_steps_arg] = self.estimated_max_steps()
+            updated_kwargs[total_steps_arg] = self.trainer.estimated_stepping_batches
         return updated_kwargs
 
     def configure_optimizers(self) -> Union[torch.optim.Optimizer, Dict[str, Any]]:
-        optim_kwargs = self._update_special_optimizer_args(self.optimizer_kwargs)
+        optim_kwargs = self._update_special_optimizer_arg(self.optimizer_kwargs)
         optimizer = self.optimizer_class(
             filter(lambda p: p.requires_grad, self.parameters()), **optim_kwargs
         )
         if not self.lr_scheduler_class:
             return optimizer
 
-        scheduler_kwargs = self._update_special_optimizer_args(self.lr_scheduler_kwargs)
+        scheduler_kwargs = self._update_special_optimizer_arg(self.lr_scheduler_kwargs)
         lr_scheduler = self.lr_scheduler_class(optimizer, **scheduler_kwargs)
         return {
             "optimizer": optimizer,
