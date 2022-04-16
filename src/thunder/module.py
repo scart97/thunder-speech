@@ -19,6 +19,7 @@ from torchmetrics.text.wer import WordErrorRate
 
 from thunder.ctc_loss import calculate_ctc
 from thunder.text_processing.transform import BatchTextTransformer
+from thunder.utils import SchedulerBuilderType
 
 
 class BaseCTCModule(pl.LightningModule):
@@ -30,7 +31,7 @@ class BaseCTCModule(pl.LightningModule):
         text_transform: BatchTextTransformer,
         optimizer_class: Type[torch.optim.Optimizer] = torch.optim.AdamW,
         optimizer_kwargs: Dict = None,
-        lr_scheduler_class: Any = None,
+        lr_scheduler_class: SchedulerBuilderType = None,
         lr_scheduler_kwargs: Dict = None,
         encoder_final_dimension: int = None,
     ):

@@ -14,16 +14,18 @@ __all__ = [
     "chain_calls",
     "BaseCheckpoint",
     "download_checkpoint",
+    "SchedulerBuilderType",
 ]
 
 import functools
 import os
 from enum import Enum
 from pathlib import Path
-from typing import Callable, List, Union
+from typing import Callable, List, Type, Union
 
 import torchaudio
 import wget
+from torch.optim.lr_scheduler import ReduceLROnPlateau, _LRScheduler
 
 
 def audio_len(item: Union[Path, str]) -> float:
@@ -137,3 +139,14 @@ def download_checkpoint(name: BaseCheckpoint, checkpoint_folder: str = None) -> 
         wget.download(url, out=str(checkpoint_path))
 
     return checkpoint_path
+
+
+# Reference to learning rate scheduler class
+_SchedulerClassType = Union[
+    Type[_LRScheduler],
+    Type[ReduceLROnPlateau],
+]
+# Arbitrary function that returns a learning rate scheduler
+_SchedulerFuncType = Callable[..., Union[_LRScheduler, ReduceLROnPlateau]]
+# Two valid options to build a learning rate scheduler
+SchedulerBuilderType = Union[_SchedulerClassType, _SchedulerFuncType]

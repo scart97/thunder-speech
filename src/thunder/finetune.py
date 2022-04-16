@@ -14,6 +14,7 @@ from torch import nn
 from thunder.module import BaseCTCModule
 from thunder.registry import load_pretrained
 from thunder.text_processing.transform import BatchTextTransformer
+from thunder.utils import SchedulerBuilderType
 
 
 class FinetuneCTCModule(BaseCTCModule):
@@ -27,7 +28,7 @@ class FinetuneCTCModule(BaseCTCModule):
         text_kwargs: Dict[str, Any] = None,
         optimizer_class: Type[torch.optim.Optimizer] = torch.optim.AdamW,
         optimizer_kwargs: Dict[str, Any] = None,
-        lr_scheduler_class: Any = None,
+        lr_scheduler_class: SchedulerBuilderType = None,
         lr_scheduler_kwargs: Dict[str, Any] = None,
     ):
         """Generic finetune module, load any combination of encoder/decoder and custom tokens
