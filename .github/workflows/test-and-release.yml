@@ -25,7 +25,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install libsndfile1
-        poetry run pip install 'setuptools==59.5.0'
         poetry install
     - name: Test with pytest
       run: |
