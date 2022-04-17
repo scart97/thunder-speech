@@ -384,7 +384,7 @@ quality = ["black (>=20.8b1)", "isort (>=5.5.4)", "flake8 (>=3.8.3)"]
 
 [[package]]
 name = "hydra-core"
-version = "1.1.1"
+version = "1.1.2"
 description = "A framework for elegantly configuring complex applications"
 category = "main"
 optional = false
@@ -392,7 +392,7 @@ python-versions = "*"
 
 [package.dependencies]
 antlr4-python3-runtime = "4.8"
-importlib-resources = {version = "*", markers = "python_version < \"3.9\""}
+importlib-resources = {version = "<5.3", markers = "python_version < \"3.9\""}
 omegaconf = ">=2.1.0,<2.2.0"
 
 [[package]]
@@ -461,7 +461,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 
 [[package]]
 name = "importlib-resources"
-version = "5.4.0"
+version = "5.2.3"
 description = "Read resources from Python packages"
 category = "main"
 optional = false
@@ -1342,7 +1342,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "a56fd26039d515983e9ef301ee3a43a03061ae11a9c27d79d414d05783c79013"
+content-hash = "888fa8abcfea5772f421c480d4b3470b9445a40663e88c7a7a291419aebba394"
 
 [metadata.files]
 absl-py = [
@@ -1752,8 +1752,8 @@ huggingface-hub = [
     {file = "huggingface_hub-0.4.0.tar.gz", hash = "sha256:f0e3389f8988eb7781b17de520ae7fd0aa50d9823534e3ae55344d943a88ac87"},
 ]
 hydra-core = [
-    {file = "hydra-core-1.1.1.tar.gz", hash = "sha256:d396d4d979ff66e2d654b8ef5435ad3b6bbd093c4330f3ed316c339d5d741269"},
-    {file = "hydra_core-1.1.1-py3-none-any.whl", hash = "sha256:928b154d8105db4ee67d768e3cd0f74ca9373121fc99dee54488393b17a31929"},
+    {file = "hydra-core-1.1.2.tar.gz", hash = "sha256:168313397c38375db6eee1e943beaa86f743310bb3dc474d1fe0835ebc690715"},
+    {file = "hydra_core-1.1.2-py3-none-any.whl", hash = "sha256:967fff142a44d635d85adf98881a34cb54d2ff6ff2133acc7a14fa87c57adf35"},
 ]
 hypothesis = [
     {file = "hypothesis-6.43.2-py3-none-any.whl", hash = "sha256:bb6fbaffa8bb2176bfd73a816149df70fbeae68f8692b8a6feb6b39ddbfde98b"},
@@ -1772,8 +1772,8 @@ importlib-metadata = [
     {file = "importlib_metadata-4.11.3.tar.gz", hash = "sha256:ea4c597ebf37142f827b8f39299579e31685c31d3a438b59f469406afd0f2539"},
 ]
 importlib-resources = [
-    {file = "importlib_resources-5.4.0-py3-none-any.whl", hash = "sha256:33a95faed5fc19b4bc16b29a6eeae248a3fe69dd55d4d229d2b480e23eeaad45"},
-    {file = "importlib_resources-5.4.0.tar.gz", hash = "sha256:d756e2f85dd4de2ba89be0b21dba2a3bbec2e871a42a3a16719258a11f87506b"},
+    {file = "importlib_resources-5.2.3-py3-none-any.whl", hash = "sha256:ae35ed1cfe8c0d6c1a53ecd168167f01fa93b893d51a62cdf23aea044c67211b"},
+    {file = "importlib_resources-5.2.3.tar.gz", hash = "sha256:203d70dda34cfbfbb42324a8d4211196e7d3e858de21a5eb68c6d1cdd99e4e98"},
 ]
 iniconfig = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
