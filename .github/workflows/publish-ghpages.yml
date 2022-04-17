@@ -27,7 +27,7 @@ jobs:
           sudo apt-get install libsndfile1
           poetry install
       - name: Build docs
-        run: mkdocs build
+        run: poetry run mkdocs build
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
         with:
