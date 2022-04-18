@@ -8,10 +8,12 @@
 
 from typing import Any, Dict, Optional, Tuple
 
+from warnings import warn
+
 import torch
 from torch import Tensor, nn
 from torchaudio.models.wav2vec2.utils import import_huggingface_model
-from transformers import AutoModelForCTC, Wav2Vec2Processor
+from transformers import AutoModelForCTC, AutoFeatureExtractor, AutoTokenizer
 
 from thunder.blocks import lengths_to_mask, linear_decoder
 from thunder.huggingface.transform import Wav2Vec2Preprocess
@@ -53,31 +55,43 @@ def load_huggingface_checkpoint(
         Thunder module containing the huggingface model.
     """
     model = AutoModelForCTC.from_pretrained(model_name, **model_kwargs)
-    processor = Wav2Vec2Processor.from_pretrained(model_name)
-    vocab = list(processor.tokenizer.get_vocab().keys())
-    text_transform = BatchTextTransformer(
-        tokens=vocab,
-        blank_token=processor.tokenizer.pad_token,
-        pad_token=processor.tokenizer.pad_token,
-        unknown_token=processor.tokenizer.unk_token,
-        start_token=processor.tokenizer.bos_token,
-        end_token=processor.tokenizer.eos_token,
-    )
-    decoder = linear_decoder(
-        model.base_model.config.hidden_size, len(vocab), decoder_dropout=0.0
-    )
-    if hasattr(model, "lm_head"):
-        decoder[1].load_state_dict(model.lm_head.state_dict())
+    feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
+    # Some models only contain the encoder, and no tokenizer
+    # In that case we need to warn the user to fix it before training
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        vocab = list(tokenizer.get_vocab().keys())
+        text_transform = BatchTextTransformer(
+            tokens=vocab,
+            blank_token=tokenizer.pad_token,
+            pad_token=tokenizer.pad_token,
+            unknown_token=tokenizer.unk_token,
+            start_token=tokenizer.bos_token,
+            end_token=tokenizer.eos_token,
+        )
+        decoder = linear_decoder(
+            model.base_model.config.hidden_size, len(vocab), decoder_dropout=0.0
+        )
+        if hasattr(model, "lm_head"):
+            decoder[1].load_state_dict(model.lm_head.state_dict())
+    except OSError:
+        warn(
+            UserWarning(
+                "Huggingface model is missing the tokenizer! decoder and text_transform were not initialized"
+            )
+        )
+        text_transform = None
+        decoder = None
 
     module = BaseCTCModule(
         encoder=_HuggingFaceEncoderAdapt(
             model.base_model,
-            mask_input=processor.feature_extractor.return_attention_mask,
+            mask_input=feature_extractor.return_attention_mask,
         ),
         decoder=decoder,
         text_transform=text_transform,
         audio_transform=Wav2Vec2Preprocess(
-            mask_input=processor.feature_extractor.return_attention_mask,
+            mask_input=feature_extractor.return_attention_mask,
         ),
         encoder_final_dimension=model.base_model.config.hidden_size,
     )

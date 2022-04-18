@@ -6,6 +6,8 @@
 
 from urllib.error import HTTPError
 
+import pytest
+
 import pytorch_lightning as pl
 import torch
 import torchaudio
@@ -84,3 +86,11 @@ def test_quantized_script_module():
     torchaudio_transcription = scripted.predict(fake_input)
 
     assert fake_transcription[0] == torchaudio_transcription[0]
+
+
+@mark_slow
+def test_pretrained_without_vocab():
+    with pytest.warns(UserWarning, match="missing"):
+        load_pretrained("facebook/wav2vec2-base-100k-voxpopuli")
+
+
