@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v3.0.2 (2022-04-18)
+### Fix
+* **huggingface:** Correct loading of checkpoints that have unused tokens ([`887608e`](https://github.com/scart97/thunder-speech/commit/887608e7f41ef47d71429ddb9211cbc4eb69d581))
+* **huggingface:** Fix loading of pretrained only models, that lack the tokenizer ([`65106ee`](https://github.com/scart97/thunder-speech/commit/65106eea7dd6a4dc7c4f13b6a6d74567835b306e))
+
 ## v3.0.1 (2022-04-17)
 ### Fix
 * Trigger release with updated dependencies ([`3b59ffe`](https://github.com/scart97/thunder-speech/commit/3b59ffe446183ccefb8229eebaca77a4e5e098df))
