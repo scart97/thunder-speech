@@ -94,3 +94,8 @@ def test_pretrained_without_vocab():
         load_pretrained("facebook/wav2vec2-base-100k-voxpopuli")
 
 
+@mark_slow
+def test_pretrained_problematic_tokens():
+    module = load_pretrained("lgris/wav2vec2-large-xlsr-open-brazilian-portuguese-v2")
+    assert module.text_transform.num_tokens == 44
+    assert module.text_transform.vocab.start_token == None

@@ -41,6 +41,11 @@ class _HuggingFaceEncoderAdapt(nn.Module):
             self.original_encoder._get_feat_extract_output_lengths(audio_lengths),
         )
 
+def _get_special_token(tokenizer: AutoTokenizer, token_name: str):
+    token = getattr(tokenizer, token_name)
+    if token in tokenizer.additional_special_tokens:
+        return None
+    return token
 
 def load_huggingface_checkpoint(
     model_name: str, **model_kwargs: Dict[str, Any]
@@ -61,13 +66,16 @@ def load_huggingface_checkpoint(
     try:
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         vocab = list(tokenizer.get_vocab().keys())
+        # Remove tokens that were added after the model was trained
+        for t in tokenizer.additional_special_tokens:
+            vocab.remove(t)
         text_transform = BatchTextTransformer(
             tokens=vocab,
-            blank_token=tokenizer.pad_token,
-            pad_token=tokenizer.pad_token,
-            unknown_token=tokenizer.unk_token,
-            start_token=tokenizer.bos_token,
-            end_token=tokenizer.eos_token,
+            blank_token=_get_special_token(tokenizer, "pad_token"),
+            pad_token=_get_special_token(tokenizer, "pad_token"),
+            unknown_token=_get_special_token(tokenizer, "unk_token"),
+            start_token=_get_special_token(tokenizer, "bos_token"),
+            end_token=_get_special_token(tokenizer, "eos_token"),
         )
         decoder = linear_decoder(
             model.base_model.config.hidden_size, len(vocab), decoder_dropout=0.0
