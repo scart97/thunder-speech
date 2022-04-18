@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.0.3 (2022-04-18)
+### Fix
+* Improve typing on decoder and optimizer arguments ([`83c0758`](https://github.com/scart97/thunder-speech/commit/83c075897f7c38f92653e941860f40e8eb3d1e88))
+
 ## v3.0.2 (2022-04-18)
 ### Fix
 * **huggingface:** Correct loading of checkpoints that have unused tokens ([`887608e`](https://github.com/scart97/thunder-speech/commit/887608e7f41ef47d71429ddb9211cbc4eb69d581))
