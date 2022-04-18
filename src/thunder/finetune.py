@@ -6,15 +6,14 @@
 
 # Copyright (c) 2021-2022 scart97
 
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List
 
 import torch
-from torch import nn
 
 from thunder.module import BaseCTCModule
 from thunder.registry import load_pretrained
 from thunder.text_processing.transform import BatchTextTransformer
-from thunder.utils import SchedulerBuilderType
+from thunder.utils import ModuleBuilderType, OptimizerBuilderType, SchedulerBuilderType
 
 
 class FinetuneCTCModule(BaseCTCModule):
@@ -22,11 +21,11 @@ class FinetuneCTCModule(BaseCTCModule):
         self,
         checkpoint_name: str,
         checkpoint_kwargs: Dict[str, Any] = None,
-        decoder_class: Type[nn.Module] = None,
+        decoder_class: ModuleBuilderType = None,
         decoder_kwargs: Dict[str, Any] = None,
         tokens: List[str] = None,
         text_kwargs: Dict[str, Any] = None,
-        optimizer_class: Type[torch.optim.Optimizer] = torch.optim.AdamW,
+        optimizer_class: OptimizerBuilderType = torch.optim.AdamW,
         optimizer_kwargs: Dict[str, Any] = None,
         lr_scheduler_class: SchedulerBuilderType = None,
         lr_scheduler_kwargs: Dict[str, Any] = None,

@@ -25,6 +25,8 @@ from typing import Callable, List, Type, Union
 
 import torchaudio
 import wget
+from torch import nn
+from torch.optim import Optimizer
 from torch.optim.lr_scheduler import ReduceLROnPlateau, _LRScheduler
 
 
@@ -150,3 +152,17 @@ _SchedulerClassType = Union[
 _SchedulerFuncType = Callable[..., Union[_LRScheduler, ReduceLROnPlateau]]
 # Two valid options to build a learning rate scheduler
 SchedulerBuilderType = Union[_SchedulerClassType, _SchedulerFuncType]
+
+# Reference to optimizer class
+_OptimizerClassType = Type[Optimizer]
+# Arbitrary function that returns an optimizer
+_OptimizerFuncType = Callable[..., Optimizer]
+# Two valid options to build an optimizer
+OptimizerBuilderType = Union[_OptimizerClassType, _OptimizerFuncType]
+
+# Reference to nn.Module
+_ModuleClassType = Type[nn.Module]
+# Arbitrary function that returns a nn.Module
+_ModuleFuncType = Callable[..., nn.Module]
+# Two valid options to build a nn.Module
+ModuleBuilderType = Union[_ModuleClassType, _ModuleFuncType]
