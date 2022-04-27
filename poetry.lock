@@ -397,7 +397,7 @@ omegaconf = ">=2.1.0,<2.2.0"
 
 [[package]]
 name = "hypothesis"
-version = "6.43.3"
+version = "6.45.0"
 description = "A library for property-based testing"
 category = "dev"
 optional = false
@@ -1342,7 +1342,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "69d1a27d3d530df043785070cf7252e8bffd9ef4cf9beb808ccfec5dccbe2bd4"
+content-hash = "355b755dea2e93c55d72b2ce026bab78a59e99526e87956f7bcd01578ff771b4"
 
 [metadata.files]
 absl-py = [
@@ -1756,8 +1756,8 @@ hydra-core = [
     {file = "hydra_core-1.1.2-py3-none-any.whl", hash = "sha256:967fff142a44d635d85adf98881a34cb54d2ff6ff2133acc7a14fa87c57adf35"},
 ]
 hypothesis = [
-    {file = "hypothesis-6.43.3-py3-none-any.whl", hash = "sha256:b8588f4b6511481dd967686db2915104d547899e441af4d670fc1a3051cae573"},
-    {file = "hypothesis-6.43.3.tar.gz", hash = "sha256:8580703d83cf9552489195e9c603047efde56d1551d6df1d22f11055186dc734"},
+    {file = "hypothesis-6.45.0-py3-none-any.whl", hash = "sha256:92b7a7d6f0829d48bc1f87c496dfa601eb9d815549bb12daa601184807733c5b"},
+    {file = "hypothesis-6.45.0.tar.gz", hash = "sha256:9d17ebf4137e15f6db24793dad7268b8b5afcfc78b770f307c94872f1d96850a"},
 ]
 identify = [
     {file = "identify-2.4.12-py2.py3-none-any.whl", hash = "sha256:5f06b14366bd1facb88b00540a1de05b69b310cbc2654db3c7e07fa3a4339323"},
