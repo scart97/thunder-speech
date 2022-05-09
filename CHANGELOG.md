@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.0.4 (2022-05-09)
+### Fix
+* Trigger release with updated dependencies ([`2da533f`](https://github.com/scart97/thunder-speech/commit/2da533fd9874dcfb7d106f4f82e18d9396f86c00))
+
 ## v3.0.3 (2022-04-18)
 ### Fix
 * Improve typing on decoder and optimizer arguments ([`83c0758`](https://github.com/scart97/thunder-speech/commit/83c075897f7c38f92653e941860f40e8eb3d1e88))
