@@ -1,6 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 # https://mestrak.com/blog/semantic-release-with-python-poetry-github-actions-20nn
+# https://github.com/snok/install-poetry
 
 name: CI/CD
 on:
@@ -13,18 +14,29 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
+      id: setup-python
       with:
         python-version: 3.8
-    - name: Install Python Poetry
-      uses: abatilo/actions-poetry@v2.1.4
+    - name: Install Poetry
+      uses: snok/install-poetry@v1.3.1
       with:
-        poetry-version: 1.1.6
+        virtualenvs-create: true
+        virtualenvs-in-project: true
     - name: View poetry version
       run: poetry --version
-    - name: Install dependencies
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+    - name: Install system library
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install libsndfile1
+    - name: Install library
+      run: |
         poetry install
     - name: Test with pytest
       run: |
