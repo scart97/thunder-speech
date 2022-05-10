@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "thunder-speech"
-version = "3.0.4"
+version = "3.1.0"
 description = "A Hackable speech recognition library"
 authors = ["scart97 <scart.lucas@gmail.com>"]
 license = "MIT"

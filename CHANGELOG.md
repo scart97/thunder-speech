@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.1.0 (2022-05-10)
+### Feature
+* **text_processing:** Add support to use custom tokenizers ([`36880c1`](https://github.com/scart97/thunder-speech/commit/36880c15343de2f25b25886e59e2e77e4e6a2855))
+
 ## v3.0.4 (2022-05-09)
 ### Fix
 * Trigger release with updated dependencies ([`2da533f`](https://github.com/scart97/thunder-speech/commit/2da533fd9874dcfb7d106f4f82e18d9396f86c00))
