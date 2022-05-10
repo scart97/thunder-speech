@@ -1060,7 +1060,13 @@
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
-<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BatchTextTransformer</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BatchTextTransformer</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -1070,6 +1076,7 @@
         <span class="n">start_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sentencepiece_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">custom_tokenizer_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;That class is the glue code that uses all of the text processing</span>
 <span class="sd">        functions to encode/decode an entire batch of text at once.</span>
@@ -1083,6 +1090,7 @@
 <span class="sd">            start_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]</span>
 <span class="sd">            end_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]</span>
 <span class="sd">            sentencepiece_model: Path to sentencepiece .model file, if applicable.</span>
+<span class="sd">            custom_tokenizer_function: Allows the use of a custom function to tokenize the input.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="o">=</span> <span class="n">Vocabulary</span><span class="p">(</span>
@@ -1093,9 +1101,13 @@
             <span class="n">start_token</span><span class="p">,</span>
             <span class="n">end_token</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">BPETokenizer</span><span class="p">(</span><span class="n">sentencepiece_model</span><span class="p">)</span> <span class="k">if</span> <span class="n">sentencepiece_model</span> <span class="k">else</span> <span class="n">char_tokenizer</span>
-        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">custom_tokenizer_function</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">custom_tokenizer_function</span>
+        <span class="k">elif</span> <span class="n">sentencepiece_model</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">BPETokenizer</span><span class="p">(</span><span class="n">sentencepiece_model</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">char_tokenizer</span>
 
     <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">return_length</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">tokenized</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
@@ -1196,7 +1208,7 @@
 
 
 <h3 id="thunder.text_processing.transform.BatchTextTransformer.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">blank_token</span><span class="o">=</span><span class="s1">&#39;&lt;blank&gt;&#39;</span><span class="p">,</span> <span class="n">pad_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unknown_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sentencepiece_model</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">blank_token</span><span class="o">=</span><span class="s1">&#39;&lt;blank&gt;&#39;</span><span class="p">,</span> <span class="n">pad_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unknown_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sentencepiece_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">custom_tokenizer_function</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 
 </h3>
@@ -1323,6 +1335,22 @@ functions to encode/decode an entire batch of text at once.</p>
             </p>
           </td>
         </tr>
+        <tr>
+          <td><code>custom_tokenizer_function</code></td>
+          <td class="doc-param-details">
+            <p>Allows the use of a custom function to tokenize the input.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="typing.Callable">Callable</span>[[str], <span title="typing.List">List</span>[str]]</code>
+                </span>
+                <span class="doc-param-default">
+                  <b>DEFAULT:</b> 
+                    <code>None</code>
+                </span>
+            </p>
+          </td>
+        </tr>
     </tbody>
   </table>
 
@@ -1362,7 +1390,13 @@ functions to encode/decode an entire batch of text at once.</p>
 <span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span>
-<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">blank_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;blank&gt;&quot;</span><span class="p">,</span>
@@ -1371,6 +1405,7 @@ functions to encode/decode an entire batch of text at once.</p>
     <span class="n">start_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sentencepiece_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">custom_tokenizer_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;That class is the glue code that uses all of the text processing</span>
 <span class="sd">    functions to encode/decode an entire batch of text at once.</span>
@@ -1384,6 +1419,7 @@ functions to encode/decode an entire batch of text at once.</p>
 <span class="sd">        start_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]</span>
 <span class="sd">        end_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]</span>
 <span class="sd">        sentencepiece_model: Path to sentencepiece .model file, if applicable.</span>
+<span class="sd">        custom_tokenizer_function: Allows the use of a custom function to tokenize the input.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">vocab</span> <span class="o">=</span> <span class="n">Vocabulary</span><span class="p">(</span>
@@ -1394,9 +1430,13 @@ functions to encode/decode an entire batch of text at once.</p>
         <span class="n">start_token</span><span class="p">,</span>
         <span class="n">end_token</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">BPETokenizer</span><span class="p">(</span><span class="n">sentencepiece_model</span><span class="p">)</span> <span class="k">if</span> <span class="n">sentencepiece_model</span> <span class="k">else</span> <span class="n">char_tokenizer</span>
-    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">custom_tokenizer_function</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">custom_tokenizer_function</span>
+    <span class="k">elif</span> <span class="n">sentencepiece_model</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">BPETokenizer</span><span class="p">(</span><span class="n">sentencepiece_model</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">char_tokenizer</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
@@ -1481,13 +1521,7 @@ functions to encode/decode an entire batch of text at once.</p>
 
         <details class="quote">
           <summary>Source code in <code>thunder/text_processing/transform.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 81</span>
 <span class="normal"> 82</span>
 <span class="normal"> 83</span>
 <span class="normal"> 84</span>
@@ -1510,7 +1544,13 @@ functions to encode/decode an entire batch of text at once.</p>
 <span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
-<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
 <span class="k">def</span> <span class="nf">decode_prediction</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">remove_repeated</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -1611,13 +1651,7 @@ and <code>tokenizer.model</code> outputs from sentencepiece.</p>
 
         <details class="quote">
           <summary>Source code in <code>thunder/text_processing/transform.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
@@ -1637,7 +1671,13 @@ and <code>tokenizer.model</code> outputs from sentencepiece.</p>
 <span class="normal">129</span>
 <span class="normal">130</span>
 <span class="normal">131</span>
-<span class="normal">132</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">from_sentencepiece</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BatchTextTransformer&quot;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load the data from a folder that contains the `tokenizer.vocab`</span>
 <span class="sd">    and `tokenizer.model` outputs from sentencepiece.</span>
