@@ -4,11 +4,13 @@
 # Copyright (c) 2021 scart97
 
 from string import ascii_lowercase
+from typing import List
 
 import pytest
 
 import torch
 
+from thunder.text_processing.tokenizer import word_tokenizer
 from thunder.text_processing.transform import BatchTextTransformer
 
 
@@ -87,3 +89,40 @@ def test_decoder_repeat_same_element(tfm: BatchTextTransformer, blank_input):
     assert isinstance(out, list)
     assert type(out[0]) is str
     assert out[0] == "aa"
+
+
+def test_custom_tokenizer():
+    def _tok_func(s: str) -> List[str]:
+        return s.split(".")
+
+    transform = BatchTextTransformer(
+        tokens=[" "] + list(ascii_lowercase),
+        blank_token="<blank>",
+        custom_tokenizer_function=_tok_func,
+    )
+    encoded, encoded_lens = transform.encode(
+        ["h.e.l.l.o. .w.o.r.l.d", "o.i"], return_length=True
+    )
+    assert len(encoded) == 2
+    assert len(encoded_lens) == 2
+    expected = torch.Tensor([8, 5, 12, 12, 15, 0, 23, 15, 18, 12, 4])
+
+    assert (encoded[0] == expected).all()
+    assert encoded_lens[0] == 11
+    assert encoded_lens[1] == 2
+
+
+def test_word_tokenizer():
+    transform = BatchTextTransformer(
+        tokens=["hello", "world", "oi"],
+        blank_token="<blank>",
+        custom_tokenizer_function=word_tokenizer,
+    )
+    encoded, encoded_lens = transform.encode(["hello world", "oi"], return_length=True)
+    assert len(encoded) == 2
+    assert len(encoded_lens) == 2
+    expected = torch.Tensor([0, 1])
+
+    assert (encoded[0] == expected).all()
+    assert encoded_lens[0] == 2
+    assert encoded_lens[1] == 1
