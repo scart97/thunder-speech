@@ -3,8 +3,6 @@
 
 # Copyright (c) 2021 scart97
 
-from tempfile import TemporaryDirectory
-
 import torch
 from hypothesis import given, settings
 from hypothesis.strategies import booleans, integers, lists
@@ -42,27 +40,6 @@ def test_squeezeexcite_parameters_updated():
     se = SqueezeExcite(128, 4)
     x = torch.randn(10, 128, 1337)
     _test_parameters_update(se, x)
-
-
-def test_squeezeexcite_trace():
-    x_traced = torch.randn(5, 128, 137)
-    se = SqueezeExcite(128, 4)
-    # using a different shape than the traced one
-    x = torch.randn(10, 128, 1337)
-    se_trace = torch.jit.trace(se, x_traced, check_inputs=[x])
-
-    with TemporaryDirectory() as save_dir:
-        save_file = f"{save_dir}/squeeze.pth"
-        torch.jit.save(se_trace, save_file)
-        gs_loaded = torch.jit.load(save_file)
-        assert torch.allclose(gs_loaded(x), se(x))
-
-
-def test_squeezeexcite_onnx():
-    x = torch.randn(10, 128, 1337)
-    se = SqueezeExcite(128, 4)
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(se, x, f"{export_path}/squeeze.onnx", verbose=True)
 
 
 def test_squeezeexcite_script():
@@ -143,26 +120,6 @@ def test_CitrinetBlock_device_move(**kwargs):
 @mark_slow
 @citrinet_parameters
 @settings(deadline=None)
-def test_CitrinetBlock_trace(**kwargs):
-    try:
-        block = CitrinetBlock(**kwargs)
-        block.eval()
-    except ValueError:
-        return
-
-    x = torch.randn(10, kwargs["in_channels"], 1337)
-    lens = torch.randint(10, 1337, (10,))
-    block_trace = torch.jit.trace(block, (x, lens))
-
-    out1, lens1 = block(x, lens)
-    out2, lens2 = block_trace(x, lens)
-    assert torch.allclose(out1, out2)
-    assert torch.allclose(lens1, lens2)
-
-
-@mark_slow
-@citrinet_parameters
-@settings(deadline=None)
 def test_CitrinetBlock_script(**kwargs):
     try:
         block = CitrinetBlock(**kwargs)
@@ -178,23 +135,3 @@ def test_CitrinetBlock_script(**kwargs):
     out2, lens2 = block_script(x, lens)
     assert torch.allclose(out1, out2)
     assert torch.allclose(lens1, lens2)
-
-
-@mark_slow
-@citrinet_parameters
-@settings(deadline=None)
-def test_CitrinetBlock_onnx(**kwargs):
-    try:
-        block = CitrinetBlock(**kwargs)
-    except ValueError:
-        return
-    x = torch.randn(10, kwargs["in_channels"], 1337)
-    lens = torch.randint(10, 1337, (10,))
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(
-            block,
-            (x, lens),
-            f"{export_path}/CitrinetBlock.onnx",
-            verbose=True,
-            opset_version=11,
-        )

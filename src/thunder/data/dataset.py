@@ -210,9 +210,7 @@ class ManifestSpeechDataset(BaseSpeechDataset):
         super().__init__(items, force_mono=force_mono, sample_rate=sample_rate)
 
     def open_audio(self, item: dict) -> Tuple[Tensor, int]:
-        # path = "/home/scart/datasets_raw/" + item["audio_filepath"]
-        path = item["audio_filepath"]
-        return self.loader.open_audio(path)
+        return self.loader.open_audio(item["audio_filepath"])
 
     def open_text(self, item: dict) -> str:
         return item["text"]

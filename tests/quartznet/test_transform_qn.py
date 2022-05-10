@@ -3,7 +3,6 @@
 
 # Copyright (c) 2021 scart97
 
-from tempfile import TemporaryDirectory
 
 import pytest
 
@@ -17,7 +16,6 @@ from tests.utils import (
     mark_slow,
     requirescuda,
 )
-from thunder.blocks import convolution_stft
 from thunder.quartznet.transform import (
     DitherAudio,
     FeatureBatchNormalizer,
@@ -60,19 +58,6 @@ def test_normalize_device_move():
     _test_device_move(norm, (x, lens))
 
 
-def test_normalize_trace():
-    norm = FeatureBatchNormalizer()
-    norm.eval()
-    x = torch.randn(10, 40, 1337)
-    lens = torch.Tensor([1000] * 10)
-    norm_trace = torch.jit.trace(norm, (x, lens))
-
-    out1, lens1 = norm(x, lens)
-    out2, lens2 = norm_trace(x, lens)
-    assert torch.allclose(out1, out2)
-    assert torch.allclose(lens1, lens2)
-
-
 def test_normalize_script():
     norm = FeatureBatchNormalizer()
     norm.eval()
@@ -84,22 +69,6 @@ def test_normalize_script():
     out2, lens2 = norm_script(x, lens)
     assert torch.allclose(out1, out2)
     assert torch.allclose(lens1, lens2)
-
-
-def test_normalize_onnx():
-    norm = FeatureBatchNormalizer()
-    norm.eval()
-    x = torch.randn(10, 40, 1337)
-    lens = torch.Tensor([1000] * 10)
-
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(
-            norm,
-            (x, lens),
-            f"{export_path}/Normalize.onnx",
-            verbose=True,
-            opset_version=11,
-        )
 
 
 @given(floats())
@@ -144,16 +113,6 @@ def test_dither_device_move(dither_magnitude):
 
 
 @given(floats())
-def test_dither_trace(dither_magnitude):
-    dither = DitherAudio(dither_magnitude)
-    dither.eval()
-    x = torch.randn(10, 1337)
-    dither_trace = torch.jit.trace(dither, (x))
-
-    assert torch.allclose(dither(x), dither_trace(x))
-
-
-@given(floats())
 def test_dither_script(dither_magnitude):
     dither = DitherAudio(dither_magnitude)
     dither.eval()
@@ -161,22 +120,6 @@ def test_dither_script(dither_magnitude):
     dither_script = torch.jit.script(dither)
 
     assert torch.allclose(dither(x), dither_script(x))
-
-
-@given(floats())
-def test_dither_onnx(dither_magnitude):
-    dither = DitherAudio(dither_magnitude)
-    dither.eval()
-    x = torch.randn(10, 1337)
-
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(
-            dither,
-            (x),
-            f"{export_path}/Dither.onnx",
-            verbose=True,
-            opset_version=11,
-        )
 
 
 preemph_params = given(floats(min_value=0.000001, max_value=0.999999999))
@@ -216,16 +159,6 @@ def test_preemph_filter_device_move(preemph):
 
 
 @preemph_params
-def test_preemph_filter_trace(preemph):
-    filt = PreEmphasisFilter(preemph)
-    filt.eval()
-    x = torch.randn(10, 1337)
-    filt_trace = torch.jit.trace(filt, (x))
-
-    assert torch.allclose(filt(x), filt_trace(x), atol=1e-6)
-
-
-@preemph_params
 def test_preemph_filter_script(preemph):
     filt = PreEmphasisFilter(preemph)
     filt.eval()
@@ -233,23 +166,6 @@ def test_preemph_filter_script(preemph):
     filt_script = torch.jit.script(filt)
 
     assert torch.allclose(filt(x), filt_script(x), atol=1e-6)
-
-
-@mark_slow
-@preemph_params
-def test_preemph_filter_onnx(preemph):
-    filt = PreEmphasisFilter(preemph)
-    filt.eval()
-    x = torch.randn(10, 1337)
-
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(
-            filt,
-            (x),
-            f"{export_path}/PreemphFilter.onnx",
-            verbose=True,
-            opset_version=11,
-        )
 
 
 powerspec_params = given(
@@ -287,21 +203,6 @@ def test_powerspectrum_device_move(**kwargs):
     _test_device_move(spec, (x, lens))
 
 
-@mark_slow
-@powerspec_params
-def test_powerspectrum_trace(**kwargs):
-    spec = PowerSpectrum(**kwargs)
-    spec.eval()
-    x = torch.randn(10, 1337)
-    lens = torch.Tensor([1337] * 10)
-    spec_trace = torch.jit.trace(spec, (x, lens))
-
-    out1, lens1 = spec(x, lens)
-    out2, lens2 = spec_trace(x, lens)
-    assert torch.allclose(out1, out2)
-    assert torch.allclose(lens1, lens2)
-
-
 @powerspec_params
 def test_powerspectrum_script(**kwargs):
     spec = PowerSpectrum(**kwargs)
@@ -314,32 +215,6 @@ def test_powerspectrum_script(**kwargs):
     out2, lens2 = spec_script(x, lens)
     assert torch.allclose(out1, out2)
     assert torch.allclose(lens1, lens2)
-
-
-@powerspec_params
-@pytest.mark.skip
-def test_powerspectrum_onnx(**kwargs):
-    # ONNX doesn't support fft or stft computation
-    # There's suggestions to hack it using conv1d
-    # but that's no acceptable solution to a really
-    # common operator.
-    # https://github.com/pytorch/pytorch/issues/31317
-    # https://github.com/onnx/onnx/issues/1646
-    # https://github.com/onnx/onnx/pull/2625
-    spec = PowerSpectrum(**kwargs)
-    spec.stft_func = convolution_stft
-    spec.eval()
-    x = torch.randn(10, 1337)
-    lens = torch.Tensor([1337] * 10)
-
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(
-            spec,
-            (x, lens),
-            f"{export_path}/Powerspectrum.onnx",
-            opset_version=11,
-            verbose=True,
-        )
 
 
 melscale_params = given(
@@ -377,17 +252,6 @@ def test_melscale_device_move(**kwargs):
     _test_device_move(mel, x)
 
 
-@mark_slow
-@melscale_params
-def test_melscale_trace(**kwargs):
-    mel = MelScale(**kwargs)
-    mel.eval()
-    x = torch.randn(10, int(1 + kwargs["n_fft"] // 2), 137).abs()
-    mel_trace = torch.jit.trace(mel, (x))
-
-    assert torch.allclose(mel(x), mel_trace(x))
-
-
 @melscale_params
 def test_melscale_script(**kwargs):
     mel = MelScale(**kwargs)
@@ -396,23 +260,6 @@ def test_melscale_script(**kwargs):
     mel_script = torch.jit.script(mel)
 
     assert torch.allclose(mel(x), mel_script(x))
-
-
-@mark_slow
-@melscale_params
-def test_melscale_onnx(**kwargs):
-    mel = MelScale(**kwargs)
-    mel.eval()
-    x = torch.randn(10, int(1 + kwargs["n_fft"] // 2), 137).abs()
-
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(
-            mel,
-            (x),
-            f"{export_path}/melscale.onnx",
-            verbose=True,
-            opset_version=11,
-        )
 
 
 filterbank_params = given(
@@ -461,22 +308,6 @@ def test_filterbank_device_move(**kwargs):
 
 @mark_slow
 @filterbank_params
-@settings(deadline=None, max_examples=5)
-def test_filterbank_trace(**kwargs):
-    fb = FilterbankFeatures(**kwargs)
-    fb.eval()
-    x = torch.randn(10, 1337)
-    lens = torch.Tensor([1000] * 10)
-    fb_trace = torch.jit.trace(fb, (x, lens))
-
-    out1, lens1 = fb(x, lens)
-    out2, lens2 = fb_trace(x, lens)
-    assert torch.allclose(out1, out2, atol=1e-3)
-    assert torch.allclose(lens1, lens2)
-
-
-@mark_slow
-@filterbank_params
 @settings(deadline=None, max_examples=10)
 def test_filterbank_script(**kwargs):
     fb = FilterbankFeatures(**kwargs)
@@ -489,23 +320,3 @@ def test_filterbank_script(**kwargs):
     out2, lens2 = fb_script(x, lens)
     assert torch.allclose(out1, out2, atol=1e-3)
     assert torch.allclose(lens1, lens2)
-
-
-@filterbank_params
-@settings(deadline=None, max_examples=5)
-@pytest.mark.skip
-def test_filterbank_onnx(**kwargs):
-    fb = FilterbankFeatures(**kwargs)
-    fb = patch_stft(fb)
-    fb.eval()
-    x = torch.randn(10, 1337)
-    lens = torch.Tensor([1000] * 10)
-
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(
-            fb,
-            (x, lens),
-            f"{export_path}/filterbank.onnx",
-            verbose=True,
-            opset_version=11,
-        )
