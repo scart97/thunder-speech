@@ -9,7 +9,7 @@ Process batched text
 
 __all__ = ["BatchTextTransformer"]
 
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 import torch
 from torch import nn
@@ -29,6 +29,7 @@ class BatchTextTransformer(nn.Module):
         start_token: str = None,
         end_token: str = None,
         sentencepiece_model: Optional[str] = None,
+        custom_tokenizer_function: Callable[[str], List[str]] = None,
     ):
         """That class is the glue code that uses all of the text processing
         functions to encode/decode an entire batch of text at once.
@@ -42,6 +43,7 @@ class BatchTextTransformer(nn.Module):
             start_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
             end_token: Check [`Vocabulary`][thunder.text_processing.vocab.Vocabulary]
             sentencepiece_model: Path to sentencepiece .model file, if applicable.
+            custom_tokenizer_function: Allows the use of a custom function to tokenize the input.
         """
         super().__init__()
         self.vocab = Vocabulary(
@@ -52,9 +54,13 @@ class BatchTextTransformer(nn.Module):
             start_token,
             end_token,
         )
-        self.tokenizer = (
-            BPETokenizer(sentencepiece_model) if sentencepiece_model else char_tokenizer
-        )
+
+        if custom_tokenizer_function:
+            self.tokenizer = custom_tokenizer_function
+        elif sentencepiece_model:
+            self.tokenizer = BPETokenizer(sentencepiece_model)
+        else:
+            self.tokenizer = char_tokenizer
 
     def encode(self, items: List[str], return_length: bool = True, device=None):
         tokenized = [self.tokenizer(x) for x in items]
