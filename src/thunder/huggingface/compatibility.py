@@ -7,13 +7,12 @@
 # Copyright (c) 2021-2022 scart97
 
 from typing import Any, Dict, Optional, Tuple
-
 from warnings import warn
 
 import torch
 from torch import Tensor, nn
 from torchaudio.models.wav2vec2.utils import import_huggingface_model
-from transformers import AutoModelForCTC, AutoFeatureExtractor, AutoTokenizer
+from transformers import AutoFeatureExtractor, AutoModelForCTC, AutoTokenizer
 
 from thunder.blocks import lengths_to_mask, linear_decoder
 from thunder.huggingface.transform import Wav2Vec2Preprocess
@@ -41,11 +40,26 @@ class _HuggingFaceEncoderAdapt(nn.Module):
             self.original_encoder._get_feat_extract_output_lengths(audio_lengths),
         )
 
+
 def _get_special_token(tokenizer: AutoTokenizer, token_name: str):
     token = getattr(tokenizer, token_name)
     if token in tokenizer.additional_special_tokens:
         return None
     return token
+
+
+def _tok_to_transform(tokenizer: AutoTokenizer) -> BatchTextTransformer:
+    vocab = [v if v != "|" else " " for v in tokenizer.get_vocab().keys()]
+    # Remove tokens that were added after the model was trained
+    for t in tokenizer.additional_special_tokens:
+        vocab.remove(t)
+    return BatchTextTransformer(
+        tokens=vocab,
+        blank_token=_get_special_token(tokenizer, "pad_token"),
+        pad_token=_get_special_token(tokenizer, "pad_token"),
+        unknown_token=_get_special_token(tokenizer, "unk_token"),
+    )
+
 
 def load_huggingface_checkpoint(
     model_name: str, **model_kwargs: Dict[str, Any]
@@ -65,20 +79,11 @@ def load_huggingface_checkpoint(
     # In that case we need to warn the user to fix it before training
     try:
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        vocab = list(tokenizer.get_vocab().keys())
-        # Remove tokens that were added after the model was trained
-        for t in tokenizer.additional_special_tokens:
-            vocab.remove(t)
-        text_transform = BatchTextTransformer(
-            tokens=vocab,
-            blank_token=_get_special_token(tokenizer, "pad_token"),
-            pad_token=_get_special_token(tokenizer, "pad_token"),
-            unknown_token=_get_special_token(tokenizer, "unk_token"),
-            start_token=_get_special_token(tokenizer, "bos_token"),
-            end_token=_get_special_token(tokenizer, "eos_token"),
-        )
+        text_transform = _tok_to_transform(tokenizer)
         decoder = linear_decoder(
-            model.base_model.config.hidden_size, len(vocab), decoder_dropout=0.0
+            model.base_model.config.hidden_size,
+            text_transform.num_tokens,
+            decoder_dropout=0.0,
         )
         if hasattr(model, "lm_head"):
             decoder[1].load_state_dict(model.lm_head.state_dict())
