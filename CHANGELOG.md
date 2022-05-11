@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.1.1 (2022-05-11)
+### Fix
+* **huggingface:** Fix compatibility with the huggingface tokenizer ([`42a8878`](https://github.com/scart97/thunder-speech/commit/42a8878a27ad0814e2e35afbd29c9fd597945c0e))
+
 ## v3.1.0 (2022-05-10)
 ### Feature
 * **text_processing:** Add support to use custom tokenizers ([`36880c1`](https://github.com/scart97/thunder-speech/commit/36880c15343de2f25b25886e59e2e77e4e6a2855))
