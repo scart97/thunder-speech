@@ -9,10 +9,10 @@ Process batched text
 
 __all__ = ["BatchTextTransformer"]
 
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple, Union
 
 import torch
-from torch import nn
+from torch import Tensor, nn
 from torch.nn.utils.rnn import pad_sequence
 
 from thunder.text_processing.tokenizer import BPETokenizer, char_tokenizer
@@ -62,7 +62,19 @@ class BatchTextTransformer(nn.Module):
         else:
             self.tokenizer = char_tokenizer
 
-    def encode(self, items: List[str], return_length: bool = True, device=None):
+    def encode(
+        self, items: List[str], return_length: bool = True, device=None
+    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+        """Encode a list of texts to a padded pytorch tensor
+
+        Args:
+            items: List of texts to be processed
+            return_length: optionally also return the length of each element in the encoded tensor
+            device: optional device to create the tensors with
+
+        Returns:
+            Either the encoded tensor, or a tuple with tensor and lengths.
+        """
         tokenized = [self.tokenizer(x) for x in items]
         expanded_tokenized = [self.vocab.add_special_tokens(x) for x in tokenized]
         encoded = [

@@ -57,7 +57,7 @@ class SqueezeExcite(nn.Module):
             channels: Input number of channels.
             reduction_ratio: Reduction ratio for "squeeze" layer.
         """
-        super(SqueezeExcite, self).__init__()
+        super().__init__()
 
         self.pool = nn.AdaptiveAvgPool1d(1)  # context window = T
 
@@ -178,6 +178,7 @@ class CitrinetBlock(nn.Module):
         """
         Args:
             x: Tensor of shape (batch, features, time) where #features == inplanes
+            lengths: corresponding length of each element in the input tensor.
 
         Returns:
             Result of applying the block on the input, and corresponding output lengths

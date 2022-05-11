@@ -79,7 +79,7 @@ def init_weights(m: nn.Module, mode: InitMode = InitMode.xavier_uniform):
         elif mode == InitMode.kaiming_normal:
             nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
         else:
-            raise ValueError("Unknown Initialization mode: {0}".format(mode))
+            raise ValueError(f"Unknown Initialization mode: {mode}")
     elif isinstance(m, nn.BatchNorm1d):
         if m.track_running_stats:
             m.running_mean.zero_()

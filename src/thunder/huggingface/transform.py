@@ -25,6 +25,7 @@ class Wav2Vec2Preprocess(nn.Module):
 
         Args:
             div_guard: Guard value to prevent division by zero.
+            mask_input: controls the use of masking in the input tensor.
         """
         super().__init__()
         self.div_guard = div_guard
@@ -37,6 +38,7 @@ class Wav2Vec2Preprocess(nn.Module):
 
         Args:
             audio: Audio tensor of shape [batch_size, time]
+            audio_lengths: corresponding length of each element in the input tensor.
 
         Returns:
             Normalized audio tensor with same shape as input. Optionally the valid mask

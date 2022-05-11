@@ -1,11 +1,14 @@
 from string import ascii_lowercase
 from urllib.error import HTTPError
 
+import pytest
+
 import pytorch_lightning as pl
+import torch
 from torch.optim.lr_scheduler import OneCycleLR
 
 from tests.utils import mark_slow, requirescuda
-from thunder.blocks import conv1d_decoder
+from thunder.blocks import conv1d_decoder, linear_decoder
 from thunder.data.datamodule import ManifestDatamodule
 from thunder.finetune import FinetuneCTCModule
 
@@ -71,3 +74,37 @@ def test_special_scheduler_args(sample_manifest):
         gpus=-1,
     )
     trainer.fit(module, datamodule=data)
+
+
+@mark_slow
+def test_missing_parameter():
+    with pytest.raises(ValueError, match="tokens"):
+        FinetuneCTCModule(
+            "stt_en_citrinet_256",
+            tokens=list(ascii_lowercase),
+        )
+    with pytest.raises(ValueError, match="decoder"):
+        FinetuneCTCModule(
+            "stt_en_citrinet_256",
+            decoder_class=conv1d_decoder,
+        )
+
+
+@mark_slow
+def test_compatibility_between_decoders():
+    # conv model with linear decoder
+    module_conv = FinetuneCTCModule(
+        "stt_en_citrinet_256",
+        decoder_class=linear_decoder,
+        tokens=list(ascii_lowercase),
+        decoder_kwargs={"decoder_dropout": 0.0},
+    )
+    # hf model with conv decoder
+    module_hf = FinetuneCTCModule(
+        "facebook/wav2vec2-base-960h",
+        decoder_class=conv1d_decoder,
+        tokens=list(ascii_lowercase),
+    )
+    test_input = torch.rand(1, 1337)
+    module_conv.predict(test_input)
+    module_hf.predict(test_input)

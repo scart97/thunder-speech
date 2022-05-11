@@ -76,6 +76,7 @@ class BaseCTCModule(pl.LightningModule):
 
         Args:
             x: Audio tensor of shape [batch_size, time]
+            lengths: corresponding length of each element in the input tensor.
 
         Returns:
             Tensor with the predictions.
@@ -104,7 +105,7 @@ class BaseCTCModule(pl.LightningModule):
         """Training step. Check the original lightning docs for more information.
 
         Args:
-            batch: Tuple containing the batched audios, normalized lengths and the corresponding text labels.
+            batch: Tuple containing the batched audios, lengths and the corresponding text labels.
             batch_idx: Batch index
 
         Returns:
@@ -131,7 +132,7 @@ class BaseCTCModule(pl.LightningModule):
         """Validation step. Check the original lightning docs for more information.
 
         Args:
-            batch: Tuple containing the batched audios, normalized lengths and the corresponding text labels.
+            batch: Tuple containing the batched audios, lengths and the corresponding text labels.
             batch_idx: Batch index
 
         Returns:
