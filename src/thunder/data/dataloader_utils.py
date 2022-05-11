@@ -21,7 +21,7 @@ def asr_collate(samples: List[Tuple[Tensor, str]]) -> Tuple[Tensor, Tensor, List
         samples: Samples produced by dataloader
 
     Returns:
-        Tuple containing padded audios, audio lengths (normalized to 0.0 <-> 1.0 range) and the list of corresponding transcriptions in that order.
+        Tuple containing padded audios, audio lengths and the list of corresponding transcriptions in that order.
     """
     samples = sorted(samples, key=lambda sample: sample[0].size(-1), reverse=True)
     padded_audios = pad_sequence([s[0].squeeze() for s in samples], batch_first=True)

@@ -50,6 +50,7 @@ def load_components_from_citrinet_config(
 
     Args:
         config_path: Path to the .yaml file, usually called model_config.yaml
+        sentencepiece_path: Path to the sentencepiece model used to tokenize, usually called tokenizer.model
 
     Returns:
         A tuple containing, in this order, the encoder, the audio transform and the text transform

@@ -79,6 +79,7 @@ class FeatureBatchNormalizer(nn.Module):
         """
         Args:
             x: Tensor of shape (batch, features, time)
+            lengths: corresponding length of each element in the input tensor.
         """
         # https://github.com/pytorch/pytorch/issues/45208
         # https://github.com/pytorch/pytorch/issues/44768
@@ -249,7 +250,7 @@ class MelScale(nn.Module):
         # log features
         # We want to avoid taking the log of zero
         if self.log_scale:
-            x = torch.log(x + 2 ** -24)
+            x = torch.log(x + 2**-24)
         return x
 
 
