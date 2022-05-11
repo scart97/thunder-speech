@@ -1,6 +1,8 @@
 from string import ascii_lowercase
 from urllib.error import HTTPError
 
+import pytest
+
 import pytorch_lightning as pl
 from torch.optim.lr_scheduler import OneCycleLR
 
@@ -71,3 +73,17 @@ def test_special_scheduler_args(sample_manifest):
         gpus=-1,
     )
     trainer.fit(module, datamodule=data)
+
+
+@mark_slow
+def test_missing_parameter():
+    with pytest.raises(ValueError, match="tokens"):
+        FinetuneCTCModule(
+            "stt_en_citrinet_256",
+            tokens=list(ascii_lowercase),
+        )
+    with pytest.raises(ValueError, match="decoder"):
+        FinetuneCTCModule(
+            "stt_en_citrinet_256",
+            decoder_class=conv1d_decoder,
+        )
