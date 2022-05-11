@@ -1806,7 +1806,8 @@ The code is based on https://github.com/pseeth/torch-stft</p>
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
-<span class="normal">245</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">linear_decoder</span><span class="p">(</span>
+<span class="normal">245</span>
+<span class="normal">246</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">linear_decoder</span><span class="p">(</span>
     <span class="n">decoder_input_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">decoder_dropout</span><span class="p">:</span> <span class="nb">float</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Decoder that uses a linear layer with dropout</span>
@@ -1824,6 +1825,7 @@ The code is based on https://github.com/pseeth/torch-stft</p>
     <span class="c1"># change from (batch, time, #vocab) to (batch, #vocab, time)</span>
     <span class="c1"># that is expected by the rest of the library</span>
     <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+        <span class="n">SwapLastDimension</span><span class="p">(),</span>
         <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">decoder_dropout</span><span class="p">),</span>
         <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">decoder_input_channels</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">),</span>
         <span class="n">SwapLastDimension</span><span class="p">(),</span>

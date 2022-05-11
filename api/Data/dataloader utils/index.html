@@ -925,7 +925,7 @@
               </span>
           </td>
           <td class="doc-returns-details">
-            <p>Tuple containing padded audios, audio lengths (normalized to 0.0 &lt;-&gt; 1.0 range) and the list of corresponding transcriptions in that order.</p>
+            <p>Tuple containing padded audios, audio lengths and the list of corresponding transcriptions in that order.</p>
           </td>
         </tr>
     </tbody>
@@ -956,7 +956,7 @@
 <span class="sd">        samples: Samples produced by dataloader</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tuple containing padded audios, audio lengths (normalized to 0.0 &lt;-&gt; 1.0 range) and the list of corresponding transcriptions in that order.</span>
+<span class="sd">        Tuple containing padded audios, audio lengths and the list of corresponding transcriptions in that order.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">samples</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">sample</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">padded_audios</span> <span class="o">=</span> <span class="n">pad_sequence</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">],</span> <span class="n">batch_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

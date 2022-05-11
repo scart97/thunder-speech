@@ -957,8 +957,7 @@
 
         <details class="quote">
           <summary>Source code in <code>thunder/huggingface/compatibility.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 64</span>
-<span class="normal"> 65</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 65</span>
 <span class="normal"> 66</span>
 <span class="normal"> 67</span>
 <span class="normal"> 68</span>
@@ -1004,7 +1003,8 @@
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
-<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_huggingface_checkpoint</span><span class="p">(</span>
+<span class="normal">111</span>
+<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_huggingface_checkpoint</span><span class="p">(</span>
     <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseCTCModule</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load huggingface model and convert to thunder [`BaseCTCModule`][thunder.module.BaseCTCModule]</span>
@@ -1029,7 +1029,7 @@
             <span class="n">decoder_dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;lm_head&quot;</span><span class="p">):</span>
-            <span class="n">decoder</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">lm_head</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
+            <span class="n">decoder</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">lm_head</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
         <span class="n">warn</span><span class="p">(</span>
             <span class="ne">UserWarning</span><span class="p">(</span>
@@ -1137,8 +1137,7 @@
 
         <details class="quote">
           <summary>Source code in <code>thunder/huggingface/compatibility.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
-<span class="normal">115</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
@@ -1156,7 +1155,9 @@
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
-<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">prepare_scriptable_wav2vec</span><span class="p">(</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">prepare_scriptable_wav2vec</span><span class="p">(</span>
     <span class="n">module</span><span class="p">:</span> <span class="n">BaseCTCModule</span><span class="p">,</span> <span class="n">quantized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseCTCModule</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Converts thunder module containing a wav2vec2 model to be scriptable.</span>
@@ -1175,6 +1176,7 @@
             <span class="n">imported</span><span class="p">,</span> <span class="n">qconfig_spec</span><span class="o">=</span><span class="p">{</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">},</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">qint8</span>
         <span class="p">)</span>
     <span class="n">module</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">imported</span>
+    <span class="n">module</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">module</span><span class="o">.</span><span class="n">decoder</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
     <span class="k">return</span> <span class="n">module</span>
 </code></pre></div></td></tr></table></div>
         </details>

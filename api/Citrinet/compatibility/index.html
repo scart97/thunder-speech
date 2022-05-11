@@ -1055,8 +1055,7 @@ with the _ prefix</p>
 
         <details class="quote">
           <summary>Source code in <code>thunder/citrinet/compatibility.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
-<span class="normal"> 99</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
@@ -1071,7 +1070,8 @@ with the _ prefix</p>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fix_vocab</span><span class="p">(</span><span class="n">vocab_tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">114</span>
+<span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fix_vocab</span><span class="p">(</span><span class="n">vocab_tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Transform the nemo vocab tokens back to the sentencepiece sytle</span>
 <span class="sd">    with the _ prefix</span>
 
@@ -1173,8 +1173,7 @@ with the _ prefix</p>
 
         <details class="quote">
           <summary>Source code in <code>thunder/citrinet/compatibility.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
-<span class="normal">118</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
@@ -1212,7 +1211,8 @@ with the _ prefix</p>
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
-<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_citrinet_checkpoint</span><span class="p">(</span>
+<span class="normal">156</span>
+<span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_citrinet_checkpoint</span><span class="p">(</span>
     <span class="n">checkpoint</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CitrinetCheckpoint</span><span class="p">],</span> <span class="n">save_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseCTCModule</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load from the original nemo checkpoint.</span>
@@ -1288,6 +1288,18 @@ checkpoint.</p>
           <td><code>config_path</code></td>
           <td class="doc-param-details">
             <p>Path to the .yaml file, usually called model_config.yaml</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
+                </span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><code>sentencepiece_path</code></td>
+          <td class="doc-param-details">
+            <p>Path to the sentencepiece model used to tokenize, usually called tokenizer.model</p>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
@@ -1372,7 +1384,8 @@ checkpoint.</p>
 <span class="normal">92</span>
 <span class="normal">93</span>
 <span class="normal">94</span>
-<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_components_from_citrinet_config</span><span class="p">(</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_components_from_citrinet_config</span><span class="p">(</span>
     <span class="n">config_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">sentencepiece_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">BatchTextTransformer</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Read the important parameters from the config stored inside the .nemo</span>
@@ -1380,6 +1393,7 @@ checkpoint.</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        config_path: Path to the .yaml file, usually called model_config.yaml</span>
+<span class="sd">        sentencepiece_path: Path to the sentencepiece model used to tokenize, usually called tokenizer.model</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A tuple containing, in this order, the encoder, the audio transform and the text transform</span>

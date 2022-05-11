@@ -966,7 +966,9 @@
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
-<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Wav2Vec2Preprocess</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Wav2Vec2Preprocess</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">div_guard</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-7</span><span class="p">,</span>
@@ -976,6 +978,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            div_guard: Guard value to prevent division by zero.</span>
+<span class="sd">            mask_input: controls the use of masking in the input tensor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">div_guard</span> <span class="o">=</span> <span class="n">div_guard</span>
@@ -988,6 +991,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            audio: Audio tensor of shape [batch_size, time]</span>
+<span class="sd">            audio_lengths: corresponding length of each element in the input tensor.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Normalized audio tensor with same shape as input. Optionally the valid mask</span>
@@ -1057,6 +1061,22 @@
             </p>
           </td>
         </tr>
+        <tr>
+          <td><code>mask_input</code></td>
+          <td class="doc-param-details">
+            <p>controls the use of masking in the input tensor.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code>bool</code>
+                </span>
+                <span class="doc-param-default">
+                  <b>DEFAULT:</b> 
+                    <code>False</code>
+                </span>
+            </p>
+          </td>
+        </tr>
     </tbody>
   </table>
 
@@ -1074,7 +1094,8 @@
 <span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
-<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">31</span>
+<span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">div_guard</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-7</span><span class="p">,</span>
     <span class="n">mask_input</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1083,6 +1104,7 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        div_guard: Guard value to prevent division by zero.</span>
+<span class="sd">        mask_input: controls the use of masking in the input tensor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">div_guard</span> <span class="o">=</span> <span class="n">div_guard</span>
@@ -1130,6 +1152,18 @@
             </p>
           </td>
         </tr>
+        <tr>
+          <td><code>audio_lengths</code></td>
+          <td class="doc-param-details">
+            <p>corresponding length of each element in the input tensor.</p>
+            <p>
+                <span class="doc-param-annotation">
+                  <b>TYPE:</b>
+                    <code>torch.<span title="torch.Tensor">Tensor</span></code>
+                </span>
+            </p>
+          </td>
+        </tr>
     </tbody>
   </table>
 
@@ -1156,8 +1190,7 @@
 
         <details class="quote">
           <summary>Source code in <code>thunder/huggingface/transform.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">33</span>
-<span class="normal">34</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
@@ -1176,13 +1209,16 @@
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
-<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">audio</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">audio_lengths</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;Applies the normalization</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        audio: Audio tensor of shape [batch_size, time]</span>
+<span class="sd">        audio_lengths: corresponding length of each element in the input tensor.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Normalized audio tensor with same shape as input. Optionally the valid mask</span>

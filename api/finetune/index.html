@@ -971,7 +971,20 @@
 <span class="normal">72</span>
 <span class="normal">73</span>
 <span class="normal">74</span>
-<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FinetuneCTCModule</span><span class="p">(</span><span class="n">BaseCTCModule</span><span class="p">):</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FinetuneCTCModule</span><span class="p">(</span><span class="n">BaseCTCModule</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">checkpoint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1004,13 +1017,26 @@
         <span class="n">decoder_kwargs</span> <span class="o">=</span> <span class="n">decoder_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="n">text_kwargs</span> <span class="o">=</span> <span class="n">text_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
+        <span class="k">if</span> <span class="n">tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">decoder_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Missing decoder</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;New tokens were specified, but the module also needs to know the decoder class to initialize properly.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tokens</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">decoder_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Missing tokens</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;A new decoder was specified, but the module also needs to know the tokens to initialize properly.&quot;</span>
+            <span class="p">)</span>
+
         <span class="n">checkpoint_data</span> <span class="o">=</span> <span class="n">load_pretrained</span><span class="p">(</span><span class="n">checkpoint_name</span><span class="p">,</span> <span class="o">**</span><span class="n">checkpoint_kwargs</span><span class="p">)</span>
-        <span class="c1"># Changing the decoder layer and text processing</span>
+
         <span class="k">if</span> <span class="n">decoder_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Keep original decoder/text processing</span>
             <span class="n">text_transform</span> <span class="o">=</span> <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">text_transform</span>
             <span class="n">decoder</span> <span class="o">=</span> <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">decoder</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="n">tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Expecting vocabulary to not be empty&quot;</span>
+            <span class="c1"># Changing the decoder layer and text processing</span>
             <span class="n">text_transform</span> <span class="o">=</span> <span class="n">BatchTextTransformer</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="o">**</span><span class="n">text_kwargs</span><span class="p">)</span>
             <span class="n">decoder</span> <span class="o">=</span> <span class="n">decoder_class</span><span class="p">(</span>
                 <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">encoder_final_dimension</span><span class="p">,</span>
@@ -1281,7 +1307,20 @@
 <span class="normal">72</span>
 <span class="normal">73</span>
 <span class="normal">74</span>
-<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">checkpoint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">checkpoint_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1313,13 +1352,26 @@
     <span class="n">decoder_kwargs</span> <span class="o">=</span> <span class="n">decoder_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="n">text_kwargs</span> <span class="o">=</span> <span class="n">text_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
+    <span class="k">if</span> <span class="n">tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">decoder_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Missing decoder</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;New tokens were specified, but the module also needs to know the decoder class to initialize properly.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tokens</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">decoder_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Missing tokens</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;A new decoder was specified, but the module also needs to know the tokens to initialize properly.&quot;</span>
+        <span class="p">)</span>
+
     <span class="n">checkpoint_data</span> <span class="o">=</span> <span class="n">load_pretrained</span><span class="p">(</span><span class="n">checkpoint_name</span><span class="p">,</span> <span class="o">**</span><span class="n">checkpoint_kwargs</span><span class="p">)</span>
-    <span class="c1"># Changing the decoder layer and text processing</span>
+
     <span class="k">if</span> <span class="n">decoder_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Keep original decoder/text processing</span>
         <span class="n">text_transform</span> <span class="o">=</span> <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">text_transform</span>
         <span class="n">decoder</span> <span class="o">=</span> <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">decoder</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Expecting vocabulary to not be empty&quot;</span>
+        <span class="c1"># Changing the decoder layer and text processing</span>
         <span class="n">text_transform</span> <span class="o">=</span> <span class="n">BatchTextTransformer</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="o">**</span><span class="n">text_kwargs</span><span class="p">)</span>
         <span class="n">decoder</span> <span class="o">=</span> <span class="n">decoder_class</span><span class="p">(</span>
             <span class="n">checkpoint_data</span><span class="o">.</span><span class="n">encoder_final_dimension</span><span class="p">,</span>
