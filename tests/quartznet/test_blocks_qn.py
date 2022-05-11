@@ -4,7 +4,6 @@
 # Copyright (c) 2021 scart97
 
 from math import ceil, floor
-from tempfile import TemporaryDirectory
 
 import pytest
 
@@ -156,14 +155,6 @@ def test_maskconv_script():
     assert torch.allclose(lens_old, lens_new)
 
 
-def test_maskconv_onnx():
-    x = torch.randn(10, 128, 1337)
-    lens = torch.randint(10, 1337, (10,))
-    conv = MaskedConv1d(128, 10, 3)
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(conv, (x, lens), f"{export_path}/maskconv.onnx")
-
-
 quartznet_parameters = given(
     in_channels=integers(16, 32),
     out_channels=integers(16, 32),
@@ -234,27 +225,7 @@ def test_QuartznetBlock_device_move(**kwargs):
 
 @mark_slow
 @quartznet_parameters
-@settings(deadline=None)
-def test_QuartznetBlock_trace(**kwargs):
-    try:
-        block = QuartznetBlock(**kwargs)
-        block.eval()
-    except ValueError:
-        return
-
-    x = torch.randn(10, kwargs["in_channels"], 1337)
-    lens = torch.randint(10, 1337, (10,))
-    block_trace = torch.jit.trace(block, (x, lens))
-
-    out1, lens1 = block(x, lens)
-    out2, lens2 = block_trace(x, lens)
-    assert torch.allclose(out1, out2)
-    assert torch.allclose(lens1, lens2)
-
-
-@mark_slow
-@quartznet_parameters
-@settings(deadline=None)
+@settings(deadline=None, max_examples=20)
 def test_QuartznetBlock_script(**kwargs):
     try:
         block = QuartznetBlock(**kwargs)
@@ -270,23 +241,3 @@ def test_QuartznetBlock_script(**kwargs):
     out2, lens2 = block_script(x, lens)
     assert torch.allclose(out1, out2)
     assert torch.allclose(lens1, lens2)
-
-
-@mark_slow
-@quartznet_parameters
-@settings(deadline=None)
-def test_QuartznetBlock_onnx(**kwargs):
-    try:
-        block = QuartznetBlock(**kwargs)
-    except ValueError:
-        return
-    x = torch.randn(10, kwargs["in_channels"], 1337)
-    lens = torch.randint(10, 1337, (10,))
-    with TemporaryDirectory() as export_path:
-        torch.onnx.export(
-            block,
-            (x, lens),
-            f"{export_path}/QuartznetBlock.onnx",
-            verbose=True,
-            opset_version=11,
-        )

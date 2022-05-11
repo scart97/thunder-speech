@@ -4,6 +4,7 @@
 # Copyright (c) 2021 scart97
 
 
+import pickle
 from urllib.error import HTTPError
 
 import pytest
@@ -18,10 +19,19 @@ from thunder.huggingface.compatibility import prepare_scriptable_wav2vec
 from thunder.registry import load_pretrained
 
 
+@pytest.fixture(scope="session")
+def wav2vec_base():
+    return load_pretrained("facebook/wav2vec2-base-960h")
+
+
+def _copy_model(model):
+    return pickle.loads(pickle.dumps(model))
+
+
 @mark_slow
 @requirescuda
-def test_dev_run_train(sample_manifest):
-    module = load_pretrained("facebook/wav2vec2-base-960h")
+def test_dev_run_train(wav2vec_base, sample_manifest):
+    module = _copy_model(wav2vec_base)
     # Lowercase the vocab just to run this test, as labeled text is lowercase
     module.text_transform.vocab.itos = [
         x.lower() for x in module.text_transform.vocab.itos
@@ -40,14 +50,13 @@ def test_dev_run_train(sample_manifest):
 
 
 @mark_slow
-def test_expected_prediction_from_pretrained_model(sample_audio):
+def test_expected_prediction_from_pretrained_model(wav2vec_base, sample_audio):
     try:
         # Preparing data and model
-        module = load_pretrained("facebook/wav2vec2-base-960h")
         audio, sr = torchaudio.load(sample_audio)
         assert sr == 16000
 
-        output = module.predict(audio)
+        output = wav2vec_base.predict(audio)
         expected = "THE WORLD NEEDS OPPORTUNITIES FOR NEW LEADERS AND NEW IDEAS"
         assert output[0].strip() == expected
     except HTTPError:
@@ -55,16 +64,14 @@ def test_expected_prediction_from_pretrained_model(sample_audio):
 
 
 @mark_slow
-def test_script_module():
-    module = load_pretrained("facebook/wav2vec2-base-960h")
-    module.eval()
-    torchaudio_module = load_pretrained("facebook/wav2vec2-base-960h")
+def test_script_module(wav2vec_base):
+    torchaudio_module = _copy_model(wav2vec_base)
     torchaudio_module.eval()
     torchaudio_module = prepare_scriptable_wav2vec(torchaudio_module)
     scripted = torch.jit.script(torchaudio_module)
 
     fake_input = torch.randn(1, 16000)
-    fake_transcription = module.predict(fake_input)
+    fake_transcription = wav2vec_base.predict(fake_input)
     torchaudio_transcription = torchaudio_module.predict(fake_input)
     scripted_transcription = scripted.predict(fake_input)
 
@@ -73,16 +80,14 @@ def test_script_module():
 
 
 @mark_slow
-def test_quantized_script_module():
-    module = load_pretrained("facebook/wav2vec2-base-960h")
-    module.eval()
-    torchaudio_module = load_pretrained("facebook/wav2vec2-base-960h")
+def test_quantized_script_module(wav2vec_base):
+    torchaudio_module = _copy_model(wav2vec_base)
     torchaudio_module = prepare_scriptable_wav2vec(torchaudio_module, quantized=True)
     torchaudio_module.eval()
     scripted = torch.jit.script(torchaudio_module)
 
     fake_input = torch.randn(1, 16000)
-    fake_transcription = module.predict(fake_input)
+    fake_transcription = wav2vec_base.predict(fake_input)
     torchaudio_transcription = scripted.predict(fake_input)
 
     assert fake_transcription[0] == torchaudio_transcription[0]
@@ -98,4 +103,4 @@ def test_pretrained_without_vocab():
 def test_pretrained_problematic_tokens():
     module = load_pretrained("lgris/wav2vec2-large-xlsr-open-brazilian-portuguese-v2")
     assert module.text_transform.num_tokens == 44
-    assert module.text_transform.vocab.start_token == None
+    assert module.text_transform.vocab.start_token is None
