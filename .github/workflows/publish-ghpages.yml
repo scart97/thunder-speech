@@ -30,11 +30,11 @@ jobs:
           path: .venv
           key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install system library
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install libsndfile1
       - name: Install library
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: |
           poetry install
       - name: Build docs
