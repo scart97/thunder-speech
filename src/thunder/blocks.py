@@ -239,6 +239,7 @@ def linear_decoder(
     # change from (batch, time, #vocab) to (batch, #vocab, time)
     # that is expected by the rest of the library
     return nn.Sequential(
+        SwapLastDimension(),
         nn.Dropout(decoder_dropout),
         nn.Linear(decoder_input_channels, num_classes),
         SwapLastDimension(),

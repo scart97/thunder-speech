@@ -35,8 +35,9 @@ class _HuggingFaceEncoderAdapt(nn.Module):
                 audio_lengths, max_length=audio.size(-1)
             ).int()
         out = self.original_encoder(audio, attention_mask=attention_mask)
+        out_correct_shape = out.last_hidden_state.transpose(-1, -2)
         return (
-            out.last_hidden_state,
+            out_correct_shape,
             self.original_encoder._get_feat_extract_output_lengths(audio_lengths),
         )
 
@@ -86,7 +87,7 @@ def load_huggingface_checkpoint(
             decoder_dropout=0.0,
         )
         if hasattr(model, "lm_head"):
-            decoder[1].load_state_dict(model.lm_head.state_dict())
+            decoder[2].load_state_dict(model.lm_head.state_dict())
     except OSError:
         warn(
             UserWarning(
@@ -130,4 +131,5 @@ def prepare_scriptable_wav2vec(
             imported, qconfig_spec={torch.nn.Linear}, dtype=torch.qint8
         )
     module.encoder = imported
+    module.decoder = nn.Sequential(*module.decoder[1:])
     return module
