@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v3.1.2 (2022-05-11)
+### Fix
+* Transpose the output of huggingface encoders to be consistent with the convention used in the library ([`951307e`](https://github.com/scart97/thunder-speech/commit/951307e3a1479502700dedc22761eeb7b1fc44b2))
+* **finetune:** Better error message in case of missing parameter ([`405325b`](https://github.com/scart97/thunder-speech/commit/405325b58396bee846db9138b8b96703188bb42c))
+
+### Documentation
+* Updating old docs ([`ae6a0b8`](https://github.com/scart97/thunder-speech/commit/ae6a0b8100370664aa909091767ad6f82803d169))
+
 ## v3.1.1 (2022-05-11)
 ### Fix
 * **huggingface:** Fix compatibility with the huggingface tokenizer ([`42a8878`](https://github.com/scart97/thunder-speech/commit/42a8878a27ad0814e2e35afbd29c9fd597945c0e))
