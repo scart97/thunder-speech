@@ -225,7 +225,7 @@ def test_QuartznetBlock_device_move(**kwargs):
 
 @mark_slow
 @quartznet_parameters
-@settings(deadline=None)
+@settings(deadline=None, max_examples=20)
 def test_QuartznetBlock_script(**kwargs):
     try:
         block = QuartznetBlock(**kwargs)

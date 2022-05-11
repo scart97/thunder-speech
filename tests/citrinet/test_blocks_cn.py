@@ -119,7 +119,7 @@ def test_CitrinetBlock_device_move(**kwargs):
 
 @mark_slow
 @citrinet_parameters
-@settings(deadline=None)
+@settings(deadline=None, max_examples=20)
 def test_CitrinetBlock_script(**kwargs):
     try:
         block = CitrinetBlock(**kwargs)
