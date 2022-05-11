@@ -49,13 +49,26 @@ class FinetuneCTCModule(BaseCTCModule):
         decoder_kwargs = decoder_kwargs or {}
         text_kwargs = text_kwargs or {}
 
+        if tokens is not None and decoder_class is None:
+            # Missing decoder
+            raise ValueError(
+                "New tokens were specified, but the module also needs to know the decoder class to initialize properly."
+            )
+
+        if tokens is None and decoder_class is not None:
+            # Missing tokens
+            raise ValueError(
+                "A new decoder was specified, but the module also needs to know the tokens to initialize properly."
+            )
+
         checkpoint_data = load_pretrained(checkpoint_name, **checkpoint_kwargs)
-        # Changing the decoder layer and text processing
+
         if decoder_class is None:
+            # Keep original decoder/text processing
             text_transform = checkpoint_data.text_transform
             decoder = checkpoint_data.decoder
         else:
-            assert tokens is not None, "Expecting vocabulary to not be empty"
+            # Changing the decoder layer and text processing
             text_transform = BatchTextTransformer(tokens, **text_kwargs)
             decoder = decoder_class(
                 checkpoint_data.encoder_final_dimension,
