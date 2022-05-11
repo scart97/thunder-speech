@@ -887,6 +887,7 @@
 
 
 
+
   <div class="doc doc-object doc-function">
 
 
@@ -956,21 +957,7 @@
 
         <details class="quote">
           <summary>Source code in <code>thunder/huggingface/compatibility.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 64</span>
 <span class="normal"> 65</span>
 <span class="normal"> 66</span>
 <span class="normal"> 67</span>
@@ -1012,7 +999,12 @@
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
-<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_huggingface_checkpoint</span><span class="p">(</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_huggingface_checkpoint</span><span class="p">(</span>
     <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseCTCModule</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load huggingface model and convert to thunder [`BaseCTCModule`][thunder.module.BaseCTCModule]</span>
@@ -1030,20 +1022,11 @@
     <span class="c1"># In that case we need to warn the user to fix it before training</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
-        <span class="n">vocab</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">get_vocab</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="c1"># Remove tokens that were added after the model was trained</span>
-        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">additional_special_tokens</span><span class="p">:</span>
-            <span class="n">vocab</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-        <span class="n">text_transform</span> <span class="o">=</span> <span class="n">BatchTextTransformer</span><span class="p">(</span>
-            <span class="n">tokens</span><span class="o">=</span><span class="n">vocab</span><span class="p">,</span>
-            <span class="n">blank_token</span><span class="o">=</span><span class="n">_get_special_token</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">&quot;pad_token&quot;</span><span class="p">),</span>
-            <span class="n">pad_token</span><span class="o">=</span><span class="n">_get_special_token</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">&quot;pad_token&quot;</span><span class="p">),</span>
-            <span class="n">unknown_token</span><span class="o">=</span><span class="n">_get_special_token</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">&quot;unk_token&quot;</span><span class="p">),</span>
-            <span class="n">start_token</span><span class="o">=</span><span class="n">_get_special_token</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">&quot;bos_token&quot;</span><span class="p">),</span>
-            <span class="n">end_token</span><span class="o">=</span><span class="n">_get_special_token</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">&quot;eos_token&quot;</span><span class="p">),</span>
-        <span class="p">)</span>
+        <span class="n">text_transform</span> <span class="o">=</span> <span class="n">_tok_to_transform</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">)</span>
         <span class="n">decoder</span> <span class="o">=</span> <span class="n">linear_decoder</span><span class="p">(</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">base_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">hidden_size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">),</span> <span class="n">decoder_dropout</span><span class="o">=</span><span class="mf">0.0</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">base_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">hidden_size</span><span class="p">,</span>
+            <span class="n">text_transform</span><span class="o">.</span><span class="n">num_tokens</span><span class="p">,</span>
+            <span class="n">decoder_dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;lm_head&quot;</span><span class="p">):</span>
             <span class="n">decoder</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">lm_head</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
@@ -1154,12 +1137,7 @@
 
         <details class="quote">
           <summary>Source code in <code>thunder/huggingface/compatibility.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span>
@@ -1173,7 +1151,12 @@
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
-<span class="normal">128</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">prepare_scriptable_wav2vec</span><span class="p">(</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">prepare_scriptable_wav2vec</span><span class="p">(</span>
     <span class="n">module</span><span class="p">:</span> <span class="n">BaseCTCModule</span><span class="p">,</span> <span class="n">quantized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseCTCModule</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Converts thunder module containing a wav2vec2 model to be scriptable.</span>
