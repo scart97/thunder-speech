@@ -24,7 +24,7 @@ jobs:
       - name: View poetry version
         run: poetry --version
       - name: Load cached venv
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cached-poetry-dependencies
         with:
           path: .venv
