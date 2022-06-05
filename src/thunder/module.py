@@ -71,6 +71,9 @@ class BaseCTCModule(pl.LightningModule):
             torch.randint(100, 16000, (10,)),
         )
 
+        self.quant = torch.quantization.QuantStub()
+        self.dequant = torch.quantization.DeQuantStub()
+
     def forward(self, x: Tensor, lengths: Tensor) -> Tuple[Tensor, Optional[Tensor]]:
         """Process the audio tensor to create the predictions.
 
@@ -82,8 +85,11 @@ class BaseCTCModule(pl.LightningModule):
             Tensor with the predictions.
         """
         features, feature_lengths = self.audio_transform(x, lengths)
-        encoded, out_lengths = self.encoder(features, feature_lengths)
-        return self.decoder(encoded), out_lengths
+        qfeatures = self.quant(features)
+        encoded, out_lengths = self.encoder(qfeatures, feature_lengths)
+        qpred = self.decoder(encoded)
+        pred = self.dequant(qpred)
+        return pred, out_lengths
 
     @torch.jit.export
     def predict(self, x: Tensor) -> List[str]:
