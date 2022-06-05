@@ -66,6 +66,7 @@ class SqueezeExcite(nn.Module):
             nn.ReLU(True),
             nn.Linear(channels // reduction_ratio, channels, bias=False),
         )
+        self.ff = nn.quantized.FloatFunctional()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -80,7 +81,7 @@ class SqueezeExcite(nn.Module):
         y = y.transpose(1, -1)  # [B, C, T - context_window + 1]
         y = torch.sigmoid(y)
 
-        return x * y
+        return self.ff.mul(x, y)
 
 
 class CitrinetBlock(nn.Module):
@@ -171,6 +172,7 @@ class CitrinetBlock(nn.Module):
             self.res = None
 
         self.mout = MultiSequential(*_get_act_dropout_layer(drop_prob=dropout))
+        self.ff = nn.quantized.FloatFunctional()
 
     def forward(
         self, x: torch.Tensor, lengths: torch.Tensor
@@ -190,7 +192,7 @@ class CitrinetBlock(nn.Module):
         # compute the residuals
         if self.res is not None:
             res_out, _ = self.res(x, lengths)
-            out = out + res_out
+            out = self.ff.add(out, res_out)
 
         # compute the output
         out, lengths_out = self.mout(out, lengths_out)
