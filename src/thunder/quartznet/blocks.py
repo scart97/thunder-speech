@@ -103,7 +103,7 @@ class MaskedConv1d(nn.Module):
         dilation: _size_1_t = 1,
         groups: int = 1,
         bias: bool = False,
-        use_mask: bool = True,
+        use_mask: bool = False,
     ):
         """Masked Convolution.
         This module correspond to a 1d convolution with input masking. Arguments to create are the
@@ -219,7 +219,9 @@ def _get_conv_bn_layer(
             )
         ]
 
-    layers.append(Masked(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1)))
+    layers.append(
+        Masked(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1), quant=True)
+    )
 
     return layers
 

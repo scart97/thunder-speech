@@ -24,6 +24,7 @@ from typing import Optional, Tuple
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
+from torch.quantization import DeQuantStub, QuantStub
 
 
 def _fourier_matrix(n_fft: int, device: torch.device) -> torch.Tensor:
@@ -105,14 +106,23 @@ class MultiSequential(nn.Sequential):
 class Masked(nn.Module):
     """Wrapper to mix normal modules with others that take 2 inputs"""
 
-    def __init__(self, *layers):
+    def __init__(self, *layers, quant=False):
         super().__init__()
         self.layer = nn.Sequential(*layers)
+        self.should_quant = quant
+        self.quant = QuantStub()
+        self.dequant = DeQuantStub()
 
     def forward(
         self, audio: torch.Tensor, audio_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
-        return self.layer(audio), audio_lengths
+        if self.should_quant:
+            audio_f = self.dequant(audio)
+            out_f = self.layer(audio_f)
+            out = self.quant(out_f)
+        else:
+            out = self.layer(audio)
+        return out, audio_lengths
 
 
 def normalize_tensor(
