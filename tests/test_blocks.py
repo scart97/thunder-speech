@@ -2,7 +2,7 @@ import torch
 from pytorch_lightning import seed_everything
 
 from tests.utils import requirescuda
-from thunder.blocks import _fourier_matrix, convolution_stft
+from thunder.blocks import _fourier_matrix, convolution_stft, lengths_to_mask
 
 
 def test_fourier_transform_matrix():
@@ -51,3 +51,18 @@ def test_convolution_stft_device_move():
     outputs_gpu = apply_op(x.cuda())
 
     assert torch.allclose(outputs_cpu, outputs_gpu.cpu(), atol=1e-3)
+
+
+def test_lengths_to_mask():
+    lengths = torch.tensor([8, 5, 4, 3, 1])
+    mask = lengths_to_mask(lengths, max_length=8)
+    expected = torch.tensor(
+        [
+            [True, True, True, True, True, True, True, True],
+            [True, True, True, True, True, False, False, False],
+            [True, True, True, True, False, False, False, False],
+            [True, True, True, False, False, False, False, False],
+            [True, False, False, False, False, False, False, False],
+        ]
+    )
+    assert torch.allclose(mask, expected)
