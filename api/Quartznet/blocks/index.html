@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.6">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
     
     
       
@@ -17,7 +17,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.4a0965b7.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.1d29e8d0.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.cbb835fc.min.css">
@@ -1069,38 +1069,25 @@
 
 
 <h2 id="thunder.quartznet.blocks.InitMode" class="doc doc-heading">
-          <code>InitMode</code>
+        <code>
+InitMode            (<span title="str">str</span>, <span title="enum.Enum">Enum</span>)
+        </code>
 
 
 
 </h2>
 
-
     <div class="doc doc-contents ">
-        <p class="doc doc-class-bases">
-          Bases: <code>str</code>, <code><span title="enum.Enum">Enum</span></code></p>
 
+      <p>Weight init methods. Used by <a class="autorefs autorefs-internal" href="#thunder.quartznet.blocks.init_weights"><code>init_weights</code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Possible values are <code>xavier_uniform</code>,<code>xavier_normal</code>,<code>kaiming_uniform</code> and <code>kaiming_normal</code></p>
+</div>
 
-
-<details class="note">
-  <summary>Note</summary>
-  <p>Possible values are <code>xavier_uniform</code>,<code>xavier_normal</code>,<code>kaiming_uniform</code> and <code>kaiming_normal</code></p>
-</details>      <p>Weight init methods. Used by <a class="autorefs autorefs-internal" href="#thunder.quartznet.blocks.init_weights"><code>init_weights</code></a>.</p>
-
-
-          <details class="quote">
-            <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">InitMode</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+        <details class="quote">
+          <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">InitMode</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Weight init methods. Used by [`init_weights`][thunder.quartznet.blocks.init_weights].</span>
 
 <span class="sd">    Note:</span>
@@ -1111,12 +1098,13 @@
     <span class="n">xavier_normal</span> <span class="o">=</span> <span class="s2">&quot;xavier_normal&quot;</span>
     <span class="n">kaiming_uniform</span> <span class="o">=</span> <span class="s2">&quot;kaiming_uniform&quot;</span>
     <span class="n">kaiming_normal</span> <span class="o">=</span> <span class="s2">&quot;kaiming_normal&quot;</span>
-</code></pre></div></td></tr></table></div>
-          </details>
+</code></pre></div>
+        </details>
 
 
 
   <div class="doc doc-children">
+
 
 
 
@@ -1144,112 +1132,20 @@
 
 
 <h2 id="thunder.quartznet.blocks.MaskedConv1d" class="doc doc-heading">
-          <code>MaskedConv1d</code>
+        <code>
+MaskedConv1d            (<span title="torch.nn.modules.module.Module">Module</span>)
+        </code>
 
 
 
 </h2>
 
-
     <div class="doc doc-contents ">
-        <p class="doc doc-class-bases">
-          Bases: <code><span title="torch.nn">nn</span>.<span title="torch.nn.Module">Module</span></code></p>
 
 
-
-
-          <details class="quote">
-            <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MaskedConv1d</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+        <details class="quote">
+          <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MaskedConv1d</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="n">__constants__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;use_mask&quot;</span><span class="p">,</span> <span class="s2">&quot;padding&quot;</span><span class="p">,</span> <span class="s2">&quot;dilation&quot;</span><span class="p">,</span> <span class="s2">&quot;kernel_size&quot;</span><span class="p">,</span> <span class="s2">&quot;stride&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -1339,8 +1235,8 @@
             <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_fill</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lengths</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_seq_len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-          </details>
+</code></pre></div>
+        </details>
 
 
 
@@ -1355,21 +1251,18 @@
 
 
 
-
-
-
-
-
-  <div class="doc doc-object doc-function">
+  <div class="doc doc-object doc-method">
 
 
 
 <h3 id="thunder.quartznet.blocks.MaskedConv1d.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dilation</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
 
 </h3>
-
 
     <div class="doc doc-contents ">
 
@@ -1377,196 +1270,76 @@
 This module correspond to a 1d convolution with input masking. Arguments to create are the
 same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>in_channels</code></td>
+        <td><code>int</code></td>
+        <td><p>Same as nn.Conv1d</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>in_channels</code></td>
-          <td class="doc-param-details">
-            <p>Same as nn.Conv1d</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>out_channels</code></td>
-          <td class="doc-param-details">
-            <p>Same as nn.Conv1d</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>kernel_size</code></td>
-          <td class="doc-param-details">
-            <p>Same as nn.Conv1d</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="torch.nn.common_types._size_1_t">_size_1_t</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>stride</code></td>
-          <td class="doc-param-details">
-            <p>Same as nn.Conv1d</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="torch.nn.common_types._size_1_t">_size_1_t</span></code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>1</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>padding</code></td>
-          <td class="doc-param-details">
-            <p>Same as nn.Conv1d</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="torch.nn.common_types._size_1_t">_size_1_t</span></code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>0</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>dilation</code></td>
-          <td class="doc-param-details">
-            <p>Same as nn.Conv1d</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="torch.nn.common_types._size_1_t">_size_1_t</span></code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>1</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>groups</code></td>
-          <td class="doc-param-details">
-            <p>Same as nn.Conv1d</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>1</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>bias</code></td>
-          <td class="doc-param-details">
-            <p>Same as nn.Conv1d</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>bool</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>False</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>use_mask</code></td>
-          <td class="doc-param-details">
-            <p>Controls the masking of input before the convolution during the forward.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>bool</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>True</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+      <tr>
+        <td><code>out_channels</code></td>
+        <td><code>int</code></td>
+        <td><p>Same as nn.Conv1d</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>kernel_size</code></td>
+        <td><code>Union[int, Tuple[int]]</code></td>
+        <td><p>Same as nn.Conv1d</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>stride</code></td>
+        <td><code>Union[int, Tuple[int]]</code></td>
+        <td><p>Same as nn.Conv1d</p></td>
+        <td><code>1</code></td>
+      </tr>
+      <tr>
+        <td><code>padding</code></td>
+        <td><code>Union[int, Tuple[int]]</code></td>
+        <td><p>Same as nn.Conv1d</p></td>
+        <td><code>0</code></td>
+      </tr>
+      <tr>
+        <td><code>dilation</code></td>
+        <td><code>Union[int, Tuple[int]]</code></td>
+        <td><p>Same as nn.Conv1d</p></td>
+        <td><code>1</code></td>
+      </tr>
+      <tr>
+        <td><code>groups</code></td>
+        <td><code>int</code></td>
+        <td><p>Same as nn.Conv1d</p></td>
+        <td><code>1</code></td>
+      </tr>
+      <tr>
+        <td><code>bias</code></td>
+        <td><code>bool</code></td>
+        <td><p>Same as nn.Conv1d</p></td>
+        <td><code>False</code></td>
+      </tr>
+      <tr>
+        <td><code>use_mask</code></td>
+        <td><code>bool</code></td>
+        <td><p>Controls the masking of input before the convolution during the forward.</p></td>
+        <td><code>True</code></td>
+      </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">out_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -1611,7 +1384,7 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">dilation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="o">.</span><span class="n">dilation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="o">.</span><span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -1619,93 +1392,63 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
 
 
 
-  <div class="doc doc-object doc-function">
+  <div class="doc doc-object doc-method">
 
 
 
 <h3 id="thunder.quartznet.blocks.MaskedConv1d.forward" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lengths</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lengths</span><span class="p">)</span></code>
 
 
 </h3>
-
 
     <div class="doc doc-contents ">
 
       <p>Forward method</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>x</code></td>
+        <td><code>Tensor</code></td>
+        <td><p>Signal to be processed, of shape (batch, features, time)</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>x</code></td>
-          <td class="doc-param-details">
-            <p>Signal to be processed, of shape (batch, features, time)</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>torch.<span title="torch.Tensor">Tensor</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>lengths</code></td>
-          <td class="doc-param-details">
-            <p>Lenghts of each element in the batch of x, with shape (batch)</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>torch.<span title="torch.Tensor">Tensor</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
       <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>lengths</code></td>
+        <td><code>Tensor</code></td>
+        <td><p>Lenghts of each element in the batch of x, with shape (batch)</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><span title="typing.Tuple">Tuple</span>[torch.<span title="torch.Tensor">Tensor</span>, torch.<span title="torch.Tensor">Tensor</span>]</code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>Both the signal processed by the convolution and the resulting lengths</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Tuple[torch.Tensor, torch.Tensor]</code></td>
+      <td><p>Both the signal processed by the convolution and the resulting lengths</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">lengths</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Forward method</span>
@@ -1719,7 +1462,7 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_fill</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lengths</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_seq_len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -1727,82 +1470,57 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
 
 
 
-  <div class="doc doc-object doc-function">
+  <div class="doc doc-object doc-method">
 
 
 
 <h3 id="thunder.quartznet.blocks.MaskedConv1d.get_seq_len" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_seq_len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">get_seq_len</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lengths</span><span class="p">)</span></code>
 
 
 </h3>
-
 
     <div class="doc doc-contents ">
 
       <p>Get the lengths of the inputs after the convolution operation is applied.</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>lengths</code></td>
+        <td><code>Tensor</code></td>
+        <td><p>Original lengths of the inputs</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>lengths</code></td>
-          <td class="doc-param-details">
-            <p>Original lengths of the inputs</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>torch.<span title="torch.Tensor">Tensor</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code>torch.<span title="torch.Tensor">Tensor</span></code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>Resulting lengths after the convolution</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Tensor</code></td>
+      <td><p>Resulting lengths after the convolution</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_seq_len</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lengths</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_seq_len</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lengths</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get the lengths of the inputs after the convolution operation is applied.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        lengths: Original lengths of the inputs</span>
@@ -1817,7 +1535,7 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
         <span class="p">)</span>
         <span class="o">+</span> <span class="mi">1</span>
     <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -1825,89 +1543,63 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
 
 
 
-  <div class="doc doc-object doc-function">
+  <div class="doc doc-object doc-method">
 
 
 
 <h3 id="thunder.quartznet.blocks.MaskedConv1d.mask_fill" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">mask_fill</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lengths</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">mask_fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lengths</span><span class="p">)</span></code>
 
 
 </h3>
-
 
     <div class="doc doc-contents ">
 
       <p>Mask the input based on it's respective lengths.</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>x</code></td>
+        <td><code>Tensor</code></td>
+        <td><p>Signal to be processed, of shape (batch, features, time)</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>x</code></td>
-          <td class="doc-param-details">
-            <p>Signal to be processed, of shape (batch, features, time)</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>torch.<span title="torch.Tensor">Tensor</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>lengths</code></td>
-          <td class="doc-param-details">
-            <p>Lenghts of each element in the batch of x, with shape (batch)</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>torch.<span title="torch.Tensor">Tensor</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
       <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>lengths</code></td>
+        <td><code>Tensor</code></td>
+        <td><p>Lenghts of each element in the batch of x, with shape (batch)</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code>torch.<span title="torch.Tensor">Tensor</span></code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>The masked signal</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Tensor</code></td>
+      <td><p>The masked signal</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">mask_fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">lengths</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">mask_fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">lengths</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Mask the input based on it&#39;s respective lengths.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        x: Signal to be processed, of shape (batch, features, time)</span>
@@ -1917,7 +1609,7 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">lengths_to_mask</span><span class="p">(</span><span class="n">lengths</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -1940,130 +1632,20 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
 
 
 <h2 id="thunder.quartznet.blocks.QuartznetBlock" class="doc doc-heading">
-          <code>QuartznetBlock</code>
+        <code>
+QuartznetBlock            (<span title="torch.nn.modules.module.Module">Module</span>)
+        </code>
 
 
 
 </h2>
 
-
     <div class="doc doc-contents ">
-        <p class="doc doc-class-bases">
-          Bases: <code><span title="torch.nn">nn</span>.<span title="torch.nn.Module">Module</span></code></p>
 
 
-
-
-          <details class="quote">
-            <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">QuartznetBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+        <details class="quote">
+          <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">QuartznetBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -2171,8 +1753,8 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
         <span class="c1"># compute the output</span>
         <span class="n">out</span><span class="p">,</span> <span class="n">lengths_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mout</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">lengths_out</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">lengths_out</span>
-</code></pre></div></td></tr></table></div>
-          </details>
+</code></pre></div>
+        </details>
 
 
 
@@ -2186,18 +1768,18 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
 
 
 
-
-
-  <div class="doc doc-object doc-function">
+  <div class="doc doc-object doc-method">
 
 
 
 <h3 id="thunder.quartznet.blocks.QuartznetBlock.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dilation</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">residual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">separable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dilation</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">residual</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">separable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
 
 </h3>
-
 
     <div class="doc doc-contents ">
 
@@ -2205,239 +1787,76 @@ same as nn.Conv1d, but with the addition of use_mask for special behaviour.</p>
 but simplified to only support the new quartznet model. Biggest change is that
 dense residual used on Jasper is not supported here, and masked convolutions were also removed.</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>in_channels</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of input channels</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>in_channels</code></td>
-          <td class="doc-param-details">
-            <p>Number of input channels</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>out_channels</code></td>
-          <td class="doc-param-details">
-            <p>Number of output channels</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>repeat</code></td>
-          <td class="doc-param-details">
-            <p>Repetitions inside block.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>5</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>kernel_size</code></td>
-          <td class="doc-param-details">
-            <p>Kernel size.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="torch.nn.common_types._size_1_t">_size_1_t</span></code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>(11,)</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>stride</code></td>
-          <td class="doc-param-details">
-            <p>Stride of each repetition.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="torch.nn.common_types._size_1_t">_size_1_t</span></code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>(1,)</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>dilation</code></td>
-          <td class="doc-param-details">
-            <p>Dilation of each repetition.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="torch.nn.common_types._size_1_t">_size_1_t</span></code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>(1,)</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>dropout</code></td>
-          <td class="doc-param-details">
-            <p>Dropout used before each activation.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>float</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>0.0</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>residual</code></td>
-          <td class="doc-param-details">
-            <p>Controls the use of residual connection.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>bool</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>True</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>separable</code></td>
-          <td class="doc-param-details">
-            <p>Controls the use of separable convolutions.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>bool</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>False</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+      <tr>
+        <td><code>out_channels</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of output channels</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>repeat</code></td>
+        <td><code>int</code></td>
+        <td><p>Repetitions inside block.</p></td>
+        <td><code>5</code></td>
+      </tr>
+      <tr>
+        <td><code>kernel_size</code></td>
+        <td><code>Union[int, Tuple[int]]</code></td>
+        <td><p>Kernel size.</p></td>
+        <td><code>(11,)</code></td>
+      </tr>
+      <tr>
+        <td><code>stride</code></td>
+        <td><code>Union[int, Tuple[int]]</code></td>
+        <td><p>Stride of each repetition.</p></td>
+        <td><code>(1,)</code></td>
+      </tr>
+      <tr>
+        <td><code>dilation</code></td>
+        <td><code>Union[int, Tuple[int]]</code></td>
+        <td><p>Dilation of each repetition.</p></td>
+        <td><code>(1,)</code></td>
+      </tr>
+      <tr>
+        <td><code>dropout</code></td>
+        <td><code>float</code></td>
+        <td><p>Dropout used before each activation.</p></td>
+        <td><code>0.0</code></td>
+      </tr>
+      <tr>
+        <td><code>residual</code></td>
+        <td><code>bool</code></td>
+        <td><p>Controls the use of residual connection.</p></td>
+        <td><code>True</code></td>
+      </tr>
+      <tr>
+        <td><code>separable</code></td>
+        <td><code>bool</code></td>
+        <td><p>Controls the use of separable convolutions.</p></td>
+        <td><code>False</code></td>
+      </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">out_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -2521,7 +1940,7 @@ dense residual used on Jasper is not supported here, and masked convolutions wer
         <span class="bp">self</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">mout</span> <span class="o">=</span> <span class="n">MultiSequential</span><span class="p">(</span><span class="o">*</span><span class="n">_get_act_dropout_layer</span><span class="p">(</span><span class="n">drop_prob</span><span class="o">=</span><span class="n">dropout</span><span class="p">))</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -2529,88 +1948,56 @@ dense residual used on Jasper is not supported here, and masked convolutions wer
 
 
 
-  <div class="doc doc-object doc-function">
+  <div class="doc doc-object doc-method">
 
 
 
 <h3 id="thunder.quartznet.blocks.QuartznetBlock.forward" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lengths</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lengths</span><span class="p">)</span></code>
 
 
 </h3>
 
-
     <div class="doc doc-contents ">
 
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>x</code></td>
+        <td><code>Tensor</code></td>
+        <td><p>Tensor of shape (batch, features, time) where #features == inplanes</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>x</code></td>
-          <td class="doc-param-details">
-            <p>Tensor of shape (batch, features, time) where #features == inplanes</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>torch.<span title="torch.Tensor">Tensor</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><span title="typing.Tuple">Tuple</span>[torch.<span title="torch.Tensor">Tensor</span>, torch.<span title="torch.Tensor">Tensor</span>]</code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>Result of applying the block on the input, and corresponding output lengths</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Tuple[torch.Tensor, torch.Tensor]</code></td>
+      <td><p>Result of applying the block on the input, and corresponding output lengths</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">lengths</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -2632,7 +2019,7 @@ dense residual used on Jasper is not supported here, and masked convolutions wer
     <span class="c1"># compute the output</span>
     <span class="n">out</span><span class="p">,</span> <span class="n">lengths_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mout</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">lengths_out</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">lengths_out</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -2661,131 +2048,66 @@ dense residual used on Jasper is not supported here, and masked convolutions wer
 
 </h2>
 
-
     <div class="doc doc-contents ">
 
       <p>Basic Quartznet encoder setup.
 Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (repeat_blocks=3)</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>feat_in</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of input features to the model.</p></td>
+        <td><code>64</code></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>feat_in</code></td>
-          <td class="doc-param-details">
-            <p>Number of input features to the model.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>64</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>filters</code></td>
-          <td class="doc-param-details">
-            <p>List of filter sizes used to create the encoder blocks.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="typing.List">List</span>[int]</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>[256, 256, 512, 512, 512]</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>kernel_sizes</code></td>
-          <td class="doc-param-details">
-            <p>List of kernel sizes corresponding to each filter size.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="typing.List">List</span>[int]</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>[33, 39, 51, 63, 75]</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>repeat_blocks</code></td>
-          <td class="doc-param-details">
-            <p>Number of repetitions of each block.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>1</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
       <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>filters</code></td>
+        <td><code>List[int]</code></td>
+        <td><p>List of filter sizes used to create the encoder blocks.</p></td>
+        <td><code>[256, 256, 512, 512, 512]</code></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><span title="torch.nn">nn</span>.<span title="torch.nn.Module">Module</span></code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>Pytorch model corresponding to the encoder.</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+      <tr>
+        <td><code>kernel_sizes</code></td>
+        <td><code>List[int]</code></td>
+        <td><p>List of kernel sizes corresponding to each filter size.</p></td>
+        <td><code>[33, 39, 51, 63, 75]</code></td>
+      </tr>
+      <tr>
+        <td><code>repeat_blocks</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of repetitions of each block.</p></td>
+        <td><code>1</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Module</code></td>
+      <td><p>Pytorch model corresponding to the encoder.</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">QuartznetEncoder</span><span class="p">(</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">QuartznetEncoder</span><span class="p">(</span>
     <span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
     <span class="n">filters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span>
     <span class="n">kernel_sizes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span>
@@ -2806,13 +2128,11 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
         <span class="n">stem</span><span class="p">(</span><span class="n">feat_in</span><span class="p">),</span>
         <span class="o">*</span><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="p">),</span>
     <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
   </div>
-
-
 
 
 
@@ -2826,121 +2146,59 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
 
 </h2>
 
-
     <div class="doc doc-contents ">
 
       <p>Creates the body of the Quartznet model. That is the middle part.</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>filters</code></td>
+        <td><code>List[int]</code></td>
+        <td><p>List of filters inside each block in the body.</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>filters</code></td>
-          <td class="doc-param-details">
-            <p>List of filters inside each block in the body.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="typing.List">List</span>[int]</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>kernel_size</code></td>
-          <td class="doc-param-details">
-            <p>Corresponding list of kernel sizes for each block. Should have the same length as the first argument.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="typing.List">List</span>[int]</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>repeat_blocks</code></td>
-          <td class="doc-param-details">
-            <p>Number of repetitions of each block inside the body.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>1</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
       <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>kernel_size</code></td>
+        <td><code>List[int]</code></td>
+        <td><p>Corresponding list of kernel sizes for each block. Should have the same length as the first argument.</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="thunder.quartznet.blocks.QuartznetBlock" href="#thunder.quartznet.blocks.QuartznetBlock">QuartznetBlock</a>]</code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>List of layers that form the body of the network.</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+      <tr>
+        <td><code>repeat_blocks</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of repetitions of each block inside the body.</p></td>
+        <td><code>1</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>List[thunder.quartznet.blocks.QuartznetBlock]</code></td>
+      <td><p>List of layers that form the body of the network.</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">body</span><span class="p">(</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">body</span><span class="p">(</span>
     <span class="n">filters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">kernel_size</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">repeat_blocks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">QuartznetBlock</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Creates the body of the Quartznet model. That is the middle part.</span>
@@ -2976,7 +2234,7 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
         <span class="p">]</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">layers</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -2989,111 +2247,59 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
 
 
 <h2 id="thunder.quartznet.blocks.init_weights" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">init_weights</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">InitMode</span><span class="o">.</span><span class="n">xavier_uniform</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">init_weights</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">mode</span><span class="o">=&lt;</span><span class="n">InitMode</span><span class="o">.</span><span class="n">xavier_uniform</span><span class="p">:</span> <span class="s1">&#39;xavier_uniform&#39;</span><span class="o">&gt;</span><span class="p">)</span></code>
 
 
 </h2>
-
 
     <div class="doc doc-contents ">
 
       <p>Initialize Linear, Conv1d or BatchNorm1d weights.
 There's no return, the operation occurs inplace.</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>m</code></td>
+        <td><code>Module</code></td>
+        <td><p>The layer to be initialized</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>m</code></td>
-          <td class="doc-param-details">
-            <p>The layer to be initialized</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="torch.nn">nn</span>.<span title="torch.nn.Module">Module</span></code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>mode</code></td>
-          <td class="doc-param-details">
-            <p>Weight initialization mode. Only applicable to linear and conv layers.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><a class="autorefs autorefs-internal" title="thunder.quartznet.blocks.InitMode" href="#thunder.quartznet.blocks.InitMode">InitMode</a></code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>InitMode.xavier_uniform</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
       <tr>
-        <th><b>RAISES</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>mode</code></td>
+        <td><code>InitMode</code></td>
+        <td><p>Weight initialization mode. Only applicable to linear and conv layers.</p></td>
+        <td><code>&lt;InitMode.xavier_uniform: &#39;xavier_uniform&#39;&gt;</code></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-            <span class="doc-raises-annotation">
-                <code>ValueError</code>
-            </span>
-          </td>
-          <td class="doc-raises-details">
-            <p>Raised when the initial mode is not one of the possible options.</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>ValueError</code></td>
+        <td><p>Raised when the initial mode is not one of the possible options.</p></td>
+      </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">init_weights</span><span class="p">(</span><span class="n">m</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="n">InitMode</span> <span class="o">=</span> <span class="n">InitMode</span><span class="o">.</span><span class="n">xavier_uniform</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_weights</span><span class="p">(</span><span class="n">m</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="n">InitMode</span> <span class="o">=</span> <span class="n">InitMode</span><span class="o">.</span><span class="n">xavier_uniform</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize Linear, Conv1d or BatchNorm1d weights.</span>
 <span class="sd">    There&#39;s no return, the operation occurs inplace.</span>
 
@@ -3125,7 +2331,7 @@ There's no return, the operation occurs inplace.</p>
         <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">affine</span><span class="p">:</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">ones_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -3143,75 +2349,47 @@ There's no return, the operation occurs inplace.</p>
 
 </h2>
 
-
     <div class="doc doc-contents ">
 
       <p>Creates the Quartznet stem. That is the first block of the model, that process the input directly.</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>feat_in</code></td>
+        <td><code>int</code></td>
+        <td><p>Number of input features</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>feat_in</code></td>
-          <td class="doc-param-details">
-            <p>Number of input features</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>int</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><a class="autorefs autorefs-internal" title="thunder.quartznet.blocks.QuartznetBlock" href="#thunder.quartznet.blocks.QuartznetBlock">QuartznetBlock</a></code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>Quartznet stem block</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>QuartznetBlock</code></td>
+      <td><p>Quartznet stem block</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">stem</span><span class="p">(</span><span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuartznetBlock</span><span class="p">:</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">stem</span><span class="p">(</span><span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuartznetBlock</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Creates the Quartznet stem. That is the first block of the model, that process the input directly.</span>
 
 <span class="sd">    Args:</span>
@@ -3229,11 +2407,12 @@ There's no return, the operation occurs inplace.</p>
         <span class="n">residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">separable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
   </div>
+
 
 
 
@@ -3311,10 +2490,10 @@ There's no return, the operation occurs inplace.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.85cb4492.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.a877e258.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
       
     
   </body>

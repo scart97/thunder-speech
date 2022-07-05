@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.6">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
     
     
       
@@ -17,7 +17,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.4a0965b7.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.1d29e8d0.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.cbb835fc.min.css">
@@ -919,41 +919,27 @@
 
 
 <h2 id="thunder.citrinet.compatibility.CitrinetCheckpoint" class="doc doc-heading">
-          <code>CitrinetCheckpoint</code>
+        <code>
+CitrinetCheckpoint            (<a class="autorefs autorefs-internal" title="thunder.utils.BaseCheckpoint" href="../../utils/#thunder.utils.BaseCheckpoint">BaseCheckpoint</a>)
+        </code>
 
 
 
 </h2>
 
-
     <div class="doc doc-contents ">
-        <p class="doc doc-class-bases">
-          Bases: <code><a class="autorefs autorefs-internal" title="thunder.utils.BaseCheckpoint" href="../../utils/#thunder.utils.BaseCheckpoint">BaseCheckpoint</a></code></p>
 
-
-
-<details class="note">
-  <summary>Note</summary>
-  <p>Possible values are <code>stt_en_citrinet_256</code>,<code>stt_en_citrinet_512</code>,<code>stt_en_citrinet_1024</code>, <code>stt_es_citrinet_512</code></p>
-</details>      <p>Trained model weight checkpoints.
+      <p>Trained model weight checkpoints.
 Used by <a class="autorefs autorefs-internal" href="../../utils/#thunder.utils.download_checkpoint"><code>download_checkpoint</code></a> and
 <a class="autorefs autorefs-internal" href="#thunder.citrinet.compatibility.load_citrinet_checkpoint"><code>load_citrinet_checkpoint</code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Possible values are <code>stt_en_citrinet_256</code>,<code>stt_en_citrinet_512</code>,<code>stt_en_citrinet_1024</code>, <code>stt_es_citrinet_512</code></p>
+</div>
 
-
-          <details class="quote">
-            <summary>Source code in <code>thunder/citrinet/compatibility.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CitrinetCheckpoint</span><span class="p">(</span><span class="n">BaseCheckpoint</span><span class="p">):</span>
+        <details class="quote">
+          <summary>Source code in <code>thunder/citrinet/compatibility.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CitrinetCheckpoint</span><span class="p">(</span><span class="n">BaseCheckpoint</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Trained model weight checkpoints.</span>
 <span class="sd">    Used by [`download_checkpoint`][thunder.utils.download_checkpoint] and</span>
 <span class="sd">    [`load_citrinet_checkpoint`][thunder.citrinet.compatibility.load_citrinet_checkpoint].</span>
@@ -965,12 +951,13 @@ Used by <a class="autorefs autorefs-internal" href="../../utils/#thunder.utils.d
     <span class="n">stt_en_citrinet_512</span> <span class="o">=</span> <span class="s2">&quot;https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_en_citrinet_512/versions/1.0.0rc1/files/stt_en_citrinet_512.nemo&quot;</span>
     <span class="n">stt_en_citrinet_1024</span> <span class="o">=</span> <span class="s2">&quot;https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_en_citrinet_1024/versions/1.0.0rc1/files/stt_en_citrinet_1024.nemo&quot;</span>
     <span class="n">stt_es_citrinet_512</span> <span class="o">=</span> <span class="s2">&quot;https://api.ngc.nvidia.com/v2/models/nvidia/nemo/stt_es_citrinet_512/versions/1.0.0/files/stt_es_citrinet_512.nemo&quot;</span>
-</code></pre></div></td></tr></table></div>
-          </details>
+</code></pre></div>
+        </details>
 
 
 
   <div class="doc doc-children">
+
 
 
 
@@ -1004,75 +991,48 @@ Used by <a class="autorefs autorefs-internal" href="../../utils/#thunder.utils.d
 
 </h2>
 
-
     <div class="doc doc-contents ">
 
       <p>Transform the nemo vocab tokens back to the sentencepiece sytle
 with the _ prefix</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>vocab_tokens</code></td>
+        <td><code>List[str]</code></td>
+        <td><p>List of tokens in the vocabulary</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>vocab_tokens</code></td>
-          <td class="doc-param-details">
-            <p>List of tokens in the vocabulary</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="typing.List">List</span>[str]</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
-      <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><span title="typing.List">List</span>[str]</code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>New list of tokens with the new prefix</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>List[str]</code></td>
+      <td><p>New list of tokens with the new prefix</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/citrinet/compatibility.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fix_vocab</span><span class="p">(</span><span class="n">vocab_tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fix_vocab</span><span class="p">(</span><span class="n">vocab_tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Transform the nemo vocab tokens back to the sentencepiece sytle</span>
 <span class="sd">    with the _ prefix</span>
 
@@ -1089,7 +1049,7 @@ with the _ prefix</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">out_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;▁&quot;</span> <span class="o">+</span> <span class="n">token</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out_tokens</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -1107,113 +1067,53 @@ with the _ prefix</p>
 
 </h2>
 
-
     <div class="doc doc-contents ">
 
       <p>Load from the original nemo checkpoint.</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>checkpoint</code></td>
+        <td><code>Union[str, thunder.citrinet.compatibility.CitrinetCheckpoint]</code></td>
+        <td><p>Path to local .nemo file or checkpoint to be downloaded locally and lodaded.</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>checkpoint</code></td>
-          <td class="doc-param-details">
-            <p>Path to local .nemo file or checkpoint to be downloaded locally and lodaded.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="typing.Union">Union</span>[str, <a class="autorefs autorefs-internal" title="thunder.citrinet.compatibility.CitrinetCheckpoint" href="#thunder.citrinet.compatibility.CitrinetCheckpoint">CitrinetCheckpoint</a>]</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>save_folder</code></td>
-          <td class="doc-param-details">
-            <p>Path to save the checkpoint when downloading it. Ignored if you pass a .nemo file as the first argument.</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code>str</code>
-                </span>
-                <span class="doc-param-default">
-                  <b>DEFAULT:</b> 
-                    <code>None</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
       <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>save_folder</code></td>
+        <td><code>str</code></td>
+        <td><p>Path to save the checkpoint when downloading it. Ignored if you pass a .nemo file as the first argument.</p></td>
+        <td><code>None</code></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><a class="autorefs autorefs-internal" title="thunder.module.BaseCTCModule" href="../../module/#thunder.module.BaseCTCModule">BaseCTCModule</a></code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>The model loaded from the checkpoint</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseCTCModule</code></td>
+      <td><p>The model loaded from the checkpoint</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/citrinet/compatibility.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_citrinet_checkpoint</span><span class="p">(</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">load_citrinet_checkpoint</span><span class="p">(</span>
     <span class="n">checkpoint</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CitrinetCheckpoint</span><span class="p">],</span> <span class="n">save_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseCTCModule</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load from the original nemo checkpoint.</span>
@@ -1253,7 +1153,7 @@ with the _ prefix</p>
             <span class="n">encoder_final_dimension</span><span class="o">=</span><span class="mi">640</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">module</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
@@ -1271,122 +1171,54 @@ with the _ prefix</p>
 
 </h2>
 
-
     <div class="doc doc-contents ">
 
       <p>Read the important parameters from the config stored inside the .nemo
 checkpoint.</p>
 
-  <table>
-    <thead>
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
       <tr>
-        <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>config_path</code></td>
+        <td><code>Union[str, pathlib.Path]</code></td>
+        <td><p>Path to the .yaml file, usually called model_config.yaml</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>config_path</code></td>
-          <td class="doc-param-details">
-            <p>Path to the .yaml file, usually called model_config.yaml</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td><code>sentencepiece_path</code></td>
-          <td class="doc-param-details">
-            <p>Path to the sentencepiece model used to tokenize, usually called tokenizer.model</p>
-            <p>
-                <span class="doc-param-annotation">
-                  <b>TYPE:</b>
-                    <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
-                </span>
-            </p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead>
       <tr>
-        <th><b>RETURNS</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <td><code>sentencepiece_path</code></td>
+        <td><code>Union[str, pathlib.Path]</code></td>
+        <td><p>Path to the sentencepiece model used to tokenize, usually called tokenizer.model</p></td>
+        <td><em>required</em></td>
       </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-              <span class="doc-returns-annotation">
-                  <code><span title="typing.Tuple">Tuple</span>[<span title="torch.nn">nn</span>.<span title="torch.nn.Module">Module</span>, <span title="torch.nn">nn</span>.<span title="torch.nn.Module">Module</span>, <a class="autorefs autorefs-internal" title="thunder.text_processing.transform.BatchTextTransformer" href="../../Text%20Processing/transform/#thunder.text_processing.transform.BatchTextTransformer">BatchTextTransformer</a>]</code>
-              </span>
-          </td>
-          <td class="doc-returns-details">
-            <p>A tuple containing, in this order, the encoder, the audio transform and the text transform</p>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Tuple[torch.nn.modules.module.Module, torch.nn.modules.module.Module, thunder.text_processing.transform.BatchTextTransformer]</code></td>
+      <td><p>A tuple containing, in this order, the encoder, the audio transform and the text transform</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>thunder/citrinet/compatibility.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span>
-<span class="normal">92</span>
-<span class="normal">93</span>
-<span class="normal">94</span>
-<span class="normal">95</span>
-<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_components_from_citrinet_config</span><span class="p">(</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">load_components_from_citrinet_config</span><span class="p">(</span>
     <span class="n">config_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">sentencepiece_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">BatchTextTransformer</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Read the important parameters from the config stored inside the .nemo</span>
@@ -1438,11 +1270,12 @@ checkpoint.</p>
         <span class="n">audio_transform</span><span class="p">,</span>
         <span class="n">text_transform</span><span class="p">,</span>
     <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
         </details>
     </div>
 
   </div>
+
 
 
 
@@ -1520,10 +1353,10 @@ checkpoint.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.85cb4492.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.a877e258.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
       
     
   </body>
