@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v3.1.3 (2022-07-05)
+### Fix
+* **blocks:** Assert normalize_tensor input is properly masked ([`0643122`](https://github.com/scart97/thunder-speech/commit/0643122a32b08d6b801f13a9f0a720083d75d1af))
+
+### Documentation
+* **mkdocstrings:** Revert to python-legacy handler ([`405a9ae`](https://github.com/scart97/thunder-speech/commit/405a9ae792c57ebdadb272f00e4fbe7032612207))
+
 ## v3.1.2 (2022-05-11)
 ### Fix
 * Transpose the output of huggingface encoders to be consistent with the convention used in the library ([`951307e`](https://github.com/scart97/thunder-speech/commit/951307e3a1479502700dedc22761eeb7b1fc44b2))
