@@ -40,8 +40,6 @@ def test_masked_feature_extractor():
     thunder_tfm = Wav2Vec2Preprocess(mask_input=True)
 
     input_tensor = torch.randn(3, 160000)
-    input_tensor[1, 100000:] = 0
-    input_tensor[2, 80000:] = 0
     original_lengths = torch.tensor([160000, 100000, 80000])
 
     original_result = _get_original_results(

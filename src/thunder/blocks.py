@@ -134,6 +134,8 @@ def normalize_tensor(
     """
     # Vectorized implementation of (x - x.mean()) / x.std() considering only the valid mask
     if mask is not None:
+        # Making sure the elements outside the mask are zero, to have the correct mean/std
+        input_values = torch.masked_fill(input_values, ~mask.type(torch.bool), 0.0)
         # Number of valid elements
         num_elements = mask.sum(dim=dim, keepdim=True).detach()
         # Mean is sum over number of elements
