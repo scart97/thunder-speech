@@ -71,27 +71,28 @@ class SpecAugment(nn.Module):
 
     @torch.no_grad()
     def forward(self, x):
-        sh = x.shape
+        if self.training:
+            sh = x.shape
 
-        if self.adaptive_temporal_width:
-            time_width = max(1, int(sh[2] * self.time_width))
-        else:
-            time_width = self.time_width
+            if self.adaptive_temporal_width:
+                time_width = max(1, int(sh[2] * self.time_width))
+            else:
+                time_width = self.time_width
 
-        for idx in range(sh[0]):
-            for i in range(self.freq_masks):
-                x_left = self._rng.randint(0, sh[1] - self.freq_width)
+            for idx in range(sh[0]):
+                for _ in range(self.freq_masks):
+                    x_left = self._rng.randint(0, sh[1] - self.freq_width)
 
-                w = self._rng.randint(1, self.freq_width)
+                    w = self._rng.randint(1, self.freq_width)
 
-                x[idx, x_left : x_left + w, :] = self.mask_value
+                    x[idx, x_left : x_left + w, :] = self.mask_value
 
-            for i in range(self.time_masks):
-                y_left = self._rng.randint(0, sh[2] - time_width)
+                for _ in range(self.time_masks):
+                    y_left = self._rng.randint(0, sh[2] - time_width)
 
-                w = self._rng.randint(1, time_width)
+                    w = self._rng.randint(1, time_width)
 
-                x[idx, :, y_left : y_left + w] = self.mask_value
+                    x[idx, :, y_left : y_left + w] = self.mask_value
 
         return x
 
@@ -118,15 +119,16 @@ class SpecCutout(nn.Module):
 
     @torch.no_grad()
     def forward(self, x):
-        sh = x.shape
+        if self.training:
+            sh = x.shape
 
-        for idx in range(sh[0]):
-            for i in range(self.rect_masks):
-                rect_x = self._rng.randint(0, sh[1] - self.rect_freq)
-                rect_y = self._rng.randint(0, sh[2] - self.rect_time)
+            for idx in range(sh[0]):
+                for _ in range(self.rect_masks):
+                    rect_x = self._rng.randint(0, sh[1] - self.rect_freq)
+                    rect_y = self._rng.randint(0, sh[2] - self.rect_time)
 
-                w_x = self._rng.randint(1, self.rect_time)
-                w_y = self._rng.randint(1, self.rect_freq)
-                x[idx, rect_x : rect_x + w_x, rect_y : rect_y + w_y] = 0.0
+                    w_x = self._rng.randint(1, self.rect_time)
+                    w_y = self._rng.randint(1, self.rect_freq)
+                    x[idx, rect_x : rect_x + w_x, rect_y : rect_y + w_y] = 0.0
 
         return x
