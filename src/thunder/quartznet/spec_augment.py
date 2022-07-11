@@ -82,14 +82,14 @@ class SpecAugment(nn.Module):
             for i in range(self.freq_masks):
                 x_left = self._rng.randint(0, sh[1] - self.freq_width)
 
-                w = self._rng.randint(0, self.freq_width)
+                w = self._rng.randint(1, self.freq_width)
 
                 x[idx, x_left : x_left + w, :] = self.mask_value
 
             for i in range(self.time_masks):
                 y_left = self._rng.randint(0, sh[2] - time_width)
 
-                w = self._rng.randint(0, time_width)
+                w = self._rng.randint(1, time_width)
 
                 x[idx, :, y_left : y_left + w] = self.mask_value
 
@@ -125,9 +125,8 @@ class SpecCutout(nn.Module):
                 rect_x = self._rng.randint(0, sh[1] - self.rect_freq)
                 rect_y = self._rng.randint(0, sh[2] - self.rect_time)
 
-                w_x = self._rng.randint(0, self.rect_time)
-                w_y = self._rng.randint(0, self.rect_freq)
-
+                w_x = self._rng.randint(1, self.rect_time)
+                w_y = self._rng.randint(1, self.rect_freq)
                 x[idx, rect_x : rect_x + w_x, rect_y : rect_y + w_y] = 0.0
 
         return x
