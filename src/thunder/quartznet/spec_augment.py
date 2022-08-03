@@ -45,14 +45,14 @@ class SpecAugment(nn.Module):
         self.freq_width = freq_width
         self.time_width = time_width
 
-    @torch.no_grad()
     def forward(self, x):
         if self.training:
-            for _ in range(self.time_masks):
-                x = mask_along_axis(x, self.time_width, 0.0, 2)
+            with torch.no_grad():
+                for _ in range(self.time_masks):
+                    x = mask_along_axis(x, self.time_width, 0.0, 2)
 
-            for _ in range(self.freq_masks):
-                x = mask_along_axis(x, self.freq_width, 0.0, 1)
+                for _ in range(self.freq_masks):
+                    x = mask_along_axis(x, self.freq_width, 0.0, 1)
 
         return x
 

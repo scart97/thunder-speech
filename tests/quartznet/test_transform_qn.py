@@ -16,6 +16,7 @@ from tests.utils import (
     mark_slow,
     requirescuda,
 )
+from thunder.quartznet.spec_augment import SpecAugment
 from thunder.quartznet.transform import (
     DitherAudio,
     FeatureBatchNormalizer,
@@ -320,3 +321,64 @@ def test_filterbank_script(**kwargs):
     out2, lens2 = fb_script(x, lens)
     assert torch.allclose(out1, out2, atol=1e-3)
     assert torch.allclose(lens1, lens2)
+
+
+def test_specaugment_freq():
+    sa = SpecAugment(freq_masks=5)
+    x = torch.ones((1, 100, 100))
+    out = sa(x)
+    idx = torch.argwhere(out[0] == 0.0)
+    # All of the masks are complete
+    assert len(idx) % 100 == 0
+    # Have the full sequence 0-99 for every mask
+    assert idx[:, 1].sum() % 4950 == 0
+
+
+def test_specaugment_time():
+    sa = SpecAugment(time_masks=5)
+    x = torch.ones((1, 100, 100))
+    out = sa(x)
+    idx = torch.argwhere(out[0] == 0.0)
+    # All of the masks are complete
+    assert len(idx) % 100 == 0
+    # Have the full sequence 0-99 for every mask
+    assert idx[:, 0].sum() % 4950 == 0
+
+
+specaugment_params = given(
+    time_masks=integers(0, 50),
+    freq_masks=integers(0, 50),
+    time_width=integers(0, 50),
+    freq_width=integers(0, 50),
+)
+
+
+@specaugment_params
+def test_specaugment_shape(**kwargs):
+    sa = SpecAugment(**kwargs)
+    x = torch.ones((1, 100, 100))
+    out = sa(x)
+    assert out.shape[0] == x.shape[0]
+
+
+@requirescuda
+@specaugment_params
+@settings(deadline=None, max_examples=10)
+def test_specaugment_device_move(**kwargs):
+    sa = SpecAugment(**kwargs)
+    x = torch.ones((1, 100, 100))
+    _test_device_move(sa, x)
+
+
+@specaugment_params
+@settings(deadline=None, max_examples=10)
+def test_specaugment_script(**kwargs):
+    sa = SpecAugment(**kwargs)
+    sa.eval()
+    x = torch.ones((1, 100, 100))
+
+    sa_script = torch.jit.script(sa)
+
+    out1 = sa(x)
+    out2 = sa_script(x)
+    assert torch.allclose(out1, out2, atol=1e-3)
