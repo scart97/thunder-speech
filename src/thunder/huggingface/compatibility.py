@@ -88,7 +88,7 @@ def load_huggingface_checkpoint(
         )
         if hasattr(model, "lm_head"):
             decoder[2].load_state_dict(model.lm_head.state_dict())
-    except OSError:
+    except (OSError, KeyError):
         warn(
             UserWarning(
                 "Huggingface model is missing the tokenizer! decoder and text_transform were not initialized"

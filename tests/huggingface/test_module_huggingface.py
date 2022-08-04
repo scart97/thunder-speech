@@ -101,3 +101,9 @@ def test_quantized_script_module(wav2vec_base):
 def test_pretrained_without_vocab():
     with pytest.warns(UserWarning, match="missing"):
         load_pretrained("facebook/wav2vec2-base-100k-voxpopuli")
+
+
+@mark_slow
+def test_data2vec():
+    with pytest.warns(UserWarning, match="missing"):
+        load_pretrained("facebook/data2vec-audio-base")
