@@ -15,7 +15,7 @@ __all__ = [
 
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Tuple, Union
+from typing import Tuple, TypedDict, Union
 
 import torch
 from omegaconf import OmegaConf
@@ -59,8 +59,18 @@ class QuartznetCheckpoint(BaseCheckpoint):
 # fmt:on
 
 
+class AugmentParams(TypedDict, total=False):
+    num_cutout_masks: int
+    num_time_masks: int
+    num_freq_masks: int
+    mask_time_width: int
+    mask_freq_width: int
+    dropout: float
+
+
 def load_components_from_quartznet_config(
-    config_path: Union[str, Path]
+    config_path: Union[str, Path],
+    augment_params: AugmentParams = None,
 ) -> Tuple[nn.Module, nn.Module, BatchTextTransformer]:
     """Read the important parameters from the config stored inside the .nemo
     checkpoint.
@@ -71,6 +81,7 @@ def load_components_from_quartznet_config(
     Returns:
         A tuple containing, in this order, the encoder, the audio transform and the text transform
     """
+    augment_params = augment_params or {}
     conf = OmegaConf.load(config_path)
     encoder_params = conf["encoder"]["params"]
     quartznet_conf = OmegaConf.to_container(encoder_params["jasper"])
@@ -82,6 +93,7 @@ def load_components_from_quartznet_config(
     encoder_cfg = {
         "filters": filters,
         "kernel_sizes": kernel_sizes,
+        "dropout": augment_params.pop("dropout", 0.0),
     }
     preprocess = conf["preprocessor"]["params"]
 
@@ -92,6 +104,7 @@ def load_components_from_quartznet_config(
         "n_fft": preprocess["n_fft"],
         "nfilt": preprocess["features"],
         "dither": preprocess["dither"],
+        **augment_params,
     }
 
     labels = (
@@ -146,7 +159,9 @@ def load_quartznet_weights(encoder: nn.Module, decoder: nn.Module, weights_path:
 
 
 def load_quartznet_checkpoint(
-    checkpoint: Union[str, QuartznetCheckpoint], save_folder: str = None
+    checkpoint: Union[str, QuartznetCheckpoint],
+    save_folder: str = None,
+    augment_params: AugmentParams = None,
 ) -> BaseCTCModule:
     """Load from the original nemo checkpoint.
 
@@ -170,7 +185,7 @@ def load_quartznet_checkpoint(
             encoder,
             audio_transform,
             text_transform,
-        ) = load_components_from_quartznet_config(config_path)
+        ) = load_components_from_quartznet_config(config_path, augment_params)
 
         decoder = conv1d_decoder(1024, text_transform.num_tokens)
 
