@@ -16,6 +16,7 @@
 
 import torch
 import torch.nn as nn
+from torch import Tensor
 from torchaudio.functional import mask_along_axis
 
 
@@ -57,7 +58,7 @@ class SpecAugment(nn.Module):
         return x
 
 
-def _create_mask(specgram, mask_param, axis):
+def _create_mask(specgram: Tensor, mask_param: int, axis: int):
     # modified from mask_along_axis in torchaudio
     # source: https://github.com/pytorch/audio/blob/54eb0991fae635c6586f7f1d6bf6080128fbff11/torchaudio/functional/functional.py#L870
     value = torch.rand(1) * mask_param
@@ -85,17 +86,17 @@ class SpecCutout(nn.Module):
     time_width - maximum size of cut rectangles along the time dimension
     """
 
-    def __init__(self, rect_masks=0, time_width=5, freq_width=20):
+    def __init__(self, rect_masks: int = 0, time_width: int = 5, freq_width: int = 20):
         super().__init__()
         self.rect_masks = rect_masks
         self.time_width = time_width
         self.freq_width = freq_width
 
-    @torch.no_grad()
     def forward(self, x):
         if self.training:
-            for _ in range(self.rect_masks):
-                freq_mask = _create_mask(x, self.freq_width, 1)
-                time_mask = _create_mask(x, self.freq_width, 2)
-                x = x.masked_fill(freq_mask & time_mask, 0.0)
+            with torch.no_grad():
+                for _ in range(self.rect_masks):
+                    freq_mask = _create_mask(x, self.freq_width, 1)
+                    time_mask = _create_mask(x, self.freq_width, 2)
+                    x = x.masked_fill(freq_mask & time_mask, 0.0)
         return x

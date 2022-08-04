@@ -16,7 +16,7 @@ from tests.utils import (
     mark_slow,
     requirescuda,
 )
-from thunder.quartznet.spec_augment import SpecAugment
+from thunder.quartznet.spec_augment import SpecAugment, SpecCutout
 from thunder.quartznet.transform import (
     DitherAudio,
     FeatureBatchNormalizer,
@@ -381,4 +381,53 @@ def test_specaugment_script(**kwargs):
 
     out1 = sa(x)
     out2 = sa_script(x)
+    assert torch.allclose(out1, out2, atol=1e-3)
+
+
+def test_speccutout():
+    sc = SpecCutout(rect_masks=5)
+    x = torch.ones((1, 100, 100))
+    out = sc(x)
+    idx = torch.argwhere(out[0] == 0.0)
+    # The masks are not complete
+    assert len(idx) % 100 != 0
+    # Doesn't have the full sequence 0-99 for every mask
+    assert idx[:, 1].sum() % 4950 != 0
+
+
+speccutout_params = given(
+    rect_masks=integers(0, 50),
+    time_width=integers(0, 50),
+    freq_width=integers(0, 50),
+)
+
+
+@speccutout_params
+def test_speccutout_shape(**kwargs):
+    sc = SpecCutout(**kwargs)
+    x = torch.ones((1, 100, 100))
+    out = sc(x)
+    assert out.shape[0] == x.shape[0]
+
+
+@requirescuda
+@speccutout_params
+@settings(deadline=None, max_examples=10)
+def test_speccutout_device_move(**kwargs):
+    sc = SpecCutout(**kwargs)
+    x = torch.ones((1, 100, 100))
+    _test_device_move(sc, x)
+
+
+@speccutout_params
+@settings(deadline=None, max_examples=10)
+def test_speccutout_script(**kwargs):
+    sc = SpecCutout(**kwargs)
+    sc.eval()
+    x = torch.ones((1, 100, 100))
+
+    sc_script = torch.jit.script(sc)
+
+    out1 = sc(x)
+    out2 = sc_script(x)
     assert torch.allclose(out1, out2, atol=1e-3)
