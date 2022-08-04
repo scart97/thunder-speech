@@ -65,6 +65,7 @@ from thunder.blocks import (
     lengths_to_mask,
     normalize_tensor,
 )
+from thunder.quartznet.spec_augment import SpecAugment, SpecCutout
 
 
 class FeatureBatchNormalizer(nn.Module):
@@ -262,6 +263,11 @@ def FilterbankFeatures(
     preemph: float = 0.97,
     nfilt: int = 64,
     dither: float = 1e-5,
+    num_cutout_masks: int = 0,
+    num_time_masks: int = 0,
+    num_freq_masks: int = 0,
+    mask_time_width: int = 50,
+    mask_freq_width: int = 20,
 ) -> nn.Module:
     """Creates the Filterbank features used in the Quartznet model.
 
@@ -276,7 +282,10 @@ def FilterbankFeatures(
     Returns:
         Module that computes the features based on raw audio tensor.
     """
-    return MultiSequential(
+    if num_cutout_masks > 0 and (num_freq_masks + num_time_masks > 0):
+        raise ValueError("Cutout and SpecAugment can't be used at the same time.")
+
+    base_modules = [
         Masked(DitherAudio(dither=dither), PreEmphasisFilter(preemph=preemph)),
         PowerSpectrum(
             n_window_size=n_window_size,
@@ -285,7 +294,31 @@ def FilterbankFeatures(
         ),
         Masked(MelScale(sample_rate=sample_rate, n_fft=n_fft, nfilt=nfilt)),
         FeatureBatchNormalizer(),
-    )
+    ]
+
+    if num_cutout_masks > 0:
+        base_modules.append(
+            Masked(
+                SpecCutout(
+                    rect_masks=num_cutout_masks,
+                    time_width=mask_time_width,
+                    freq_width=mask_freq_width,
+                )
+            )
+        )
+    if num_freq_masks + num_time_masks > 0:
+        base_modules.append(
+            Masked(
+                SpecAugment(
+                    time_masks=num_time_masks,
+                    freq_masks=num_freq_masks,
+                    time_width=mask_time_width,
+                    freq_width=mask_freq_width,
+                )
+            )
+        )
+
+    return MultiSequential(*base_modules)
 
 
 def patch_stft(filterbank: nn.Module) -> nn.Module:
