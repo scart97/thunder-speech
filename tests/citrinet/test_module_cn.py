@@ -39,7 +39,11 @@ def test_dev_run_train(sample_manifest):
         num_workers=0,
     )
     trainer = pl.Trainer(
-        fast_dev_run=True, logger=False, enable_checkpointing=False, gpus=-1
+        fast_dev_run=True,
+        logger=False,
+        enable_checkpointing=False,
+        accelerator="gpu",
+        devices=-1,
     )
     trainer.fit(module, datamodule=data)
 
@@ -50,7 +54,7 @@ def test_script_module():
         module = load_pretrained("stt_en_citrinet_256")
     except HTTPError:
         return
-    module_script = torch.jit.script(module)
+    module_script = module.to_torchscript()
     x = torch.randn(10, 1337)
     out1 = module.predict(x)[0]
     out2 = module_script.predict(x)[0]

@@ -359,7 +359,10 @@ def stem(feat_in: int) -> QuartznetBlock:
 
 
 def body(
-    filters: List[int], kernel_size: List[int], repeat_blocks: int = 1
+    filters: List[int],
+    kernel_size: List[int],
+    repeat_blocks: int = 1,
+    dropout: float = 0.0,
 ) -> List[QuartznetBlock]:
     """Creates the body of the Quartznet model. That is the middle part.
 
@@ -375,7 +378,11 @@ def body(
     f_in = 256
     for f, k in zip(filters, kernel_size):
         for _ in range(repeat_blocks):
-            layers.append(QuartznetBlock(f_in, f, kernel_size=(k,), separable=True))
+            layers.append(
+                QuartznetBlock(
+                    f_in, f, kernel_size=(k,), separable=True, dropout=dropout
+                )
+            )
             f_in = f
     layers.extend(
         [
@@ -387,9 +394,16 @@ def body(
                 kernel_size=(87,),
                 residual=False,
                 separable=True,
+                dropout=dropout,
             ),
             QuartznetBlock(
-                512, 1024, repeat=1, kernel_size=(1,), residual=False, separable=False
+                512,
+                1024,
+                repeat=1,
+                kernel_size=(1,),
+                residual=False,
+                separable=False,
+                dropout=dropout,
             ),
         ]
     )
@@ -401,6 +415,7 @@ def QuartznetEncoder(
     filters: List[int] = [256, 256, 512, 512, 512],
     kernel_sizes: List[int] = [33, 39, 51, 63, 75],
     repeat_blocks: int = 1,
+    dropout: float = 0.0,
 ) -> nn.Module:
     """Basic Quartznet encoder setup.
     Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (repeat_blocks=3)
@@ -415,5 +430,5 @@ def QuartznetEncoder(
     """
     return MultiSequential(
         stem(feat_in),
-        *body(filters, kernel_sizes, repeat_blocks),
+        *body(filters, kernel_sizes, repeat_blocks, dropout),
     )

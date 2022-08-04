@@ -37,7 +37,11 @@ def test_dev_run_train(sample_manifest):
         num_workers=0,
     )
     trainer = pl.Trainer(
-        fast_dev_run=True, logger=False, enable_checkpointing=False, gpus=-1
+        fast_dev_run=True,
+        logger=False,
+        enable_checkpointing=False,
+        accelerator="gpu",
+        devices=-1,
     )
     trainer.fit(module, datamodule=data)
 
@@ -71,7 +75,8 @@ def test_special_scheduler_args(sample_manifest):
         max_epochs=3,
         logger=False,
         enable_checkpointing=False,
-        gpus=-1,
+        accelerator="gpu",
+        devices=-1,
     )
     trainer.fit(module, datamodule=data)
 

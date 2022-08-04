@@ -220,6 +220,7 @@ def body(
     filters: List[int],
     kernel_size: List[int],
     strides: List[int],
+    dropout: float = 0.0,
 ) -> List[CitrinetBlock]:
     """Creates the body of the Citrinet model. That is the middle part.
 
@@ -235,7 +236,9 @@ def body(
     f_in = 256
     for f, k, s in zip(filters, kernel_size, strides):
         layers.append(
-            CitrinetBlock(f_in, f, kernel_size=(k,), stride=(s,), separable=True)
+            CitrinetBlock(
+                f_in, f, kernel_size=(k,), stride=(s,), separable=True, dropout=dropout
+            )
         )
         f_in = f
     layers.append(
@@ -246,13 +249,18 @@ def body(
             kernel_size=(41,),
             residual=False,
             separable=True,
+            dropout=dropout,
         )
     )
     return layers
 
 
 def CitrinetEncoder(
-    filters: List[int], kernel_sizes: List[int], strides: List[int], feat_in: int = 80
+    filters: List[int],
+    kernel_sizes: List[int],
+    strides: List[int],
+    feat_in: int = 80,
+    dropout: float = 0.0,
 ) -> nn.Module:
     """Basic Citrinet encoder setup.
 
@@ -266,5 +274,5 @@ def CitrinetEncoder(
     """
     return MultiSequential(
         stem(feat_in),
-        *body(filters, kernel_sizes, strides),
+        *body(filters, kernel_sizes, strides, dropout),
     )

@@ -11,7 +11,7 @@ __all__ = ["CitrinetCheckpoint", "load_components_from_citrinet_config", "fix_vo
 
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List, Tuple, Union
+from typing import List, Tuple, TypedDict, Union
 
 from omegaconf import OmegaConf
 from torch import nn
@@ -42,8 +42,19 @@ class CitrinetCheckpoint(BaseCheckpoint):
 # fmt:on
 
 
+class AugmentParams(TypedDict, total=False):
+    num_cutout_masks: int
+    num_time_masks: int
+    num_freq_masks: int
+    mask_time_width: int
+    mask_freq_width: int
+    dropout: float
+
+
 def load_components_from_citrinet_config(
-    config_path: Union[str, Path], sentencepiece_path: Union[str, Path]
+    config_path: Union[str, Path],
+    sentencepiece_path: Union[str, Path],
+    augment_params: AugmentParams = None,
 ) -> Tuple[nn.Module, nn.Module, BatchTextTransformer]:
     """Read the important parameters from the config stored inside the .nemo
     checkpoint.
@@ -55,6 +66,8 @@ def load_components_from_citrinet_config(
     Returns:
         A tuple containing, in this order, the encoder, the audio transform and the text transform
     """
+    augment_params = augment_params or {}
+
     conf = OmegaConf.load(config_path)
     encoder_params = conf["encoder"]
     quartznet_conf = OmegaConf.to_container(encoder_params["jasper"])
@@ -68,6 +81,7 @@ def load_components_from_citrinet_config(
         "filters": filters,
         "kernel_sizes": kernel_sizes,
         "strides": strides,
+        "dropout": augment_params.pop("dropout", 0.0),
     }
     preprocess = conf["preprocessor"]
 
@@ -78,6 +92,7 @@ def load_components_from_citrinet_config(
         "n_fft": preprocess["n_fft"],
         "nfilt": preprocess["features"],
         "dither": preprocess["dither"],
+        **augment_params,
     }
 
     labels = conf["labels"] if "labels" in conf else conf["decoder"]["vocabulary"]
@@ -116,7 +131,9 @@ def fix_vocab(vocab_tokens: List[str]) -> List[str]:
 
 
 def load_citrinet_checkpoint(
-    checkpoint: Union[str, CitrinetCheckpoint], save_folder: str = None
+    checkpoint: Union[str, CitrinetCheckpoint],
+    save_folder: str = None,
+    augment_params: AugmentParams = None,
 ) -> BaseCTCModule:
     """Load from the original nemo checkpoint.
 
@@ -141,7 +158,9 @@ def load_citrinet_checkpoint(
             encoder,
             audio_transform,
             text_transform,
-        ) = load_components_from_citrinet_config(config_path, sentencepiece_path)
+        ) = load_components_from_citrinet_config(
+            config_path, sentencepiece_path, augment_params
+        )
 
         decoder = conv1d_decoder(640, num_classes=text_transform.num_tokens)
 
