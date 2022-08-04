@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
     
     
       
@@ -2203,7 +2203,7 @@ low frequency. It applies a FIR filter of the form:</p>
 
 
 <h2 id="thunder.quartznet.transform.FilterbankFeatures" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">FilterbankFeatures</span><span class="p">(</span><span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="n">n_window_size</span><span class="o">=</span><span class="mi">320</span><span class="p">,</span> <span class="n">n_window_stride</span><span class="o">=</span><span class="mi">160</span><span class="p">,</span> <span class="n">n_fft</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">preemph</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span> <span class="n">nfilt</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">dither</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">FilterbankFeatures</span><span class="p">(</span><span class="n">sample_rate</span><span class="o">=</span><span class="mi">16000</span><span class="p">,</span> <span class="n">n_window_size</span><span class="o">=</span><span class="mi">320</span><span class="p">,</span> <span class="n">n_window_stride</span><span class="o">=</span><span class="mi">160</span><span class="p">,</span> <span class="n">n_fft</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">preemph</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span> <span class="n">nfilt</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">dither</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">num_cutout_masks</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_time_masks</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_freq_masks</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mask_time_width</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">mask_freq_width</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span></code>
 
 
 </h2>
@@ -2292,6 +2292,11 @@ low frequency. It applies a FIR filter of the form:</p>
     <span class="n">preemph</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.97</span><span class="p">,</span>
     <span class="n">nfilt</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
     <span class="n">dither</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span>
+    <span class="n">num_cutout_masks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">num_time_masks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">num_freq_masks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">mask_time_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="n">mask_freq_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Creates the Filterbank features used in the Quartznet model.</span>
 
@@ -2306,7 +2311,10 @@ low frequency. It applies a FIR filter of the form:</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        Module that computes the features based on raw audio tensor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">MultiSequential</span><span class="p">(</span>
+    <span class="k">if</span> <span class="n">num_cutout_masks</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">num_freq_masks</span> <span class="o">+</span> <span class="n">num_time_masks</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cutout and SpecAugment can&#39;t be used at the same time.&quot;</span><span class="p">)</span>
+
+    <span class="n">base_modules</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">Masked</span><span class="p">(</span><span class="n">DitherAudio</span><span class="p">(</span><span class="n">dither</span><span class="o">=</span><span class="n">dither</span><span class="p">),</span> <span class="n">PreEmphasisFilter</span><span class="p">(</span><span class="n">preemph</span><span class="o">=</span><span class="n">preemph</span><span class="p">)),</span>
         <span class="n">PowerSpectrum</span><span class="p">(</span>
             <span class="n">n_window_size</span><span class="o">=</span><span class="n">n_window_size</span><span class="p">,</span>
@@ -2315,7 +2323,31 @@ low frequency. It applies a FIR filter of the form:</p>
         <span class="p">),</span>
         <span class="n">Masked</span><span class="p">(</span><span class="n">MelScale</span><span class="p">(</span><span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">n_fft</span><span class="o">=</span><span class="n">n_fft</span><span class="p">,</span> <span class="n">nfilt</span><span class="o">=</span><span class="n">nfilt</span><span class="p">)),</span>
         <span class="n">FeatureBatchNormalizer</span><span class="p">(),</span>
-    <span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">num_cutout_masks</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">base_modules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Masked</span><span class="p">(</span>
+                <span class="n">SpecCutout</span><span class="p">(</span>
+                    <span class="n">rect_masks</span><span class="o">=</span><span class="n">num_cutout_masks</span><span class="p">,</span>
+                    <span class="n">time_width</span><span class="o">=</span><span class="n">mask_time_width</span><span class="p">,</span>
+                    <span class="n">freq_width</span><span class="o">=</span><span class="n">mask_freq_width</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">num_freq_masks</span> <span class="o">+</span> <span class="n">num_time_masks</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">base_modules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Masked</span><span class="p">(</span>
+                <span class="n">SpecAugment</span><span class="p">(</span>
+                    <span class="n">time_masks</span><span class="o">=</span><span class="n">num_time_masks</span><span class="p">,</span>
+                    <span class="n">freq_masks</span><span class="o">=</span><span class="n">num_freq_masks</span><span class="p">,</span>
+                    <span class="n">time_width</span><span class="o">=</span><span class="n">mask_time_width</span><span class="p">,</span>
+                    <span class="n">freq_width</span><span class="o">=</span><span class="n">mask_freq_width</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">MultiSequential</span><span class="p">(</span><span class="o">*</span><span class="n">base_modules</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>

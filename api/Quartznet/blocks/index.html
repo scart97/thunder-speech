@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
     
     
       
@@ -2043,7 +2043,7 @@ dense residual used on Jasper is not supported here, and masked convolutions wer
 
 
 <h2 id="thunder.quartznet.blocks.QuartznetEncoder" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">QuartznetEncoder</span><span class="p">(</span><span class="n">feat_in</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span> <span class="n">kernel_sizes</span><span class="o">=</span><span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span> <span class="n">repeat_blocks</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">QuartznetEncoder</span><span class="p">(</span><span class="n">feat_in</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span> <span class="n">kernel_sizes</span><span class="o">=</span><span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span> <span class="n">repeat_blocks</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
 
 
 </h2>
@@ -2112,6 +2112,7 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
     <span class="n">filters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span>
     <span class="n">kernel_sizes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span>
     <span class="n">repeat_blocks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Basic Quartznet encoder setup.</span>
 <span class="sd">    Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (repeat_blocks=3)</span>
@@ -2126,7 +2127,7 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">MultiSequential</span><span class="p">(</span>
         <span class="n">stem</span><span class="p">(</span><span class="n">feat_in</span><span class="p">),</span>
-        <span class="o">*</span><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="p">),</span>
+        <span class="o">*</span><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="p">,</span> <span class="n">dropout</span><span class="p">),</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -2141,7 +2142,7 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
 
 
 <h2 id="thunder.quartznet.blocks.body" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">repeat_blocks</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
 
 
 </h2>
@@ -2199,7 +2200,10 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
         <details class="quote">
           <summary>Source code in <code>thunder/quartznet/blocks.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">body</span><span class="p">(</span>
-    <span class="n">filters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">kernel_size</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">repeat_blocks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">filters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">kernel_size</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">repeat_blocks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">QuartznetBlock</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Creates the body of the Quartznet model. That is the middle part.</span>
 
@@ -2215,7 +2219,11 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
     <span class="n">f_in</span> <span class="o">=</span> <span class="mi">256</span>
     <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat_blocks</span><span class="p">):</span>
-            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QuartznetBlock</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="n">k</span><span class="p">,),</span> <span class="n">separable</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">QuartznetBlock</span><span class="p">(</span>
+                    <span class="n">f_in</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="n">k</span><span class="p">,),</span> <span class="n">separable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">f_in</span> <span class="o">=</span> <span class="n">f</span>
     <span class="n">layers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
         <span class="p">[</span>
@@ -2227,9 +2235,16 @@ Can be used to build either Quartznet5x5 (repeat_blocks=1) or Quartznet15x5 (rep
                 <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">87</span><span class="p">,),</span>
                 <span class="n">residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">separable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
             <span class="p">),</span>
             <span class="n">QuartznetBlock</span><span class="p">(</span>
-                <span class="mi">512</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">separable</span><span class="o">=</span><span class="kc">False</span>
+                <span class="mi">512</span><span class="p">,</span>
+                <span class="mi">1024</span><span class="p">,</span>
+                <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span>
+                <span class="n">residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">separable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">]</span>
     <span class="p">)</span>

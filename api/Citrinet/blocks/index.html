@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
     
     
       
@@ -1660,7 +1660,7 @@ SqueezeExcite            (<span title="torch.nn.modules.module.Module">Module</s
 
 
 <h2 id="thunder.citrinet.blocks.CitrinetEncoder" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">CitrinetEncoder</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">strides</span><span class="p">,</span> <span class="n">feat_in</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">CitrinetEncoder</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">strides</span><span class="p">,</span> <span class="n">feat_in</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
 
 
 </h2>
@@ -1724,7 +1724,11 @@ SqueezeExcite            (<span title="torch.nn.modules.module.Module">Module</s
         <details class="quote">
           <summary>Source code in <code>thunder/citrinet/blocks.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">CitrinetEncoder</span><span class="p">(</span>
-    <span class="n">filters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">kernel_sizes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">strides</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">80</span>
+    <span class="n">filters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">kernel_sizes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">strides</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">feat_in</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span>
+    <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Basic Citrinet encoder setup.</span>
 
@@ -1738,7 +1742,7 @@ SqueezeExcite            (<span title="torch.nn.modules.module.Module">Module</s
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">MultiSequential</span><span class="p">(</span>
         <span class="n">stem</span><span class="p">(</span><span class="n">feat_in</span><span class="p">),</span>
-        <span class="o">*</span><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">strides</span><span class="p">),</span>
+        <span class="o">*</span><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">strides</span><span class="p">,</span> <span class="n">dropout</span><span class="p">),</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -1753,7 +1757,7 @@ SqueezeExcite            (<span title="torch.nn.modules.module.Module">Module</s
 
 
 <h2 id="thunder.citrinet.blocks.body" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">strides</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">body</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">strides</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span></code>
 
 
 </h2>
@@ -1814,6 +1818,7 @@ SqueezeExcite            (<span title="torch.nn.modules.module.Module">Module</s
     <span class="n">filters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">kernel_size</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">strides</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">CitrinetBlock</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Creates the body of the Citrinet model. That is the middle part.</span>
 
@@ -1829,7 +1834,9 @@ SqueezeExcite            (<span title="torch.nn.modules.module.Module">Module</s
     <span class="n">f_in</span> <span class="o">=</span> <span class="mi">256</span>
     <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="n">strides</span><span class="p">):</span>
         <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">CitrinetBlock</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="n">k</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="n">s</span><span class="p">,),</span> <span class="n">separable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">CitrinetBlock</span><span class="p">(</span>
+                <span class="n">f_in</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="n">k</span><span class="p">,),</span> <span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="n">s</span><span class="p">,),</span> <span class="n">separable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span>
+            <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">f_in</span> <span class="o">=</span> <span class="n">f</span>
     <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -1840,6 +1847,7 @@ SqueezeExcite            (<span title="torch.nn.modules.module.Module">Module</s
             <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">41</span><span class="p">,),</span>
             <span class="n">residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">separable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">layers</span>
