@@ -72,7 +72,8 @@ dm = ManifestDatamodule(
 model = load_pretrained("QuartzNet5x5LS_En")
 
 trainer = pl.Trainer(
-    gpus=-1, # Use all gpus
+    accelerator='gpu',
+    devices=-1, # Use all gpus
     max_epochs=10,
     callbacks=[FinetuneEncoderDecoder(unfreeze_encoder_at_epoch=1)],
 )

@@ -44,7 +44,11 @@ def test_dev_run_train(wav2vec_base, sample_manifest):
         num_workers=0,
     )
     trainer = pl.Trainer(
-        fast_dev_run=True, logger=False, enable_checkpointing=False, gpus=-1
+        fast_dev_run=True,
+        logger=False,
+        enable_checkpointing=False,
+        accelerator="gpu",
+        devices=-1,
     )
     trainer.fit(module, datamodule=data)
 
@@ -68,7 +72,7 @@ def test_script_module(wav2vec_base):
     torchaudio_module = _copy_model(wav2vec_base)
     torchaudio_module.eval()
     torchaudio_module = prepare_scriptable_wav2vec(torchaudio_module)
-    scripted = torch.jit.script(torchaudio_module)
+    scripted = torchaudio_module.to_torchscript()
 
     fake_input = torch.randn(1, 16000)
     fake_transcription = wav2vec_base.predict(fake_input)
@@ -84,7 +88,7 @@ def test_quantized_script_module(wav2vec_base):
     torchaudio_module = _copy_model(wav2vec_base)
     torchaudio_module = prepare_scriptable_wav2vec(torchaudio_module, quantized=True)
     torchaudio_module.eval()
-    scripted = torch.jit.script(torchaudio_module)
+    scripted = torchaudio_module.to_torchscript()
 
     fake_input = torch.randn(1, 16000)
     fake_transcription = wav2vec_base.predict(fake_input)

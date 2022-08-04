@@ -122,7 +122,7 @@ def prepare_scriptable_wav2vec(
         quantized: If true, also performs quantization of the model
 
     Returns:
-        Modified module ready to call torch.jit.script(module) or module.to_torchscript()
+        Modified module ready to call module.to_torchscript()
     """
     imported = import_huggingface_model(module.encoder.original_encoder)
     if quantized:
