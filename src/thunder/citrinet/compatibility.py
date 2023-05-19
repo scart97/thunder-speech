@@ -15,7 +15,7 @@ from typing import List, Tuple, TypedDict, Union
 
 from omegaconf import OmegaConf
 from torch import nn
-from torchaudio.datasets.utils import extract_archive
+from torchaudio.datasets.utils import _extract_tar
 
 from thunder.blocks import conv1d_decoder
 from thunder.citrinet.blocks import CitrinetEncoder
@@ -150,7 +150,7 @@ def load_citrinet_checkpoint(
         nemo_filepath = checkpoint
 
     with TemporaryDirectory() as extract_folder:
-        extract_archive(str(nemo_filepath), extract_folder)
+        _extract_tar(str(nemo_filepath), extract_folder)
         extract_path = Path(extract_folder)
         config_path = extract_path / "model_config.yaml"
         sentencepiece_path = str(extract_path / "tokenizer.model")
