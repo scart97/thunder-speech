@@ -38,7 +38,7 @@ jobs:
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: |
         poetry source add --priority=explicit pytorch "https://download.pytorch.org/whl/cu121"
-        poetry add --source pytorch torch@latest torchaudio@latest
+        poetry add --source pytorch torch@latest torchaudio@latest pysoundfile
         poetry install
     - name: Test with pytest
       run: |
