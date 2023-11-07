@@ -66,7 +66,6 @@ class FinetuneEncoderDecoder(BaseFinetuning):
         pl_module: pl.LightningModule,
         epoch: int,
         optimizer: Optimizer,
-        opt_idx: int,
     ):
         """Unfreezes the encoder at the specified epoch
 
@@ -74,7 +73,6 @@ class FinetuneEncoderDecoder(BaseFinetuning):
             pl_module: Lightning Module
             epoch: epoch number
             optimizer: optimizer used during training
-            opt_idx: optimizer index
         """
         if epoch == self.unfreeze_encoder_at_epoch:
             self.unfreeze_and_add_param_group(
