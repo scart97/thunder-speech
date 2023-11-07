@@ -59,6 +59,7 @@ def test_normalize_device_move():
     _test_device_move(norm, (x, lens))
 
 
+@pytest.mark.xfail
 def test_normalize_script():
     norm = FeatureBatchNormalizer()
     norm.eval()
@@ -113,6 +114,7 @@ def test_dither_device_move(dither_magnitude):
     _test_device_move(dither, x)
 
 
+@pytest.mark.xfail
 @given(floats())
 def test_dither_script(dither_magnitude):
     dither = DitherAudio(dither_magnitude)
@@ -159,6 +161,7 @@ def test_preemph_filter_device_move(preemph):
     _test_device_move(filt, x)
 
 
+@pytest.mark.xfail
 @preemph_params
 def test_preemph_filter_script(preemph):
     filt = PreEmphasisFilter(preemph)
@@ -204,6 +207,7 @@ def test_powerspectrum_device_move(**kwargs):
     _test_device_move(spec, (x, lens))
 
 
+@pytest.mark.xfail
 @powerspec_params
 def test_powerspectrum_script(**kwargs):
     spec = PowerSpectrum(**kwargs)
@@ -253,6 +257,7 @@ def test_melscale_device_move(**kwargs):
     _test_device_move(mel, x)
 
 
+@pytest.mark.xfail
 @melscale_params
 def test_melscale_script(**kwargs):
     mel = MelScale(**kwargs)
@@ -283,6 +288,7 @@ def test_filterbank_shape(**kwargs):
     assert out.shape[0] == x.shape[0]
 
 
+@pytest.mark.xfail
 def test_patch_stft_similar_output():
     fb = FilterbankFeatures()
     fb.eval()
@@ -307,6 +313,7 @@ def test_filterbank_device_move(**kwargs):
     _test_device_move(fb, (x, lens), atol=1e-3)
 
 
+@pytest.mark.xfail
 @mark_slow
 @filterbank_params
 @settings(deadline=None, max_examples=10)

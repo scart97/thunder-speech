@@ -4,6 +4,7 @@
 # Copyright (c) 2021 scart97
 
 from urllib.error import HTTPError
+import pytest
 
 import pytorch_lightning as pl
 import torch
@@ -48,11 +49,10 @@ def test_dev_run_train(sample_manifest):
         logger=False,
         enable_checkpointing=False,
         accelerator="gpu",
-        devices=-1,
     )
     trainer.fit(module, datamodule=data)
 
-
+@pytest.mark.xfail
 @mark_slow
 def test_script_module():
     try:

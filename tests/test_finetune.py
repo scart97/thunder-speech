@@ -41,7 +41,6 @@ def test_dev_run_train(sample_manifest):
         logger=False,
         enable_checkpointing=False,
         accelerator="gpu",
-        devices=-1,
     )
     trainer.fit(module, datamodule=data)
 
@@ -76,7 +75,6 @@ def test_special_scheduler_args(sample_manifest):
         logger=False,
         enable_checkpointing=False,
         accelerator="gpu",
-        devices=-1,
     )
     trainer.fit(module, datamodule=data)
 

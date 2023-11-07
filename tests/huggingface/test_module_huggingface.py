@@ -17,21 +17,18 @@ from tests.utils import mark_slow, requirescuda
 from thunder.data.datamodule import ManifestDatamodule
 from thunder.huggingface.compatibility import prepare_scriptable_wav2vec
 from thunder.registry import load_pretrained
-
+from copy import deepcopy
 
 @pytest.fixture(scope="session")
 def wav2vec_base():
     return load_pretrained("facebook/wav2vec2-base-960h")
 
 
-def _copy_model(model):
-    return pickle.loads(pickle.dumps(model))
-
 
 @mark_slow
 @requirescuda
 def test_dev_run_train(wav2vec_base, sample_manifest):
-    module = _copy_model(wav2vec_base)
+    module = deepcopy(wav2vec_base)
     # Lowercase the vocab just to run this test, as labeled text is lowercase
     module.text_transform.vocab.itos = [
         x.lower() for x in module.text_transform.vocab.itos
@@ -48,7 +45,6 @@ def test_dev_run_train(wav2vec_base, sample_manifest):
         logger=False,
         enable_checkpointing=False,
         accelerator="gpu",
-        devices=-1,
     )
     trainer.fit(module, datamodule=data)
 
@@ -69,7 +65,7 @@ def test_expected_prediction_from_pretrained_model(wav2vec_base, sample_audio):
 
 @mark_slow
 def test_script_module(wav2vec_base):
-    torchaudio_module = _copy_model(wav2vec_base)
+    torchaudio_module = deepcopy(wav2vec_base)
     torchaudio_module.eval()
     torchaudio_module = prepare_scriptable_wav2vec(torchaudio_module)
     scripted = torchaudio_module.to_torchscript()
@@ -85,7 +81,7 @@ def test_script_module(wav2vec_base):
 
 @mark_slow
 def test_quantized_script_module(wav2vec_base):
-    torchaudio_module = _copy_model(wav2vec_base)
+    torchaudio_module = deepcopy(wav2vec_base)
     torchaudio_module = prepare_scriptable_wav2vec(torchaudio_module, quantized=True)
     torchaudio_module.eval()
     scripted = torchaudio_module.to_torchscript()
