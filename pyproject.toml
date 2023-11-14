@@ -21,7 +21,7 @@ dependencies = [
     "wget>=3.2",
     "sentencepiece>=0.1.96",
     "protobuf==3.18.1",
-    "pysoundfile"
+    "soundfile>=0.12.1",
 ]
 
 [project.urls]
