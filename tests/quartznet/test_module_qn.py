@@ -52,6 +52,7 @@ def test_dev_run_train(sample_manifest):
     )
     trainer.fit(module, datamodule=data)
 
+
 @pytest.mark.xfail
 @mark_slow
 def test_script_module():

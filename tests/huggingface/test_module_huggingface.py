@@ -4,7 +4,6 @@
 # Copyright (c) 2021 scart97
 
 
-import pickle
 from urllib.error import HTTPError
 
 import pytest
@@ -19,10 +18,10 @@ from thunder.huggingface.compatibility import prepare_scriptable_wav2vec
 from thunder.registry import load_pretrained
 from copy import deepcopy
 
+
 @pytest.fixture(scope="session")
 def wav2vec_base():
     return load_pretrained("facebook/wav2vec2-base-960h")
-
 
 
 @mark_slow
