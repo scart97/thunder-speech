@@ -30,7 +30,12 @@ repository = "https://github.com/scart97/thunder-speech"
 documentation = "https://scart97.github.io/thunder-speech/"
 
 [project.optional-dependencies]
-test = ["pytest>=7.1.2", "pytest-cov>=3.0.0", "hypothesis>=6.49.1", "ruff"]
+test = [
+    "pytest>=7.1.2",
+    "pytest-cov>=3.0.0",
+    "hypothesis>=6.49.1",
+    "ruff>=0.1.5",
+]
 docs = [
     "mkdocs>=1.3.0",
     "mkdocs-material>=8.3.9",
