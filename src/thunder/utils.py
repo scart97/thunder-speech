@@ -27,7 +27,7 @@ import torchaudio
 import wget
 from torch import nn
 from torch.optim import Optimizer
-from torch.optim.lr_scheduler import ReduceLROnPlateau, _LRScheduler
+from torch.optim.lr_scheduler import ReduceLROnPlateau, LRScheduler
 
 
 def audio_len(item: Union[Path, str]) -> float:
@@ -145,11 +145,11 @@ def download_checkpoint(name: BaseCheckpoint, checkpoint_folder: str = None) -> 
 
 # Reference to learning rate scheduler class
 _SchedulerClassType = Union[
-    Type[_LRScheduler],
+    Type[LRScheduler],
     Type[ReduceLROnPlateau],
 ]
 # Arbitrary function that returns a learning rate scheduler
-_SchedulerFuncType = Callable[..., Union[_LRScheduler, ReduceLROnPlateau]]
+_SchedulerFuncType = Callable[..., Union[LRScheduler, ReduceLROnPlateau]]
 # Two valid options to build a learning rate scheduler
 SchedulerBuilderType = Union[_SchedulerClassType, _SchedulerFuncType]
 
