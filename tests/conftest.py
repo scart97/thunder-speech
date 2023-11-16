@@ -15,7 +15,7 @@ import pytest
 
 from hypothesis import settings
 from torch.hub import download_url_to_file
-from torchaudio.datasets.utils import extract_archive
+from torchaudio.datasets.utils import _extract_tar
 
 from thunder.text_processing.preprocess import normalize_text
 from thunder.utils import audio_len, get_default_cache_folder, get_files
@@ -35,7 +35,7 @@ def sample_data():
             "https://github.com/scart97/lapsbm-backup/archive/refs/tags/lapsbm-ci.tar.gz",
             str(path / "lapsbm-backup-lapsbm-ci.tar.gz"),
         )
-        extract_archive(path / "lapsbm-backup-lapsbm-ci.tar.gz", path)
+        _extract_tar(path / "lapsbm-backup-lapsbm-ci.tar.gz", path)
     return out_path
 
 

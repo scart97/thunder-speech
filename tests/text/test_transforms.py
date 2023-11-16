@@ -61,7 +61,7 @@ def test_decoder_remove_blanks(tfm: BatchTextTransformer, blank_input):
 
     assert len(out) == 1
     assert isinstance(out, list)
-    assert type(out[0]) is str
+    assert isinstance(out[0], str)
     assert out[0] == ""
 
 
@@ -75,7 +75,7 @@ def test_decoder_simple_sequence(tfm: BatchTextTransformer, blank_input):
 
     assert len(out) == 1
     assert isinstance(out, list)
-    assert type(out[0]) is str
+    assert isinstance(out[0], str)
     assert out[0] == "ab"
 
 
@@ -87,7 +87,7 @@ def test_decoder_repeat_same_element(tfm: BatchTextTransformer, blank_input):
 
     assert len(out) == 1
     assert isinstance(out, list)
-    assert type(out[0]) is str
+    assert isinstance(out[0], str)
     assert out[0] == "aa"
 
 

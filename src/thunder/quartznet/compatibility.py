@@ -20,7 +20,7 @@ from typing import Tuple, TypedDict, Union
 import torch
 from omegaconf import OmegaConf
 from torch import nn
-from torchaudio.datasets.utils import extract_archive
+from torchaudio.datasets.utils import _extract_tar
 
 from thunder.blocks import conv1d_decoder
 from thunder.module import BaseCTCModule
@@ -178,7 +178,7 @@ def load_quartznet_checkpoint(
         nemo_filepath = Path(checkpoint)
 
     with TemporaryDirectory() as extract_folder:
-        extract_archive(str(nemo_filepath), extract_folder)
+        _extract_tar(str(nemo_filepath), extract_folder)
         extract_path = Path(extract_folder)
         config_path = extract_path / "model_config.yaml"
         (

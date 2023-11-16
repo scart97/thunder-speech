@@ -82,14 +82,13 @@ The first step to contribute is to do an editable installation of the library:
 ```
 git clone https://github.com/scart97/thunder-speech.git
 cd thunder-speech
-poetry install
-pre-commit install
+pip install -e .[test,docs]
 ```
 
 Then, make sure that everything is working. You can run the test suit, that is based on pytest:
 
 ```
-RUN_SLOW=1 poetry run pytest
+RUN_SLOW=1 pytest
 ```
 
 Here the `RUN_SLOW` flag is used to run all the tests, including the ones that might download checkpoints or do small training runs and are marked as slow. If you don't have a CUDA capable gpu, some tests will be unconditionally skipped.
