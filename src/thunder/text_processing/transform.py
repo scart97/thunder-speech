@@ -135,7 +135,7 @@ class BatchTextTransformer(nn.Module):
         special_tokens = ["<s>", "</s>", "<pad>", "<unk>"]
         vocab = []
 
-        with open(f"{output_dir}/tokenizer.vocab", "r") as f:
+        with open(f"{output_dir}/tokenizer.vocab", "r", encoding="utf-8") as f:
             # Read tokens from each line and parse for vocab
             for line in f:
                 piece = line.split("\t")[0]
