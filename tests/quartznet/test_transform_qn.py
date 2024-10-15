@@ -24,7 +24,6 @@ from thunder.quartznet.transform import (
     MelScale,
     PowerSpectrum,
     PreEmphasisFilter,
-    patch_stft,
 )
 
 
@@ -286,19 +285,6 @@ def test_filterbank_shape(**kwargs):
     lens = torch.Tensor([1000] * 10)
     out, _ = fb(x, lens)
     assert out.shape[0] == x.shape[0]
-
-
-@pytest.mark.xfail
-def test_patch_stft_similar_output():
-    fb = FilterbankFeatures()
-    fb.eval()
-    x = torch.randn(10, 1000)
-    lens = torch.Tensor([1000] * 10)
-    out1, _ = fb(x, lens)
-    fb = patch_stft(fb)
-    scripted = torch.jit.script(fb)
-    out2, _ = scripted(x, lens)
-    assert torch.allclose(out1, out2, atol=1e-3)
 
 
 @requirescuda

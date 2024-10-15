@@ -7,7 +7,6 @@
 # Copyright (c) 2021-2022 scart97
 
 __all__ = [
-    "convolution_stft",
     "MultiSequential",
     "Masked",
     "normalize_tensor",
@@ -18,77 +17,10 @@ __all__ = [
     "linear_decoder",
 ]
 
-import math
 from typing import Optional, Tuple
 
 import torch
-import torch.nn.functional as F
 from torch import Tensor, nn
-
-
-def _fourier_matrix(n_fft: int, device: torch.device) -> torch.Tensor:
-    # https://mathworld.wolfram.com/FourierMatrix.html
-    idx = torch.arange(0, n_fft, device=device, dtype=torch.float).unsqueeze(1)
-    z = idx @ idx.T
-    imaginary = -2 * math.pi * z / n_fft
-    real = torch.zeros_like(imaginary)
-    return torch.exp(torch.complex(real, imaginary))
-
-
-def convolution_stft(
-    input_data: torch.Tensor,
-    n_fft: int = 1024,
-    hop_length: int = 512,
-    win_length: int = 1024,
-    window: torch.Tensor = torch.hann_window(1024, periodic=False),
-    center: bool = True,
-    return_complex: bool = False,
-) -> torch.Tensor:
-    """Implements the stft operation using the convolution method. This is one alternative
-    to make possible to export code using this operation to onnx and arm based environments.
-    The signature shuld follow the same as torch.stft, making it possible to just swap the two.
-    The code is based on https://github.com/pseeth/torch-stft
-    """
-    assert n_fft >= win_length
-    pad_amount = int(n_fft / 2)
-    window = window.to(input_data.device)
-
-    fourier_basis = _fourier_matrix(n_fft, device=input_data.device)
-
-    cutoff = int((n_fft / 2 + 1))
-    fourier_basis = torch.stack(
-        [torch.real(fourier_basis[:cutoff, :]), torch.imag(fourier_basis[:cutoff, :])]
-    ).reshape(-1, n_fft)
-    forward_basis = fourier_basis[:, None, :].float()
-
-    window_pad = (n_fft - win_length) // 2
-    window_pad2 = n_fft - (window_pad + win_length)
-    fft_window = torch.nn.functional.pad(window, [window_pad, window_pad2])
-    # window the bases
-    forward_basis *= fft_window
-    forward_basis = forward_basis.float()
-
-    num_batches = input_data.shape[0]
-    num_samples = input_data.shape[-1]
-
-    # similar to librosa, reflect-pad the input
-    input_data = input_data.view(num_batches, 1, num_samples)
-
-    input_data = F.pad(
-        input_data.unsqueeze(1),
-        (pad_amount, pad_amount, 0, 0),
-        mode="reflect",
-    )
-    input_data = input_data.squeeze(1)
-
-    forward_transform = F.conv1d(
-        input_data, forward_basis, stride=hop_length, padding=0
-    )
-
-    cutoff = int((n_fft / 2) + 1)
-    real_part = forward_transform[:, :cutoff, :]
-    imag_part = forward_transform[:, cutoff:, :]
-    return torch.stack((real_part, imag_part), dim=-1)
 
 
 class MultiSequential(nn.Sequential):
