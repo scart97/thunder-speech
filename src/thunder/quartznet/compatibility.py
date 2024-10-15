@@ -132,7 +132,7 @@ def load_quartznet_weights(encoder: nn.Module, decoder: nn.Module, weights_path:
         decoder: Decoder module to load the weights into
         weights_path: Path to the pytorch weights checkpoint
     """
-    weights = torch.load(weights_path)
+    weights = torch.load(weights_path, weights_only=True)
 
     def fix_encoder_name(x: str) -> str:
         x = x.replace("encoder.", "").replace(".res.0", ".res")
