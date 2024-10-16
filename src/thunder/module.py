@@ -123,7 +123,7 @@ class BaseCTCModule(pl.LightningModule):
             self.text_transform.vocab.blank_idx,
         )
 
-        self.log("loss/train_loss", loss)
+        self.log("loss/train_loss", loss, batch_size=audio.shape[0])
         return loss
 
     def validation_step(
@@ -157,9 +157,13 @@ class BaseCTCModule(pl.LightningModule):
         self.validation_cer(decoded_preds, decoded_targets)
         self.validation_wer(decoded_preds, decoded_targets)
 
-        self.log("loss/val_loss", loss)
-        self.log("metrics/cer", self.validation_cer, on_epoch=True)
-        self.log("metrics/wer", self.validation_wer, on_epoch=True)
+        self.log("loss/val_loss", loss, batch_size=audio.shape[0])
+        self.log(
+            "metrics/cer", self.validation_cer, batch_size=audio.shape[0], on_epoch=True
+        )
+        self.log(
+            "metrics/wer", self.validation_wer, batch_size=audio.shape[0], on_epoch=True
+        )
         return loss
 
     def _update_special_optimizer_arg(self, original_kwargs: Dict) -> Dict:

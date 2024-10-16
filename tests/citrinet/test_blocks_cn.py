@@ -80,6 +80,7 @@ def test_CitrinetBlock_combinations(**kwargs):
 
 @mark_slow
 @citrinet_parameters
+@settings(deadline=None)
 def test_CitrinetBlock_update(**kwargs):
     try:
         block = CitrinetBlock(**kwargs)

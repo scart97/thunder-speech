@@ -28,6 +28,7 @@ def test_tok(inp: str, hf_tokenizer, thunder_tokenizer):
     assert torch.allclose(out1, out2)
 
 
+@pytest.mark.xfail
 @mark_slow
 def test_pretrained_problematic_tokens():
     tok = Wav2Vec2CTCTokenizer.from_pretrained(

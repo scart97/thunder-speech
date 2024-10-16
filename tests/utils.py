@@ -47,7 +47,7 @@ def _test_parameters_update(model: nn.Module, x):
     for param in model.parameters():
         if param.requires_grad:
             assert param.grad is not None
-            assert (torch.sum(param.grad ** 2) != 0.0).all()
+            assert (torch.sum(param.grad**2) != 0.0).all()
 
 
 def _test_device_move(model: nn.Module, x: torch.Tensor, atol: float = 1e-4):

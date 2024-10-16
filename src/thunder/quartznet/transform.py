@@ -61,7 +61,6 @@ from torchaudio.functional import melscale_fbanks
 from thunder.blocks import (
     Masked,
     MultiSequential,
-    convolution_stft,
     lengths_to_mask,
     normalize_tensor,
 )
@@ -174,10 +173,6 @@ class PowerSpectrum(nn.Module):
 
         window_tensor = torch.hann_window(self.win_length, periodic=False)
         self.register_buffer("window", window_tensor)
-        # This way so that the torch.stft can be changed to the patched version
-        # before scripting. That way it works correctly when the export option
-        # doesnt support fft, like mobile or onnx.
-        self.stft_func = torch.stft
 
     def get_sequence_length(self, lengths: torch.Tensor) -> torch.Tensor:
         seq_len = torch.floor(lengths / self.hop_length) + 1
@@ -191,15 +186,16 @@ class PowerSpectrum(nn.Module):
         Args:
             x: Tensor of shape (batch, time)
         """
-        x = self.stft_func(
+        x = torch.stft(
             x,
             n_fft=self.n_fft,
             hop_length=self.hop_length,
             win_length=self.win_length,
             center=True,
             window=self.window.to(dtype=torch.float),
-            return_complex=False,
+            return_complex=True,
         )
+        x = torch.view_as_real(x)
 
         # torch returns real, imag; so convert to magnitude
         x = torch.sqrt(x.pow(2).sum(-1))
@@ -319,18 +315,3 @@ def FilterbankFeatures(
         )
 
     return MultiSequential(*base_modules)
-
-
-def patch_stft(filterbank: nn.Module) -> nn.Module:
-    """This function applies a patch to the FilterbankFeatures to use instead a convolution
-    layer based stft. That makes possible to export to onnx and use the scripted model
-    directly on arm cpu's, inside mobile applications.
-
-    Args:
-        filterbank: the FilterbankFeatures layer to be patched
-
-    Returns:
-        Layer with the stft operation patched.
-    """
-    filterbank[1].stft_func = convolution_stft
-    return filterbank

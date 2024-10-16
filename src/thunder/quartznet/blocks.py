@@ -189,7 +189,6 @@ def _get_conv_bn_layer(
     separable: bool = False,
     **conv_kwargs,
 ):
-
     if separable:
         layers = [
             MaskedConv1d(
@@ -264,7 +263,6 @@ class QuartznetBlock(nn.Module):
         conv = []
 
         for _ in range(repeat - 1):
-
             conv.extend(
                 _get_conv_bn_layer(
                     inplanes_loop,

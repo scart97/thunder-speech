@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # This test is modified from the pytorch lightning test
-# source: https://github.com/PyTorchLightning/pytorch-lightning/blob/master/tests/helpers/boring_model.py
+# source: https://github.com/Lightning-AI/lightning/blob/master/src/lightning/pytorch/demos/boring_classes.py
 
 import pytest
 
@@ -72,27 +72,15 @@ class BoringModel(pl.LightningModule):
         loss = self.loss(batch, output)
         return {"loss": loss}
 
-    def training_step_end(self, training_step_outputs):
-        return training_step_outputs
-
-    def training_epoch_end(self, outputs) -> None:
-        torch.stack([x["loss"] for x in outputs]).mean()
-
     def validation_step(self, batch, batch_idx):
         output = self(batch)
         loss = self.loss(batch, output)
         return {"x": loss}
 
-    def validation_epoch_end(self, outputs) -> None:
-        torch.stack([x["x"] for x in outputs]).mean()
-
     def test_step(self, batch, batch_idx):
         output = self(batch)
         loss = self.loss(batch, output)
         return {"y": loss}
-
-    def test_epoch_end(self, outputs) -> None:
-        torch.stack([x["y"] for x in outputs]).mean()
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(

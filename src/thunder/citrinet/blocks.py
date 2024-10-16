@@ -119,7 +119,6 @@ class CitrinetBlock(nn.Module):
         conv = []
 
         for _ in range(repeat - 1):
-
             conv.extend(
                 _get_conv_bn_layer(
                     inplanes_loop,

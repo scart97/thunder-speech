@@ -12,19 +12,8 @@ module = load_citrinet_checkpoint("/path/to/citrinet.nemo")
 
 ## How to export models with special restrictions?
 
-Case 1: Using Quartznet or Citrinet on platforms that doesnt support FFT (android, onnx):
 
-```py
-from thunder.registry import load_pretrained
-from thunder.quartznet.transform import patch_stft
-import torch
-
-module = load_pretrained("QuartzNet5x5LS_En")
-module.audio_transform = patch_stft(module.audio_transform)
-module.to_torchscript("model_ready_for_inference.pt")
-```
-
-Case 2: Wav2vec 2.0 using torchscript
+Case 1: Wav2vec 2.0 using torchscript
 
 
 ```py
@@ -73,7 +62,7 @@ model = load_pretrained("QuartzNet5x5LS_En")
 
 trainer = pl.Trainer(
     accelerator='gpu',
-    devices=-1, # Use all gpus
+    devices='auto', # Use all gpus
     max_epochs=10,
     callbacks=[FinetuneEncoderDecoder(unfreeze_encoder_at_epoch=1)],
 )
