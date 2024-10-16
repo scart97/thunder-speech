@@ -35,12 +35,3 @@ jobs:
     - name: Test with pytest
       run: |
         HYPOTHESIS_PROFILE="ci" RUN_SLOW=1 pytest -sv --cov-report=xml
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        env_vars: PYTHON
-        name: codecov-thunder
-        fail_ci_if_error: true
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

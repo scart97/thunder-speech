@@ -1,4 +1,3 @@
-[![codecov](https://codecov.io/gh/scart97/thunder-speech/branch/master/graph/badge.svg?token=USCEGEGM3D)](https://codecov.io/gh/scart97/thunder-speech)
 ![Test](https://github.com/scart97/thunder-speech/workflows/Test/badge.svg)
 [![docs](https://img.shields.io/badge/docs-read-informational)](https://scart97.github.io/thunder-speech/)
 
